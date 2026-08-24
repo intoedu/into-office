@@ -328,6 +328,14 @@ input,select,textarea { font-family:inherit; }
 .st-open{background:#fef3c7;color:#b45309;} .st-in_progress{background:#f0f9ff;color:#0369a1;}
 .st-answered{background:#ecfdf5;color:#047857;} .st-closed{background:var(--bg);color:var(--text-muted);}
 .empty-sm { padding:48px 20px; text-align:center; color:var(--text-muted); font-size:14px; }
+/* ===== 휴지통 / 접근 암호 ===== */
+.trash-left { font-size:11.5px; font-weight:600; color:var(--text-muted); padding:3px 10px; border-radius:20px; background:var(--bg); white-space:nowrap; }
+.trash-left.soon { color:#b45309; background:var(--warning-bg); }
+.danger-btn { color:var(--danger); border-color:#fecaca; }
+.danger-btn:hover { background:var(--danger-bg); border-color:var(--danger); color:var(--danger); }
+.code-reveal { background:var(--navy); border-radius:10px; padding:22px; text-align:center; }
+.code-label { display:block; font-size:11px; font-weight:600; color:rgba(255,255,255,.6); letter-spacing:1px; margin-bottom:8px; }
+.code-value { display:block; font-size:26px; font-weight:700; color:#fff; letter-spacing:4px; font-family:'Courier New',monospace; word-break:break-all; }
 /* ===== 사인 · 도장 / 대량발송 / 보안 ===== */
 .vault-head { font-size:15px; font-weight:600; margin-bottom:12px; display:flex; align-items:center; gap:8px; }
 .vault-head span { font-size:12px; font-weight:500; color:var(--text-muted); }
@@ -700,6 +708,7 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
       <button class="tab" data-view="bulk" onclick="switchView('bulk')">📮 대량발송</button>
       <button class="tab" data-view="templates" onclick="switchView('templates')">📋 문서 템플릿</button>
       <button class="tab" data-view="signs" onclick="switchView('signs')">✍️ 사인 · 도장</button>
+      <button class="tab" data-view="trash" onclick="switchView('trash')">🗑 휴지통<span class="tab-badge" id="trashBadge" style="display:none;">0</span></button>
       <button class="tab" data-view="notices" onclick="switchView('notices')">📢 공지 · 안내</button>
       <button class="tab" data-view="requests" onclick="switchView('requests')">💬 요청 · 문의<span class="tab-badge" id="reqBadge" style="display:none;">0</span></button>
       <button class="tab" data-view="members" id="tabMembers" style="display:none;" onclick="switchView('members')">👥 회원 관리<span class="tab-badge" id="memBadge" style="display:none;">0</span></button>
@@ -834,6 +843,20 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
       <h4 class="vault-head" style="margin-top:26px;">🔴 내 도장 <span id="stampCount">(0 / 12)</span></h4>
       <div class="vault-grid" id="stampList"></div>
     </div><!-- /viewSigns -->
+
+    <!-- ===== 휴지통 ===== -->
+    <div class="view" id="viewTrash">
+      <div class="board-head">
+        <h2>휴지통</h2>
+        <button class="btn-mini danger-btn" id="emptyTrashBtn" onclick="emptyTrash()" style="display:none;">휴지통 비우기</button>
+      </div>
+      <p style="font-size:13px;color:var(--text-secondary);line-height:1.8;margin-bottom:18px;">
+        삭제한 계약서는 <strong>30일간</strong> 여기에 보관되며 언제든 되돌릴 수 있습니다.
+        30일이 지나면 원본 파일과 서명 · 감사 기록까지 자동으로 완전 삭제됩니다.
+        휴지통에 있는 동안 서명자는 링크로 문서를 열 수 없습니다.
+      </p>
+      <div class="card-list" id="trashList"></div>
+    </div><!-- /viewTrash -->
 
     <!-- ===== 문서 템플릿 ===== -->
     <div class="view" id="viewTemplates">
@@ -1395,26 +1418,52 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
 <div class="modal-overlay" id="delModal">
   <div class="modal">
     <div class="modal-header">
-      <h3>문서 삭제</h3>
+      <h3>휴지통으로 이동</h3>
       <button class="modal-close" onclick="closeDelModal()">✕</button>
     </div>
     <div class="modal-body">
       <p class="confirm-txt" id="delMsg"></p>
-      <div style="background:var(--danger-bg);border-radius:8px;padding:14px;margin-top:14px;">
-        <p style="font-size:12px;color:#b91c1c;line-height:1.7;">
-          삭제하면 원본 파일, 서명 기록, 감사 추적 기록이 모두 함께 사라지며 복구할 수 없습니다.
-          서명이 완료된 문서라면 삭제 전에 서명본과 인증서를 먼저 다운로드해 두시기 바랍니다.
+      <div style="background:var(--warning-bg);border-radius:8px;padding:14px;margin-top:14px;">
+        <p style="font-size:12px;color:#92400e;line-height:1.7;">
+          휴지통으로 옮기면 문서 목록에서 사라지고, 서명자도 링크로 열 수 없게 됩니다.
+          <strong>30일 안에는 휴지통에서 복원</strong>할 수 있으며, 30일이 지나면 자동으로 완전 삭제됩니다.
+          원본 파일과 서명·감사 기록은 완전 삭제 전까지 그대로 보존됩니다.
         </p>
       </div>
     </div>
     <div class="modal-footer">
       <button class="btn-secondary" onclick="closeDelModal()">취소</button>
-      <button class="btn-action" style="background:var(--danger);" id="delConfirmBtn" onclick="doDeleteDocument()">삭제합니다</button>
+      <button class="btn-action" style="background:var(--danger);" id="delConfirmBtn" onclick="doDeleteDocument()">휴지통으로 이동</button>
     </div>
   </div>
 </div>
 
 <!-- ===== AUDIT TRAIL MODAL ===== -->
+<!-- ===== 접근 암호 확인 ===== -->
+<div class="modal-overlay" id="codeModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>🔐 접근 암호</h3>
+      <button class="modal-close" onclick="closeCodeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:13px;color:var(--text-secondary);margin-bottom:14px;" id="codeDocTitle"></p>
+      <div id="codeBody"></div>
+      <div class="sec-box" style="margin-top:16px;background:var(--warning-bg);border-color:#fde68a;">
+        <p style="font-size:12px;color:#92400e;line-height:1.75;">
+          이 암호는 서명 링크와 <strong>다른 경로</strong>로 전달하세요.
+          링크와 암호를 같은 메시지에 담으면 암호를 거는 의미가 없습니다.
+          암호를 확인한 기록은 감사 추적에 남습니다.
+        </p>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeCodeModal()">닫기</button>
+      <button class="btn-action navy" id="codeCopyBtn" onclick="copyAccessCode()">암호 복사</button>
+    </div>
+  </div>
+</div>
+
 <!-- ===== 사인 / 도장 만들기 ===== -->
 <div class="modal-overlay" id="signMakerModal">
   <div class="modal wide">
@@ -1742,17 +1791,14 @@ async function doDeleteDocument() {
   try {
     const { data, error } = await sb.rpc('esign_delete_document', { p_document_id: docId });
     if (error || !data?.ok) throw new Error(data?.error || error?.message || '삭제 실패');
-    // Storage 원본 파일도 제거
-    if (data.file_path) {
-      await sb.storage.from(BUCKET).remove([data.file_path]).catch(() => {});
-    }
+    // 휴지통으로 옮기는 것이므로 원본 파일은 완전 삭제 시점까지 그대로 둔다
     closeDelModal();
-    showToast('문서가 삭제되었습니다.', true);
+    showToast('휴지통으로 옮겼습니다. 30일 안에 복원할 수 있습니다.', true);
     await loadDocuments();
   } catch (e) {
     showToast('삭제 실패: ' + e.message);
   } finally {
-    btn.disabled = false; btn.textContent = '삭제합니다';
+    btn.disabled = false; btn.textContent = '휴지통으로 이동';
   }
 }
 
@@ -1864,8 +1910,10 @@ function openDocMenu(ev, id) {
     '<div class="rm-sep"></div><div class="rm-label">다운로드</div>' +
     it('signed','📄','서명본 내려받기', done) +
     it('cert','🏷','감사추적인증서', true) +
+    '<div class="rm-sep"></div><div class="rm-label">보안</div>' +
+    it('code','🔐', d.has_access_code ? '접근 암호 확인' : '접근 암호 없음', !!d.has_access_code) +
     '<div class="rm-sep"></div>' +
-    it('delete','🗑','문서 삭제', true, true)
+    it('delete','🗑','휴지통으로 이동', true, true)
   );
 }
 
@@ -1878,6 +1926,7 @@ function rmAct(id, act) {
     send:    () => openSendDone(id),
     signed:  () => downloadSignedDoc(id),
     cert:    () => downloadCertificate(id),
+    code:    () => showAccessCode(id),
     delete:  () => confirmDelete(id)
   }[act] || (()=>{}))();
 }
@@ -2501,16 +2550,166 @@ async function doMemAction() {
 // ============================================================
 function switchView(v) {
   document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.view === v));
-  ['docs','bulk','templates','signs','notices','requests','members'].forEach(k =>
+  ['docs','bulk','templates','signs','trash','notices','requests','members'].forEach(k =>
     document.getElementById('view' + k.charAt(0).toUpperCase() + k.slice(1)).classList.toggle('active', k === v));
   if (v === 'templates') renderTemplates();
   if (v === 'signs') loadSignVault();
   if (v === 'bulk') loadBulkBatches();
+  if (v === 'trash') loadTrash();
   if (v === 'notices') loadNotices();
   if (v === 'requests') loadRequests();
   if (v === 'members') loadMembers();
 }
 
+
+
+// ============================================================
+// 휴지통
+// ============================================================
+async function loadTrash() {
+  const box = document.getElementById('trashList');
+  if (!box) return;
+  box.innerHTML = '<div class="empty-sm">불러오는 중...</div>';
+  const { data } = await sb.rpc('esign_list_trash');
+  if (!data?.ok) { box.innerHTML = '<div class="empty-sm">불러오지 못했습니다.</div>'; return; }
+
+  const items = data.items || [];
+  state.trashItems = items;
+  updateTrashBadge(items.length);
+  document.getElementById('emptyTrashBtn').style.display = items.length ? '' : 'none';
+
+  if (!items.length) {
+    box.innerHTML = '<div class="empty-sm">휴지통이 비어 있습니다.</div>';
+    return;
+  }
+  const st = { waiting:'서명 대기', progress:'서명 중', complete:'서명 완료',
+               cancelled:'취소', expired:'만료', scheduled:'예약' };
+  box.innerHTML = items.map(t => {
+    const signers = (t.signers || []).map(s => s.name).join(', ');
+    const soon = t.days_left <= 7;
+    return '<div class="post">' +
+      '<div class="post-top">' +
+        '<span class="post-cat cat-etc">' + (st[t.status] || t.status) + '</span>' +
+        '<span class="post-title">' + esc(t.title) + '</span>' +
+        '<span class="trash-left' + (soon ? ' soon' : '') + '">' +
+          (t.days_left > 0 ? t.days_left + '일 후 완전 삭제' : '곧 완전 삭제') + '</span>' +
+      '</div>' +
+      '<div class="post-meta">' +
+        '삭제 ' + fmtLocal(t.deleted_at) +
+        (signers ? ' · 서명자 ' + esc(signers) : '') +
+        (t.bulk_label ? ' · 대량발송 「' + esc(t.bulk_label) + '」' : '') +
+      '</div>' +
+      '<div class="post-actions">' +
+        '<button class="btn-mini primary" onclick="restoreDoc(\'' + t.id + '\')">↩ 복원</button>' +
+        '<button class="btn-del" onclick="purgeDoc(\'' + t.id + '\')">완전 삭제</button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function updateTrashBadge(n) {
+  const b = document.getElementById('trashBadge');
+  if (!b) return;
+  if (n > 0) { b.style.display = ''; b.textContent = n; }
+  else b.style.display = 'none';
+}
+
+async function restoreDoc(id) {
+  const { data } = await sb.rpc('esign_restore_document', { p_document_id: id });
+  if (!data?.ok) { showToast('복원하지 못했습니다.'); return; }
+  showToast('문서를 복원했습니다.', true);
+  loadTrash();
+  if (typeof loadDocuments === 'function') loadDocuments();
+}
+
+async function purgeDoc(id) {
+  const t = (state.trashItems || []).find(x => x.id === id);
+  if (!confirm('「' + (t ? t.title : '이 문서') + '」을(를) 완전히 삭제합니다.\n\n' +
+               '원본 파일과 서명 · 감사 추적 기록까지 모두 사라지며 되돌릴 수 없습니다.\n계속하시겠습니까?')) return;
+  const { data } = await sb.rpc('esign_purge_document', { p_document_id: id });
+  if (!data?.ok) { showToast('삭제하지 못했습니다.'); return; }
+  await removeStorageFiles(data.paths);
+  showToast('완전히 삭제되었습니다.', true);
+  loadTrash();
+}
+
+async function emptyTrash() {
+  const n = (state.trashItems || []).length;
+  if (!n) return;
+  if (!confirm('휴지통의 문서 ' + n + '건을 모두 완전히 삭제합니다.\n\n' +
+               '원본 파일과 서명 · 감사 추적 기록까지 모두 사라지며 되돌릴 수 없습니다.\n계속하시겠습니까?')) return;
+  const { data } = await sb.rpc('esign_empty_trash');
+  if (!data?.ok) { showToast('비우지 못했습니다.'); return; }
+  await removeStorageFiles(data.paths);
+  showToast(data.count + '건을 완전히 삭제했습니다.', true);
+  loadTrash();
+}
+
+// 완전 삭제된 문서의 원본 · 서명본 파일을 스토리지에서 제거
+async function removeStorageFiles(paths) {
+  const list = (paths || []).filter(Boolean);
+  if (!list.length) return;
+  await sb.storage.from(BUCKET).remove(list).catch(() => {});
+}
+
+// ============================================================
+// 접근 암호 재확인 (요청자 전용)
+// ============================================================
+async function showAccessCode(id) {
+  const d = (state.documents || []).find(x => x.id === id);
+  state.codeDocId = id;
+  state.codeValue = null;
+  document.getElementById('codeDocTitle').textContent = d ? d.title : '';
+  document.getElementById('codeBody').innerHTML = '<div class="empty-sm" style="padding:24px;">불러오는 중...</div>';
+  document.getElementById('codeCopyBtn').style.display = 'none';
+  document.getElementById('codeModal').classList.add('active');
+
+  const { data, error } = await sb.rpc('esign_get_doc_security', { p_document_id: id });
+  const body = document.getElementById('codeBody');
+
+  if (error || !data?.ok) {
+    body.innerHTML = '<div class="empty-sm" style="padding:24px;">' +
+      (data?.error === 'FORBIDDEN' ? '이 문서의 요청자만 확인할 수 있습니다.' : '암호를 불러오지 못했습니다.') + '</div>';
+    return;
+  }
+  if (!data.has_code) {
+    body.innerHTML = '<div class="empty-sm" style="padding:24px;">이 문서에는 접근 암호가 설정되어 있지 않습니다.</div>';
+    return;
+  }
+  if (!data.recoverable) {
+    body.innerHTML =
+      '<div class="sec-box" style="background:var(--danger-bg);border-color:#fecaca;">' +
+      '<p style="font-size:13px;color:#b91c1c;line-height:1.75;">' +
+      '이 문서의 암호는 <strong>다시 확인할 수 없습니다.</strong><br>' +
+      '재확인 기능이 추가되기 전에 설정된 암호라 해시만 저장되어 있습니다.<br><br>' +
+      '암호가 기억나지 않으시면 문서를 새로 만들면서 암호를 다시 설정해 주세요.</p></div>';
+    return;
+  }
+
+  state.codeValue = data.code;
+  body.innerHTML =
+    '<div class="code-reveal">' +
+      '<span class="code-label">접근 암호</span>' +
+      '<span class="code-value" id="codeValueText">' + esc(data.code) + '</span>' +
+    '</div>' +
+    (data.require_phone_verify
+      ? '<p style="font-size:12px;color:var(--text-secondary);margin-top:10px;">📱 이 문서는 휴대폰 본인 인증도 함께 요구합니다.</p>'
+      : '');
+  document.getElementById('codeCopyBtn').style.display = '';
+}
+
+function closeCodeModal() {
+  document.getElementById('codeModal').classList.remove('active');
+  state.codeValue = null;
+  state.codeDocId = null;
+}
+
+function copyAccessCode() {
+  if (!state.codeValue) return;
+  navigator.clipboard.writeText(state.codeValue)
+    .then(() => showToast('접근 암호가 복사되었습니다.', true))
+    .catch(() => showToast('복사에 실패했습니다.'));
+}
 
 // ============================================================
 // 사인 · 도장 보관함
@@ -5355,9 +5554,11 @@ async function loadDocuments() {
     signed_file_path: d.signed_file_path,
     reminder_message: d.reminder_message,
     reminder_count: d.reminder_count || 0,
-    last_reminded_at: d.last_reminded_at
+    last_reminded_at: d.last_reminded_at,
+    has_access_code: !!d.has_access_code
   }));
   state.stats = data.stats;
+  updateTrashBadge(data.trash_count || 0);
   renderDocList();
 }
 
