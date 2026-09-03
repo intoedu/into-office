@@ -81,6 +81,153 @@ input,select,textarea { font-family:inherit; }
 .public-info .pi-sep { color:rgba(255,255,255,0.28); margin:0 7px; }
 @media (max-width:520px) { .public-info { font-size:11.5px; } }
 
+/* ============================================================
+   랜딩 페이지 (비로그인 공개 영역)
+   ============================================================ */
+#landingPage { display:none; flex-direction:column; background:var(--bg); min-height:100vh; }
+#landingPage.active { display:flex; }
+
+.lp-nav { position:sticky; top:0; z-index:50; background:rgba(255,255,255,0.92); backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--border); }
+.lp-nav-inner { max-width:1120px; margin:0 auto; padding:0 24px; height:62px; display:flex; align-items:center; justify-content:space-between; gap:20px; }
+.lp-nav img { height:26px; width:auto; display:block; }
+.lp-nav-menu { display:flex; gap:26px; font-size:14px; color:var(--text-secondary); }
+.lp-nav-menu a { color:inherit; text-decoration:none; transition:color .2s; }
+.lp-nav-menu a:hover { color:var(--cyan); }
+.lp-nav-cta { display:flex; align-items:center; gap:10px; }
+.lp-btn { padding:9px 18px; border-radius:8px; font-size:14px; font-weight:600; transition:all .2s; white-space:nowrap; }
+.lp-btn-ghost { color:var(--text-secondary); }
+.lp-btn-ghost:hover { color:var(--navy); background:rgba(14,45,77,.05); }
+.lp-btn-primary { background:var(--cyan); color:#fff; }
+.lp-btn-primary:hover { background:var(--cyan-hover); }
+.lp-btn-lg { padding:14px 30px; font-size:15px; border-radius:9px; }
+.lp-btn-outline { border:1.5px solid rgba(255,255,255,.35); color:#fff; }
+.lp-btn-outline:hover { background:rgba(255,255,255,.12); }
+
+.lp-hero { background:linear-gradient(135deg,var(--navy) 0%,var(--navy-light) 55%,var(--navy) 100%); color:#fff; position:relative; overflow:hidden; }
+.lp-hero::after { content:''; position:absolute; top:-40%; right:-8%; width:560px; height:560px; border-radius:50%;
+  background:radial-gradient(circle,rgba(4,183,221,.16) 0%,transparent 70%); }
+.lp-hero-inner { max-width:1120px; margin:0 auto; padding:84px 24px 92px; position:relative; z-index:1; }
+.lp-eyebrow { display:inline-block; padding:6px 14px; border-radius:999px; background:rgba(4,183,221,.16);
+  border:1px solid rgba(4,183,221,.35); color:#7fe3f7; font-size:12.5px; font-weight:600; margin-bottom:22px; }
+.lp-hero h1 { font-size:44px; line-height:1.28; font-weight:700; letter-spacing:-.6px; margin-bottom:20px; max-width:760px; }
+.lp-hero h1 em { font-style:normal; color:var(--cyan); }
+.lp-hero p { font-size:17px; line-height:1.75; color:rgba(255,255,255,.76); max-width:620px; margin-bottom:34px; }
+.lp-hero-cta { display:flex; gap:12px; flex-wrap:wrap; align-items:center; }
+.lp-hero-note { font-size:13px; color:rgba(255,255,255,.55); margin-top:16px; }
+
+.lp-section { max-width:1120px; margin:0 auto; padding:76px 24px; width:100%; }
+.lp-section-alt { background:#fff; border-top:1px solid var(--border); border-bottom:1px solid var(--border); }
+.lp-head { text-align:center; margin-bottom:46px; }
+.lp-head h2 { font-size:30px; font-weight:700; letter-spacing:-.4px; margin-bottom:12px; }
+.lp-head p { font-size:15px; color:var(--text-secondary); line-height:1.7; }
+
+.lp-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(248px,1fr)); gap:18px; }
+.lp-card { background:var(--card); border:1px solid var(--border); border-radius:var(--radius-lg); padding:26px 24px; }
+.lp-card .ic { font-size:26px; margin-bottom:14px; display:block; }
+.lp-card h3 { font-size:16px; font-weight:650; margin-bottom:9px; }
+.lp-card p { font-size:13.5px; color:var(--text-secondary); line-height:1.72; }
+
+/* 양식 목록 */
+.lp-forms-tabs { display:flex; gap:8px; flex-wrap:wrap; justify-content:center; margin-bottom:26px; }
+.lp-tab { padding:8px 15px; border-radius:999px; border:1.5px solid var(--border); font-size:13px; color:var(--text-secondary); transition:all .2s; }
+.lp-tab:hover { border-color:var(--cyan); color:var(--cyan); }
+.lp-tab.active { background:var(--navy); border-color:var(--navy); color:#fff; }
+.lp-forms-list { display:grid; grid-template-columns:repeat(auto-fill,minmax(268px,1fr)); gap:10px; }
+.lp-form-item { display:flex; gap:11px; align-items:flex-start; padding:13px 15px; background:var(--card);
+  border:1px solid var(--border); border-radius:9px; }
+.lp-form-item .fi { font-size:16px; line-height:1.4; }
+.lp-form-item .ft { font-size:13.5px; font-weight:550; line-height:1.45; }
+.lp-form-item .fc { font-size:11.5px; color:var(--text-muted); margin-top:3px; }
+.lp-forms-count { text-align:center; margin-top:22px; font-size:13.5px; color:var(--text-muted); }
+
+/* 요금제 */
+.lp-toggle { display:flex; justify-content:center; gap:0; margin-bottom:32px; }
+.lp-toggle button { padding:9px 20px; font-size:13.5px; border:1.5px solid var(--border); color:var(--text-secondary); transition:all .2s; }
+.lp-toggle button:first-child { border-radius:8px 0 0 8px; }
+.lp-toggle button:last-child { border-radius:0 8px 8px 0; border-left:none; }
+.lp-toggle button.active { background:var(--navy); border-color:var(--navy); color:#fff; }
+.lp-toggle .save { font-size:11px; color:var(--cyan); margin-left:5px; font-weight:700; }
+.lp-plans { display:grid; grid-template-columns:repeat(auto-fit,minmax(232px,1fr)); gap:16px; align-items:stretch; }
+.lp-plan { background:var(--card); border:1.5px solid var(--border); border-radius:var(--radius-lg); padding:28px 22px;
+  display:flex; flex-direction:column; }
+.lp-plan.featured { border-color:var(--cyan); box-shadow:0 6px 24px rgba(4,183,221,.14); position:relative; }
+.lp-plan-badge { position:absolute; top:-11px; left:50%; transform:translateX(-50%); background:var(--cyan); color:#fff;
+  font-size:11px; font-weight:700; padding:4px 12px; border-radius:999px; white-space:nowrap; }
+.lp-plan h3 { font-size:15px; font-weight:650; margin-bottom:6px; }
+.lp-plan .sub { font-size:12.5px; color:var(--text-muted); margin-bottom:18px; min-height:34px; line-height:1.5; }
+.lp-plan .price { font-size:31px; font-weight:700; letter-spacing:-.8px; }
+.lp-plan .price small { font-size:14px; font-weight:500; color:var(--text-muted); margin-left:2px; }
+.lp-plan .price-note { font-size:12px; color:var(--text-muted); margin-top:5px; min-height:18px; }
+.lp-plan ul { list-style:none; margin:20px 0 22px; display:flex; flex-direction:column; gap:9px; flex:1; }
+.lp-plan li { font-size:13px; color:var(--text-secondary); display:flex; gap:8px; align-items:flex-start; line-height:1.55; }
+.lp-plan li::before { content:'✓'; color:var(--cyan); font-weight:700; flex-shrink:0; }
+.lp-plan li.muted { color:var(--text-muted); }
+.lp-plan li.muted::before { content:'·'; color:var(--text-muted); }
+.lp-plan .lp-btn { width:100%; text-align:center; }
+.lp-btn-soft { background:rgba(14,45,77,.06); color:var(--navy); }
+.lp-btn-soft:hover { background:rgba(14,45,77,.11); }
+.lp-pricing-foot { margin-top:26px; font-size:12.5px; color:var(--text-muted); line-height:1.85; text-align:center; }
+
+/* 법적 효력 */
+.lp-legal { background:var(--navy); color:#fff; }
+.lp-legal .lp-section { padding:64px 24px; }
+.lp-legal h2 { color:#fff; }
+.lp-legal .lp-head p { color:rgba(255,255,255,.66); }
+.lp-legal-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:18px; }
+.lp-legal-card { background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); border-radius:var(--radius-lg); padding:24px 22px; }
+.lp-legal-card h3 { font-size:15px; font-weight:650; margin-bottom:9px; color:#fff; }
+.lp-legal-card p { font-size:13px; color:rgba(255,255,255,.7); line-height:1.75; }
+
+/* FAQ */
+.lp-faq-item { border-bottom:1px solid var(--border); }
+.lp-faq-q { width:100%; text-align:left; padding:19px 4px; font-size:15px; font-weight:600; display:flex;
+  justify-content:space-between; align-items:center; gap:16px; color:var(--text); }
+.lp-faq-q span.mk { color:var(--cyan); font-size:19px; flex-shrink:0; transition:transform .2s; }
+.lp-faq-item.open .lp-faq-q span.mk { transform:rotate(45deg); }
+.lp-faq-a { display:none; padding:0 4px 20px; font-size:13.5px; color:var(--text-secondary); line-height:1.85; }
+.lp-faq-item.open .lp-faq-a { display:block; }
+
+/* CTA 밴드 */
+.lp-cta-band { background:linear-gradient(135deg,var(--navy) 0%,var(--navy-light) 100%); color:#fff; text-align:center; }
+.lp-cta-band .lp-section { padding:66px 24px; }
+.lp-cta-band h2 { font-size:27px; font-weight:700; margin-bottom:13px; }
+.lp-cta-band p { font-size:15px; color:rgba(255,255,255,.72); margin-bottom:28px; }
+
+/* 푸터 */
+.lp-footer { background:#0b2038; color:rgba(255,255,255,.6); font-size:12.5px; line-height:1.95; }
+.lp-footer .lp-section { padding:46px 24px 40px; }
+.lp-footer-top { display:flex; justify-content:space-between; gap:32px; flex-wrap:wrap; margin-bottom:26px;
+  padding-bottom:24px; border-bottom:1px solid rgba(255,255,255,.1); }
+.lp-footer-brand { font-size:15px; font-weight:650; color:#fff; margin-bottom:8px; }
+.lp-footer-links { display:flex; gap:20px; flex-wrap:wrap; align-items:flex-start; }
+.lp-footer-links button { color:rgba(255,255,255,.72); font-size:13px; transition:color .2s; }
+.lp-footer-links button:hover { color:#fff; text-decoration:underline; }
+.lp-biz b { color:rgba(255,255,255,.85); font-weight:600; }
+.lp-footer a { color:rgba(255,255,255,.72); text-decoration:none; border-bottom:1px solid rgba(255,255,255,.25); }
+.lp-footer a:hover { color:#fff; }
+.lp-sep { color:rgba(255,255,255,.25); margin:0 8px; }
+.lp-copy { margin-top:18px; font-size:11.5px; color:rgba(255,255,255,.4); }
+
+/* 약관 모달 본문 */
+.legal-doc { font-size:13.5px; line-height:1.9; color:var(--text-secondary); }
+.legal-doc h3 { font-size:15px; color:var(--text); margin:22px 0 10px; font-weight:650; }
+.legal-doc h3:first-child { margin-top:0; }
+.legal-doc p { margin-bottom:10px; }
+.legal-doc ul { margin:0 0 12px 18px; }
+.legal-doc li { margin-bottom:5px; }
+.legal-doc table { width:100%; border-collapse:collapse; margin:10px 0 16px; font-size:12.5px; }
+.legal-doc th, .legal-doc td { border:1px solid var(--border); padding:8px 10px; text-align:left; }
+.legal-doc th { background:var(--bg); font-weight:600; color:var(--text); }
+
+@media (max-width:820px) {
+  .lp-nav-menu { display:none; }
+  .lp-hero h1 { font-size:31px; }
+  .lp-hero-inner { padding:58px 20px 64px; }
+  .lp-section { padding:54px 20px; }
+  .lp-head h2 { font-size:24px; }
+}
+
 /* ===== APP SHELL ===== */
 .app-shell { flex-direction:column; }
 .app-header { background:var(--navy); padding:0 28px; height:56px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:100; }
@@ -540,8 +687,282 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
 </head>
 <body>
 
+<!-- ===== LANDING PAGE (비로그인 공개 영역) ===== -->
+<div id="landingPage" class="page active">
+
+  <nav class="lp-nav">
+    <div class="lp-nav-inner">
+      <img id="lpLogo" alt="INTO OFFICE">
+      <div class="lp-nav-menu">
+        <a href="#lpFeatures">기능</a>
+        <a href="#lpForms">문서 양식</a>
+        <a href="#lpPricing">요금제</a>
+        <a href="#lpFaq">자주 묻는 질문</a>
+      </div>
+      <div class="lp-nav-cta">
+        <button class="lp-btn lp-btn-ghost" onclick="goLogin()">로그인</button>
+        <button class="lp-btn lp-btn-primary" onclick="goSignup()">무료로 시작하기</button>
+      </div>
+    </div>
+  </nav>
+
+  <section class="lp-hero">
+    <div class="lp-hero-inner">
+      <span class="lp-eyebrow">전자서명법 제3조 · 서면 서명과 동일한 법적 효력</span>
+      <h1>동의서 200장을 받는 데<br><em>이틀이면 충분합니다.</em></h1>
+      <p>
+        학원 · 유학원 · 단체를 위한 전자계약 서비스입니다.
+        명단만 올리면 전원에게 서명 링크가 나가고, 누가 서명했는지 한눈에 보입니다.
+        업종별 전문 양식 35종이 이미 준비되어 있습니다.
+      </p>
+      <div class="lp-hero-cta">
+        <button class="lp-btn lp-btn-primary lp-btn-lg" onclick="goSignup()">30일 무료로 시작하기</button>
+        <button class="lp-btn lp-btn-outline lp-btn-lg" onclick="lpScroll('lpPricing')">요금제 보기</button>
+      </div>
+      <p class="lp-hero-note">카드 등록 없이 시작 · 30일 동안 10건 무료</p>
+    </div>
+  </section>
+
+  <section class="lp-section" id="lpFeatures">
+    <div class="lp-head">
+      <h2>종이로 하던 일을 그대로 옮겼습니다</h2>
+      <p>계약서 한 장을 받으려고 사람을 부르거나, 출력해서 나눠주고 다시 걷는 일이 사라집니다.</p>
+    </div>
+    <div class="lp-grid">
+      <div class="lp-card">
+        <span class="ic">📨</span>
+        <h3>한 번에 수백 명 발송</h3>
+        <p>엑셀 명단을 올리면 전원에게 개별 서명 링크가 나갑니다. 신학기 재학생 동의서, 행사 참가 동의서처럼 한 번에 많은 사람에게 받아야 하는 문서에 맞춰 만들었습니다.</p>
+      </div>
+      <div class="lp-card">
+        <span class="ic">📋</span>
+        <h3>업종별 전문 양식 35종</h3>
+        <p>빈 화면에서 시작하지 않습니다. 수강 환불 동의서, 해외 개인정보 이전 동의서, 만 14세 미만 법정대리인 동의서까지 법령 조문을 반영한 양식이 들어 있습니다.</p>
+      </div>
+      <div class="lp-card">
+        <span class="ic">🔎</span>
+        <h3>누가 안 했는지 바로 보임</h3>
+        <p>열람 여부와 서명 여부가 실시간으로 표시됩니다. 미서명자에게만 리마인드를 보낼 수 있어, 일일이 전화 돌릴 필요가 없습니다.</p>
+      </div>
+      <div class="lp-card">
+        <span class="ic">🛡️</span>
+        <h3>감사추적인증서 자동 생성</h3>
+        <p>서명 시각, 접속 기록, 문서 해시값이 인증서로 남습니다. 나중에 "그런 적 없다"는 다툼이 생겼을 때 근거가 됩니다.</p>
+      </div>
+      <div class="lp-card">
+        <span class="ic">🔐</span>
+        <h3>문서 접근 암호</h3>
+        <p>링크가 전달되어도 암호를 모르면 열 수 없습니다. 민감한 계약서는 암호를 걸어 발송하십시오.</p>
+      </div>
+      <div class="lp-card">
+        <span class="ic">✍️</span>
+        <h3>사인 · 도장 보관함</h3>
+        <p>직접 그린 사인과 도장을 저장해 두고 매번 꺼내 씁니다. 반복 서명이 많은 담당자에게 특히 편합니다.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="lp-section-alt">
+    <div class="lp-section" id="lpForms">
+      <div class="lp-head">
+        <h2>업종별 전문 양식 <span style="color:var(--cyan);">35종</span></h2>
+        <p>필요한 양식을 고르면 바로 편집해 발송할 수 있습니다. 모든 양식은 무료로 제공됩니다.</p>
+      </div>
+      <div class="lp-forms-tabs" id="lpFormTabs"></div>
+      <div class="lp-forms-list" id="lpFormList"></div>
+      <p class="lp-forms-count">
+        양식은 참고용 표준 서식이며, 사업 상황에 맞게 수정하여 사용하시면 됩니다.
+        중요한 계약은 전문가 검토를 권장합니다.
+      </p>
+    </div>
+  </section>
+
+  <section class="lp-section" id="lpPricing">
+    <div class="lp-head">
+      <h2>요금제</h2>
+      <p>월 6,900원부터. 표시 금액은 부가세 포함입니다.</p>
+    </div>
+
+    <div class="lp-toggle">
+      <button id="lpTabMonthly" class="active" onclick="lpSetCycle('m')">월 결제</button>
+      <button id="lpTabYearly" onclick="lpSetCycle('y')">연 결제<span class="save">2개월 무료</span></button>
+    </div>
+
+    <div class="lp-plans">
+      <div class="lp-plan">
+        <h3>무료 체험</h3>
+        <div class="sub">서비스를 직접 써 보고 결정하세요</div>
+        <div class="price">0<small>원</small></div>
+        <div class="price-note">가입 후 30일간</div>
+        <ul>
+          <li>문서 10건</li>
+          <li>이용 인원 1명</li>
+          <li>양식 35종 전체 이용</li>
+          <li>감사추적인증서</li>
+          <li class="muted">카드 등록 불필요</li>
+        </ul>
+        <button class="lp-btn lp-btn-soft" onclick="goSignup()">무료로 시작</button>
+      </div>
+
+      <div class="lp-plan featured">
+        <span class="lp-plan-badge">가장 많이 선택</span>
+        <h3>스탠다드</h3>
+        <div class="sub">소규모 학원 · 교습소 · 소모임에 적합합니다</div>
+        <div class="price"><span data-price="std">6,900</span><small>원 / 월</small></div>
+        <div class="price-note" data-note="std">부가세 포함</div>
+        <ul>
+          <li><span data-quota="std">문서 월 30건</span></li>
+          <li>이용 인원 3명</li>
+          <li>대량 발송</li>
+          <li>문서 접근 암호</li>
+          <li>양식 35종 전체 이용</li>
+          <li class="muted">초과분 건당 250원</li>
+        </ul>
+        <button class="lp-btn lp-btn-primary" onclick="goSignup()">시작하기</button>
+      </div>
+
+      <div class="lp-plan">
+        <h3>팀</h3>
+        <div class="sub">여러 담당자가 함께 쓰는 학원 · 유학원에 적합합니다</div>
+        <div class="price"><span data-price="team">19,900</span><small>원 / 월</small></div>
+        <div class="price-note" data-note="team">부가세 포함</div>
+        <ul>
+          <li><span data-quota="team">문서 월 120건</span></li>
+          <li>이용 인원 10명</li>
+          <li>스탠다드 기능 전체</li>
+          <li>팀원별 권한 관리</li>
+          <li class="muted">초과분 건당 200원</li>
+        </ul>
+        <button class="lp-btn lp-btn-soft" onclick="goSignup()">시작하기</button>
+      </div>
+
+      <div class="lp-plan">
+        <h3>비즈니스</h3>
+        <div class="sub">대규모 발송이 정기적으로 발생하는 기관에 적합합니다</div>
+        <div class="price"><span data-price="biz">49,900</span><small>원 / 월</small></div>
+        <div class="price-note" data-note="biz">부가세 포함</div>
+        <ul>
+          <li><span data-quota="biz">문서 월 400건</span></li>
+          <li>이용 인원 무제한</li>
+          <li>팀 기능 전체</li>
+          <li>우선 기술 지원</li>
+          <li class="muted">초과분 건당 150원</li>
+        </ul>
+        <button class="lp-btn lp-btn-soft" onclick="goSignup()">시작하기</button>
+      </div>
+    </div>
+
+    <div class="lp-pricing-foot" id="lpPricingFoot">
+      결제는 계좌이체로 진행되며, 입금 확인 후 이용이 시작됩니다.<br>
+      세금계산서 및 현금영수증을 발행해 드립니다.
+    </div>
+  </section>
+
+  <div class="lp-legal">
+    <div class="lp-section">
+      <div class="lp-head">
+        <h2>법적 효력은 종이 서명과 같습니다</h2>
+        <p>전자서명이라서 불안하다는 말씀을 자주 듣습니다. 근거를 밝혀 두었습니다.</p>
+      </div>
+      <div class="lp-legal-grid">
+        <div class="lp-legal-card">
+          <h3>전자서명법 제3조</h3>
+          <p>전자서명은 전자적 형태라는 이유만으로 서명·서명날인 또는 기명날인으로서의 효력이 부인되지 아니합니다. 당사자가 약정한 방식의 전자서명은 그 약정에 따른 효력을 가집니다.</p>
+        </div>
+        <div class="lp-legal-card">
+          <h3>감사추적인증서</h3>
+          <p>서명자의 접속 시각, 열람 기록, 서명 완료 시각, 문서의 해시값을 인증서로 자동 생성합니다. 문서가 서명 이후 변조되지 않았음을 확인할 수 있습니다.</p>
+        </div>
+        <div class="lp-legal-card">
+          <h3>5년 보관</h3>
+          <p>전자문서 및 전자거래 기본법에 따라 서명이 완료된 문서를 안전하게 보관합니다. 언제든 원본과 서명본, 인증서를 내려받을 수 있습니다.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="lp-section" id="lpFaq">
+    <div class="lp-head">
+      <h2>자주 묻는 질문</h2>
+    </div>
+    <div style="max-width:760px;margin:0 auto;">
+      <div class="lp-faq-item">
+        <button class="lp-faq-q" onclick="lpFaq(this)">서명받는 사람도 가입해야 하나요?<span class="mk">+</span></button>
+        <div class="lp-faq-a">아닙니다. 서명자는 문자나 카카오톡으로 받은 링크를 눌러 바로 서명합니다. 앱 설치도, 회원가입도 필요 없습니다. 휴대폰만 있으면 됩니다.</div>
+      </div>
+      <div class="lp-faq-item">
+        <button class="lp-faq-q" onclick="lpFaq(this)">한 번에 몇 명까지 보낼 수 있나요?<span class="mk">+</span></button>
+        <div class="lp-faq-a">엑셀 명단을 올리면 인원 제한 없이 한 번에 발송됩니다. 다만 요금제의 월 문서 한도 안에서 사용하시게 됩니다. 신학기처럼 특정 시기에 몰리는 경우에는 연 결제를 선택하시면 한도를 연 단위로 쓰실 수 있습니다.</div>
+      </div>
+      <div class="lp-faq-item">
+        <button class="lp-faq-q" onclick="lpFaq(this)">결제는 어떻게 하나요?<span class="mk">+</span></button>
+        <div class="lp-faq-a">현재는 계좌이체로 진행됩니다. 가입 후 안내되는 계좌로 입금하시면 확인 후 이용이 시작됩니다. 세금계산서와 현금영수증을 발행해 드립니다.</div>
+      </div>
+      <div class="lp-faq-item">
+        <button class="lp-faq-q" onclick="lpFaq(this)">양식을 그대로 써도 되나요?<span class="mk">+</span></button>
+        <div class="lp-faq-a">제공되는 양식은 관련 법령의 필수 기재사항을 반영한 표준 서식입니다. 다만 사업의 개별 사정에 따라 필요한 조항이 달라질 수 있으므로, 금액이 크거나 분쟁 소지가 있는 계약은 전문가 검토를 권장합니다. 양식은 참고용이며 법률 자문이 아닙니다.</div>
+      </div>
+      <div class="lp-faq-item">
+        <button class="lp-faq-q" onclick="lpFaq(this)">해지하면 문서는 어떻게 되나요?<span class="mk">+</span></button>
+        <div class="lp-faq-a">해지 후 30일 동안 모든 문서와 인증서를 내려받으실 수 있습니다. 그 기간이 지나면 문서는 삭제됩니다. 장기 보관이 필요하시면 별도로 문의해 주십시오.</div>
+      </div>
+      <div class="lp-faq-item">
+        <button class="lp-faq-q" onclick="lpFaq(this)">무료 체험이 끝나면 자동으로 결제되나요?<span class="mk">+</span></button>
+        <div class="lp-faq-a">아닙니다. 카드를 등록받지 않으므로 자동 결제가 되지 않습니다. 30일이 지나거나 10건을 모두 사용하면 이용이 중지되며, 계속 쓰시려면 직접 요금제를 선택하시면 됩니다.</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="lp-cta-band">
+    <div class="lp-section">
+      <h2>먼저 써 보고 결정하십시오</h2>
+      <p>카드 등록 없이 30일 동안 10건을 무료로 사용하실 수 있습니다.</p>
+      <button class="lp-btn lp-btn-primary lp-btn-lg" onclick="goSignup()">무료로 시작하기</button>
+    </div>
+  </div>
+
+  <footer class="lp-footer">
+    <div class="lp-section">
+      <div class="lp-footer-top">
+        <div>
+          <div class="lp-footer-brand">인투오피스 (INTO OFFICE)</div>
+          <div>학원 · 유학원 · 단체를 위한 전자계약 · 전자서명 서비스</div>
+        </div>
+        <div class="lp-footer-links">
+          <button onclick="openLegal('terms')">이용약관</button>
+          <button onclick="openLegal('privacy')"><b style="color:#fff;">개인정보처리방침</b></button>
+          <button onclick="openLegal('refund')">환불규정</button>
+          <button onclick="goLogin()">로그인</button>
+        </div>
+      </div>
+      <div class="lp-biz">
+        인투오피스는 <b>인투마케팅</b>이 운영하는 전자서명 서비스입니다.<br>
+        상호 인투마케팅<span class="lp-sep">|</span>대표자 양회광<span class="lp-sep">|</span>사업자등록번호 306-24-53380<br>
+        주소 대전광역시 유성구 은구비남로33번길 13-8, 3397호 (지족동, 양지빌딩)<br>
+        전화 010-4254-2270<span class="lp-sep">|</span>이메일 intoffice1@gmail.com<br>
+        카카오톡 채널 <a href="http://pf.kakao.com/_KvxgxaX" target="_blank" rel="noopener">인투오피스 (@intoffice)</a>
+      </div>
+      <div class="lp-copy">© 2026 인투마케팅. All rights reserved.</div>
+    </div>
+  </footer>
+</div>
+
+<!-- ===== 약관 · 방침 모달 ===== -->
+<div class="modal-overlay" id="legalModal">
+  <div class="modal wide">
+    <div class="modal-header">
+      <h3 id="legalTitle">이용약관</h3>
+      <button class="modal-close" onclick="closeLegal()">✕</button>
+    </div>
+    <div class="modal-body legal-doc" id="legalBody" style="max-height:72vh;overflow-y:auto;"></div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeLegal()">닫기</button>
+    </div>
+  </div>
+</div>
+
 <!-- ===== LOGIN PAGE ===== -->
-<div id="loginPage" class="page active">
+<div id="loginPage" class="page">
   <div class="login-card">
     <div class="login-logo">
       <img id="loginLogo" alt="INTO OFFICE">
@@ -6393,6 +6814,329 @@ function formatDate(d) {
 }
 
 // ===== NAVIGATION =====
+
+// ============================================================
+// 이용약관 · 개인정보처리방침 · 환불규정
+// ============================================================
+const LEGAL_EFFECTIVE = '2026년 9월 3일';
+
+const LEGAL_DOCS = {
+terms: { title: '이용약관', body: `
+<h3>제1조 (목적)</h3>
+<p>본 약관은 인투마케팅(이하 "회사")이 제공하는 전자계약·전자서명 서비스 "인투오피스"(이하 "서비스")의 이용에 관하여 회사와 이용자 사이의 권리·의무 및 책임사항을 정함을 목적으로 합니다.</p>
+
+<h3>제2조 (용어의 정의)</h3>
+<ul>
+<li><b>이용자</b> — 본 약관에 동의하고 서비스를 이용하는 개인 또는 단체를 말합니다.</li>
+<li><b>조직</b> — 이용자가 서비스 내에 개설한 사업장·기관 단위의 이용 공간을 말합니다.</li>
+<li><b>서명자</b> — 이용자가 발송한 문서에 서명하는 상대방을 말하며, 회원가입 없이 서명할 수 있습니다.</li>
+<li><b>문서</b> — 이용자가 서비스를 통해 생성·발송·보관하는 전자문서를 말합니다.</li>
+</ul>
+
+<h3>제3조 (약관의 게시 및 개정)</h3>
+<p>회사는 본 약관을 서비스 화면에 게시합니다. 회사는 관련 법령을 위반하지 않는 범위에서 본 약관을 개정할 수 있으며, 개정 시 적용일자와 개정 사유를 명시하여 적용일 7일 전(이용자에게 불리한 개정은 30일 전)부터 공지합니다. 이용자가 개정 약관에 동의하지 않는 경우 이용계약을 해지할 수 있습니다.</p>
+
+<h3>제4조 (이용계약의 성립)</h3>
+<p>이용계약은 이용자가 본 약관에 동의하고 가입을 신청한 후 회사가 이를 승낙함으로써 성립합니다. 회사는 다음의 경우 승낙을 유보하거나 거절할 수 있습니다.</p>
+<ul>
+<li>타인의 명의를 도용하거나 허위 정보를 기재한 경우</li>
+<li>이전에 본 약관 위반으로 이용계약이 해지된 이력이 있는 경우</li>
+<li>서비스의 정상적인 제공에 지장을 초래할 우려가 있는 경우</li>
+</ul>
+
+<h3>제5조 (서비스의 내용)</h3>
+<p>회사가 제공하는 서비스는 다음과 같습니다.</p>
+<ul>
+<li>전자문서의 생성, 발송 및 전자서명 수집</li>
+<li>다수 서명자에 대한 일괄 발송</li>
+<li>서명 완료 문서 및 감사추적인증서의 생성·보관·제공</li>
+<li>표준 문서 양식의 제공</li>
+<li>기타 회사가 정하는 부가 서비스</li>
+</ul>
+
+<h3>제6조 (제공 양식에 관한 면책)</h3>
+<p><b>회사가 제공하는 문서 양식은 일반적인 상황을 전제로 작성된 참고용 표준 서식이며, 법률 자문에 해당하지 아니합니다.</b> 개별 사안에 필요한 조항은 사업의 성격과 거래 상황에 따라 달라질 수 있습니다.</p>
+<p>이용자는 양식을 사용하기 전에 그 내용이 자신의 상황에 적합한지 스스로 확인하여야 하며, 금액이 크거나 분쟁의 소지가 있는 계약은 변호사 등 전문가의 검토를 받을 것을 권장합니다. 양식의 사용으로 인하여 발생한 법률적 결과에 대하여 회사는 책임을 지지 아니합니다.</p>
+
+<h3>제7조 (요금 및 결제)</h3>
+<ul>
+<li>서비스 요금은 서비스 화면에 게시된 요금제에 따르며, 표시 금액은 부가가치세를 포함합니다.</li>
+<li>결제는 계좌이체 방식으로 이루어지며, 회사가 입금을 확인한 시점부터 유료 이용이 개시됩니다.</li>
+<li>회사는 이용자의 요청에 따라 세금계산서 또는 현금영수증을 발행합니다.</li>
+<li>회사는 요금제를 변경할 수 있으며, 변경 시 제3조에 따라 공지합니다. 이미 결제된 이용 기간에는 종전 요금이 적용됩니다.</li>
+</ul>
+
+<h3>제8조 (이용 한도)</h3>
+<p>요금제별로 기간당 생성 가능한 문서 수와 이용 인원이 정해져 있습니다. 한도를 초과하는 경우 요금제에 정한 초과 요금이 부과되거나 추가 생성이 제한될 수 있습니다.</p>
+<p>연간 결제 이용자에게는 월별 한도를 적용하지 아니하며, 연간 총량 범위에서 자유롭게 사용할 수 있습니다. 미사용 잔여분은 계약 기간 종료 시 소멸하며 이월되지 아니합니다.</p>
+
+<h3>제9조 (이용자의 의무)</h3>
+<p>이용자는 다음 행위를 하여서는 아니 됩니다.</p>
+<ul>
+<li>타인의 명의를 도용하거나 서명 권한 없는 자에게 서명을 요구하는 행위</li>
+<li>법령에 위반되거나 공서양속에 반하는 내용의 문서를 발송하는 행위</li>
+<li>수신자의 동의 없이 광고성 정보를 발송하는 행위</li>
+<li>서비스의 취약점을 이용하거나 자동화 수단으로 비정상적인 요청을 발생시키는 행위</li>
+<li>계정을 제3자에게 양도·대여하거나 공유하는 행위</li>
+<li>회사의 사전 동의 없이 서비스를 재판매하는 행위</li>
+</ul>
+<p>이용자는 서명자의 개인정보를 처리함에 있어 개인정보 보호법 등 관계 법령을 준수하여야 하며, 이에 관하여 이용자가 개인정보처리자의 지위에 있습니다.</p>
+
+<h3>제10조 (문서의 보관 및 삭제)</h3>
+<ul>
+<li>회사는 서명이 완료된 문서를 「전자문서 및 전자거래 기본법」의 취지에 따라 안전하게 보관합니다.</li>
+<li>이용계약이 해지된 경우, <b>해지일로부터 30일간 이용자가 문서를 내려받을 수 있는 기간을 제공하며, 그 기간이 경과하면 문서는 복구할 수 없도록 삭제됩니다.</b></li>
+<li>장기 보관이 필요한 이용자는 해지 전에 회사에 별도로 요청하여야 합니다.</li>
+<li>이용자가 서비스 내에서 문서를 직접 삭제한 경우, 회사는 해당 문서의 복구에 대하여 책임지지 아니합니다.</li>
+</ul>
+
+<h3>제11조 (서비스의 중단)</h3>
+<p>회사는 설비 점검·교체, 통신 두절, 천재지변 등의 사유가 있는 경우 서비스 제공을 일시적으로 중단할 수 있습니다. 사전에 예측 가능한 중단은 미리 공지하며, 부득이한 경우 사후에 공지합니다.</p>
+
+<h3>제12조 (계약의 해지)</h3>
+<ul>
+<li>이용자는 언제든지 서비스 내 기능 또는 고객센터를 통하여 이용계약을 해지할 수 있습니다.</li>
+<li>회사는 이용자가 제9조를 중대하게 위반한 경우 사전 통지 후 이용계약을 해지할 수 있습니다. 다만 긴급한 경우에는 먼저 이용을 정지한 후 통지할 수 있습니다.</li>
+</ul>
+
+<h3>제13조 (책임의 제한)</h3>
+<ul>
+<li>회사는 전자서명이 이루어질 수 있는 기술적 수단과 그 기록을 제공하며, <b>문서의 내용, 계약의 성립 여부 및 그 법률적 효과에 대하여는 당사자가 책임을 집니다.</b></li>
+<li>회사는 이용자와 서명자 사이에 발생한 분쟁에 개입하지 아니하며, 그로 인한 손해에 대하여 책임을 지지 아니합니다.</li>
+<li>회사의 고의 또는 중대한 과실이 없는 한, 회사의 배상 책임은 해당 이용자가 최근 3개월간 회사에 지급한 이용요금의 합계액을 한도로 합니다.</li>
+<li>무료로 제공되는 서비스 및 양식과 관련하여 발생한 손해에 대하여는 회사의 고의 또는 중대한 과실이 있는 경우를 제외하고 책임을 지지 아니합니다.</li>
+</ul>
+
+<h3>제14조 (분쟁의 해결)</h3>
+<p>본 약관은 대한민국 법령에 따라 해석되며, 서비스 이용과 관련하여 분쟁이 발생한 경우 상호 협의로 해결하되, 협의가 이루어지지 아니하면 회사의 주소지를 관할하는 법원을 제1심 관할법원으로 합니다.</p>
+
+<h3>부칙</h3>
+<p>본 약관은 ` + LEGAL_EFFECTIVE + `부터 시행합니다.</p>
+` },
+
+privacy: { title: '개인정보처리방침', body: `
+<p>인투마케팅(이하 "회사")은 「개인정보 보호법」에 따라 이용자의 개인정보를 보호하고 이와 관련한 고충을 신속히 처리할 수 있도록 다음과 같이 개인정보처리방침을 수립·공개합니다.</p>
+
+<h3>1. 수집하는 개인정보 항목</h3>
+<table>
+<tr><th>구분</th><th>수집 항목</th></tr>
+<tr><td>회원가입 (필수)</td><td>아이디, 비밀번호, 이름, 이메일, 연락처, 출생연도</td></tr>
+<tr><td>회원가입 (선택)</td><td>사업장명, 업종</td></tr>
+<tr><td>서명자 정보</td><td>이름, 휴대전화번호, 서명 이미지, 서명 일시</td></tr>
+<tr><td>자동 수집</td><td>접속 IP, 접속 일시, 기기·브라우저 정보, 서비스 이용 기록</td></tr>
+<tr><td>결제 시</td><td>입금자명, 입금 일시, 세금계산서 발행 정보</td></tr>
+</table>
+<p>회사는 서비스 제공에 필요한 최소한의 정보만을 수집하며, 사상·신념, 정치적 견해 등 민감정보는 수집하지 아니합니다. 다만 이용자가 문서에 직접 기재한 내용은 이용자의 책임 아래 처리됩니다.</p>
+
+<h3>2. 개인정보의 처리 목적</h3>
+<ul>
+<li>회원 식별 및 관리, 부정 이용 방지</li>
+<li>전자서명 서비스의 제공 및 계약 당사자 확인</li>
+<li>감사추적인증서 생성 등 서명 기록의 증명</li>
+<li>요금 청구, 결제 확인 및 증빙 발행</li>
+<li>공지사항 전달 및 문의 응대</li>
+<li>서비스 개선 및 이용 통계 분석</li>
+</ul>
+
+<h3>3. 보유 및 이용 기간</h3>
+<table>
+<tr><th>구분</th><th>보유 기간</th></tr>
+<tr><td>회원 정보</td><td>회원 탈퇴 시까지</td></tr>
+<tr><td>전자서명 문서 및 인증서</td><td>이용계약 종료 후 30일<br>(그 이후 복구 불가하도록 삭제)</td></tr>
+<tr><td>계약 또는 청약철회 기록</td><td>5년 (전자상거래법)</td></tr>
+<tr><td>대금 결제 및 재화 공급 기록</td><td>5년 (전자상거래법)</td></tr>
+<tr><td>소비자 불만 및 분쟁 처리 기록</td><td>3년 (전자상거래법)</td></tr>
+<tr><td>접속 기록</td><td>3개월 (통신비밀보호법)</td></tr>
+</table>
+
+<h3>4. 개인정보의 제3자 제공</h3>
+<p>회사는 이용자의 개인정보를 제3자에게 제공하지 아니합니다. 다만 다음의 경우에는 예외로 합니다.</p>
+<ul>
+<li>이용자가 사전에 동의한 경우</li>
+<li>법령에 특별한 규정이 있거나, 수사기관이 법령에 정한 절차와 방법에 따라 요구하는 경우</li>
+</ul>
+
+<h3>5. 개인정보 처리의 위탁</h3>
+<table>
+<tr><th>수탁자</th><th>위탁 업무</th><th>보관 위치</th></tr>
+<tr><td>Supabase, Inc.</td><td>데이터베이스 및 파일 저장소 운영</td><td>대한민국 (서울 리전)</td></tr>
+</table>
+<p>회사는 위탁계약 시 개인정보의 안전한 관리를 위한 사항을 규정하고 있으며, 수탁자가 개인정보를 안전하게 처리하는지 감독합니다. 이용자의 개인정보와 문서 데이터는 <b>대한민국 내에 위치한 서버에 저장</b>되며, 국외로 이전되지 아니합니다.</p>
+
+<h3>6. 정보주체의 권리와 행사 방법</h3>
+<p>이용자는 언제든지 다음의 권리를 행사할 수 있습니다.</p>
+<ul>
+<li>개인정보 열람 요구</li>
+<li>오류가 있는 경우 정정 요구</li>
+<li>삭제 요구</li>
+<li>처리 정지 요구</li>
+</ul>
+<p>권리 행사는 서비스 내 「요청 · 문의」 메뉴 또는 아래 연락처를 통하여 하실 수 있으며, 회사는 지체 없이 조치합니다. 만 14세 미만 아동의 경우 법정대리인이 권리를 행사할 수 있습니다.</p>
+
+<h3>7. 개인정보의 파기</h3>
+<p>회사는 보유 기간이 경과하거나 처리 목적이 달성된 경우 지체 없이 개인정보를 파기합니다. 전자적 파일은 복구할 수 없는 방법으로 삭제하며, 출력물은 분쇄하거나 소각합니다.</p>
+
+<h3>8. 개인정보의 안전성 확보 조치</h3>
+<ul>
+<li>비밀번호의 일방향 암호화 저장</li>
+<li>문서 접근 암호의 암호화 저장</li>
+<li>전송 구간 암호화(HTTPS) 적용</li>
+<li>데이터베이스 행 수준 접근 제어를 통한 이용자별 데이터 분리</li>
+<li>접속 기록의 보관 및 위·변조 방지</li>
+<li>개인정보 처리 담당자의 최소화 및 접근 권한 관리</li>
+</ul>
+
+<h3>9. 서명자의 개인정보에 관한 안내</h3>
+<p>이용자가 서명을 요청하기 위하여 입력한 서명자의 개인정보(이름, 연락처)에 대하여는 <b>해당 이용자가 개인정보처리자</b>가 되며, 회사는 그 처리를 위탁받아 수행하는 지위에 있습니다. 이용자는 서명자로부터 필요한 동의를 적법하게 받아야 합니다.</p>
+
+<h3>10. 개인정보 보호책임자</h3>
+<table>
+<tr><th>구분</th><th>내용</th></tr>
+<tr><td>보호책임자</td><td>양회광 (인투마케팅 대표)</td></tr>
+<tr><td>연락처</td><td>010-4254-2270</td></tr>
+<tr><td>이메일</td><td>intoffice1@gmail.com</td></tr>
+</table>
+<p>개인정보 침해에 관한 상담이 필요하신 경우 개인정보침해신고센터(국번없이 118), 대검찰청 사이버수사과(1301), 경찰청 사이버수사국(182)에 문의하실 수 있습니다.</p>
+
+<h3>11. 개인정보처리방침의 변경</h3>
+<p>본 방침은 ` + LEGAL_EFFECTIVE + `부터 적용됩니다. 내용의 추가·삭제 및 수정이 있을 경우 시행 7일 전부터 서비스 화면을 통하여 공지합니다.</p>
+` },
+
+refund: { title: '환불규정', body: `
+<h3>1. 무료 체험</h3>
+<p>무료 체험은 요금이 부과되지 아니하므로 환불 대상이 아닙니다. 체험 기간(30일) 또는 제공 건수(10건)가 소진되면 자동으로 종료되며, 별도의 해지 절차나 위약금이 없습니다. 카드를 등록받지 않으므로 자동 결제되지 아니합니다.</p>
+
+<h3>2. 월 결제</h3>
+<table>
+<tr><th>해지 시점</th><th>환불 기준</th></tr>
+<tr><td>결제 후 7일 이내 &amp; 문서 미사용</td><td>전액 환불</td></tr>
+<tr><td>결제 후 7일 이내 &amp; 문서 사용</td><td>사용한 문서 건수 × 500원을 공제한 후 환불</td></tr>
+<tr><td>결제 후 7일 경과</td><td>잔여 일수에 해당하는 금액을 일할 계산하여 환불</td></tr>
+</table>
+<p>일할 계산은 「결제금액 ÷ 30일 × 잔여일수」로 산정합니다.</p>
+
+<h3>3. 연 결제</h3>
+<table>
+<tr><th>해지 시점</th><th>환불 기준</th></tr>
+<tr><td>결제 후 7일 이내 &amp; 문서 미사용</td><td>전액 환불</td></tr>
+<tr><td>그 외</td><td>이미 사용한 개월 수를 <b>월 결제 정가</b>로 환산하여 공제한 후 잔액 환불</td></tr>
+</table>
+<p>연 결제는 월 결제 대비 2개월분이 할인된 가격이므로, 중도 해지 시 할인 혜택은 소급하여 적용되지 아니합니다.</p>
+<p><b>산정 예시</b> — 스탠다드 연 결제(69,000원)를 이용하다 4개월 후 해지하는 경우<br>
+사용분 6,900원 × 4개월 = 27,600원을 공제하고 41,400원을 환불합니다.</p>
+
+<h3>4. 초과 사용 요금</h3>
+<p>이용 한도를 초과하여 발생한 요금은 이미 서비스가 제공된 부분이므로 환불되지 아니합니다.</p>
+
+<h3>5. 회사의 귀책으로 인한 환불</h3>
+<p>회사의 귀책사유로 서비스를 정상적으로 이용하지 못한 경우, 해당 기간에 대하여 이용요금을 환불하거나 이용 기간을 연장합니다. 서비스 장애가 <b>연속 24시간 이상</b> 지속된 경우에는 이용자의 요청에 따라 전액 환불이 가능합니다.</p>
+
+<h3>6. 환불이 제한되는 경우</h3>
+<ul>
+<li>이용자가 약관을 위반하여 이용계약이 해지된 경우</li>
+<li>부정한 방법으로 서비스를 이용한 사실이 확인된 경우</li>
+<li>무료로 제공된 이용 기간 또는 건수</li>
+</ul>
+
+<h3>7. 환불 절차</h3>
+<ol>
+<li>서비스 내 「요청 · 문의」 메뉴 또는 아래 연락처로 환불을 신청합니다.</li>
+<li>회사는 신청일로부터 3영업일 이내에 환불 금액을 산정하여 안내합니다.</li>
+<li>이용자가 확인하면 <b>영업일 기준 7일 이내</b>에 신청한 계좌로 입금합니다.</li>
+<li>계좌이체 수수료는 회사가 부담합니다.</li>
+</ol>
+
+<h3>8. 해지 후 문서의 처리</h3>
+<p>이용계약이 해지되면 <b>30일 동안 문서와 감사추적인증서를 내려받을 수 있는 기간</b>이 제공됩니다. 이 기간이 지나면 문서는 복구할 수 없도록 삭제되므로, 해지 전에 필요한 문서를 반드시 내려받으시기 바랍니다. 장기 보관이 필요한 경우 해지 전에 별도로 문의해 주십시오.</p>
+
+<h3>9. 문의처</h3>
+<table>
+<tr><th>구분</th><th>내용</th></tr>
+<tr><td>상호</td><td>인투마케팅</td></tr>
+<tr><td>전화</td><td>010-4254-2270</td></tr>
+<tr><td>이메일</td><td>intoffice1@gmail.com</td></tr>
+</table>
+
+<p style="margin-top:18px;">본 규정은 ` + LEGAL_EFFECTIVE + `부터 시행합니다.</p>
+` }
+};
+
+// ============================================================
+// 랜딩 페이지
+// ============================================================
+const LP_PRICING = {
+  m: {
+    std:  { price:'6,900',  note:'부가세 포함',              quota:'문서 월 30건' },
+    team: { price:'19,900', note:'부가세 포함',              quota:'문서 월 120건' },
+    biz:  { price:'49,900', note:'부가세 포함',              quota:'문서 월 400건' },
+    foot: '결제는 계좌이체로 진행되며, 입금 확인 후 이용이 시작됩니다.<br>세금계산서 및 현금영수증을 발행해 드립니다.'
+  },
+  y: {
+    std:  { price:'5,750',  note:'연 69,000원 일시 납부',     quota:'문서 연 360건 · 몰아쓰기 자유' },
+    team: { price:'16,583', note:'연 199,000원 일시 납부',    quota:'문서 연 1,440건 · 몰아쓰기 자유' },
+    biz:  { price:'41,583', note:'연 499,000원 일시 납부',    quota:'문서 연 4,800건 · 몰아쓰기 자유' },
+    foot: '<b style="color:var(--text-secondary);">연 결제는 월별 한도가 없습니다.</b> 신학기나 행사철처럼 특정 시기에 발송이 몰려도 연간 총량 안에서 자유롭게 사용하실 수 있습니다.<br>결제는 계좌이체로 진행되며, 세금계산서 및 현금영수증을 발행해 드립니다.'
+  }
+};
+
+function lpSetCycle(c) {
+  const d = LP_PRICING[c];
+  ['std','team','biz'].forEach(k => {
+    const p = document.querySelector('[data-price="' + k + '"]');
+    const n = document.querySelector('[data-note="' + k + '"]');
+    const q = document.querySelector('[data-quota="' + k + '"]');
+    if (p) p.textContent = d[k].price;
+    if (n) n.textContent = d[k].note;
+    if (q) q.textContent = d[k].quota;
+  });
+  document.getElementById('lpPricingFoot').innerHTML = d.foot;
+  document.getElementById('lpTabMonthly').classList.toggle('active', c === 'm');
+  document.getElementById('lpTabYearly').classList.toggle('active', c === 'y');
+}
+
+function lpScroll(id) {
+  document.getElementById(id)?.scrollIntoView({ behavior:'smooth', block:'start' });
+}
+
+function lpFaq(btn) {
+  btn.parentElement.classList.toggle('open');
+}
+
+function renderLandingForms(cat) {
+  const tabs = document.getElementById('lpFormTabs');
+  const list = document.getElementById('lpFormList');
+  if (!tabs || !list) return;
+
+  const cats = Object.keys(TPL_CAT);
+  tabs.innerHTML =
+    '<button class="lp-tab' + (cat ? '' : ' active') + '" onclick="renderLandingForms(null)">전체 ' + TEMPLATES.length + '</button>' +
+    cats.map(c => {
+      const n = TEMPLATES.filter(t => t.cat === c).length;
+      return '<button class="lp-tab' + (cat === c ? ' active' : '') + '" onclick="renderLandingForms(\'' + c + '\')">' +
+             TPL_CAT[c][2] + ' ' + TPL_CAT[c][0] + ' ' + n + '</button>';
+    }).join('');
+
+  const rows = cat ? TEMPLATES.filter(t => t.cat === cat) : TEMPLATES;
+  list.innerHTML = rows.map(t =>
+    '<div class="lp-form-item"><span class="fi">' + t.icon + '</span><div>' +
+    '<div class="ft">' + esc(t.title) + '</div>' +
+    '<div class="fc">' + TPL_CAT[t.cat][0] + '</div></div></div>'
+  ).join('');
+}
+
+function goLanding() { showPage('landingPage'); window.scrollTo(0, 0); }
+function goLogin()   { showPage('loginPage'); }
+
+// ===== 약관 · 방침 =====
+function openLegal(kind) {
+  const d = LEGAL_DOCS[kind];
+  if (!d) return;
+  document.getElementById('legalTitle').textContent = d.title;
+  document.getElementById('legalBody').innerHTML = d.body;
+  document.getElementById('legalModal').classList.add('active');
+}
+function closeLegal() { document.getElementById('legalModal').classList.remove('active'); }
+
 function showPage(id) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById(id).classList.add('active');
@@ -7457,7 +8201,10 @@ function init() {
   document.getElementById('loginLogo').src = LOGO_H;
   const sl = document.getElementById('signupLogo'); if (sl) sl.src = LOGO_H;
   const rl = document.getElementById('resetLogo'); if (rl) rl.src = LOGO_H;
+  const _lpl = document.getElementById('lpLogo'); if (_lpl) _lpl.src = LOGO_H;
   document.getElementById('headerLogo').src = LOGO_W;
+  renderLandingForms(null);
+  lpSetCycle('m');
   document.querySelectorAll('.headerLogoClone').forEach(el => el.src = LOGO_W);
   initSigners();
   // Set default deadline
@@ -7496,7 +8243,7 @@ async function handleRoute() {
     if (hash === '#create') { goCreate(); }
     else { showPage('dashPage'); await loadDocuments(); }
   } else {
-    showPage('loginPage');
+    showPage('landingPage');
   }
 }
 
