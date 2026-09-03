@@ -450,8 +450,12 @@ input,select,textarea { font-family:inherit; }
 .pending-wrap .pi { font-size:52px; margin-bottom:14px; }
 
 /* ===== TAB NAV ===== */
-.tabs { display:flex; gap:4px; border-bottom:2px solid var(--border); margin-bottom:24px; }
-.tab { padding:11px 20px; font-size:14px; font-weight:600; color:var(--text-muted); border-bottom:3px solid transparent; margin-bottom:-2px; transition:all .2s; }
+.tabs { display:flex; gap:2px; border-bottom:2px solid var(--border); margin-bottom:24px;
+  overflow-x:auto; overflow-y:hidden; scrollbar-width:none; -ms-overflow-style:none; }
+.tabs::-webkit-scrollbar { display:none; }
+.tab { padding:11px 15px; font-size:14px; font-weight:600; color:var(--text-muted);
+  border-bottom:3px solid transparent; margin-bottom:-2px; transition:all .2s;
+  white-space:nowrap; flex:0 0 auto; }
 .tab:hover { color:var(--text-secondary); }
 .tab.active { color:var(--cyan); border-bottom-color:var(--cyan); }
 .tab-badge { display:inline-block; margin-left:6px; padding:1px 7px; background:var(--danger); color:#fff; border-radius:10px; font-size:10px; }
@@ -1345,13 +1349,13 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
     <div class="tabs">
       <button class="tab active" data-view="docs" onclick="switchView('docs')">📄 문서 관리</button>
       <button class="tab" data-view="bulk" onclick="switchView('bulk')">📮 대량발송</button>
-      <button class="tab" data-view="templates" onclick="switchView('templates')">📋 문서 템플릿</button>
+      <button class="tab" data-view="templates" onclick="switchView('templates')">📋 템플릿</button>
       <button class="tab" data-view="signs" onclick="switchView('signs')">✍️ 사인 · 도장</button>
-      <button class="tab" data-view="notices" onclick="switchView('notices')">📢 공지 · 안내</button>
-      <button class="tab" data-view="requests" onclick="switchView('requests')">💬 요청 · 문의<span class="tab-badge" id="reqBadge" style="display:none;">0</span></button>
-      <button class="tab" data-view="plan" onclick="switchView('plan')">💳 요금제 · 사용량</button>
-      <button class="tab" data-view="team" onclick="switchView('team')">🧑‍🤝‍🧑 팀원</button>
-      <button class="tab" data-view="members" id="tabMembers" style="display:none;" onclick="switchView('members')">👥 회원 관리<span class="tab-badge" id="memBadge" style="display:none;">0</span></button>
+      <button class="tab" data-view="notices" onclick="switchView('notices')">📢 공지</button>
+      <button class="tab" data-view="requests" onclick="switchView('requests')">💬 문의<span class="tab-badge" id="reqBadge" style="display:none;">0</span></button>
+      <button class="tab" data-view="plan" onclick="switchView('plan')">💳 요금제</button>
+      <button class="tab" data-view="team" onclick="switchView('team')">🤝 팀원</button>
+      <button class="tab" data-view="members" id="tabMembers" style="display:none;" onclick="switchView('members')">👥 회원<span class="tab-badge" id="memBadge" style="display:none;">0</span></button>
       <button class="tab" data-view="billing" id="tabBilling" style="display:none;" onclick="switchView('billing')">🏢 조직 · 입금</button>
     </div>
 
