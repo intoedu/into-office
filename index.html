@@ -1207,6 +1207,7 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
   <div class="login-card">
     <div class="login-logo"><img id="resetLogo" alt="INTO OFFICE"></div>
     <p class="login-subtitle">새 비밀번호를 설정해주세요</p>
+    <div class="ret-banner" id="resetHint" style="text-align:left;"></div>
     <div class="form-group">
       <label>새 비밀번호</label>
       <input type="password" id="npw1" placeholder="8자 이상 입력">
@@ -2446,8 +2447,7 @@ async function downloadSignedForSigner() {
 
     // PDF가 아니면 원본 그대로
     if (doc.file_type !== 'pdf') {
-      const { data: blob, error: dErr } = await sb.storage.from(BUCKET).download(doc.file_path);
-      if (dErr || !blob) throw new Error('파일을 내려받을 수 없습니다.');
+      const blob = await fileBlob(doc.file_path);
       saveBlob(await blob.arrayBuffer(), safeName(doc.title) + '.' + doc.file_type, blob.type);
       showToast('문서를 내려받았습니다.', true);
       return;
@@ -2464,10 +2464,11 @@ async function downloadSignedForSigner() {
   }
 }
 
-function openSignedInBrowser() {
+async function openSignedInBrowser() {
   if (!state.signOrigPath) { showToast('원본 문서를 찾을 수 없습니다.'); return; }
-  const { data } = sb.storage.from(BUCKET).getPublicUrl(state.signOrigPath);
-  window.open(data.publicUrl, '_blank');
+  try {
+    window.open(await fileUrl(state.signOrigPath), '_blank');
+  } catch (e) { showToast(e.message); }
 }
 
 // ============================================================
@@ -2918,12 +2919,133 @@ async function sendResetEmail() {
   const btn = document.getElementById('forgotBtn');
   btn.disabled = true; btn.textContent = '전송 중...';
   const { error } = await sb.auth.resetPasswordForEmail(email, {
-    redirectTo: APP_URL + '#reset'
+    redirectTo: APP_URL + '?reset=1'
   });
   btn.disabled = false; btn.textContent = '재설정 메일 보내기';
   if (error) { showToast('전송 실패: ' + error.message); return; }
   closeForgot();
   showToast('재설정 메일을 보냈습니다. 메일함을 확인해주세요.', true);
+}
+
+
+
+// ── 문서 파일 URL (비공개 버킷 · 유효기간 30분) ──────────────
+const SB_FN_FILE = SB_URL + '/functions/v1/esign-file';
+
+// 서명 페이지에서는 서명 토큰으로, 그 외에는 로그인 세션으로 권한을 확인한다.
+async function fileUrl(path, signToken) {
+  if (!path) throw new Error('파일 경로가 없습니다.');
+  const headers = { 'Content-Type': 'application/json' };
+  const onSignPage = !!document.querySelector('#signPage.active');
+  const token = signToken || (onSignPage ? state.signToken : null) || null;
+
+  if (!token) {
+    const { data: sess } = await sb.auth.getSession();
+    const jwt = sess?.session?.access_token;
+    if (jwt) headers['Authorization'] = 'Bearer ' + jwt;
+  }
+
+  const res = await fetch(SB_FN_FILE, {
+    method: 'POST', headers,
+    body: JSON.stringify({ path, sign_token: token })
+  });
+  const r = await res.json().catch(() => ({}));
+  if (!r.ok) {
+    const msgs = { AUTH_REQUIRED:'로그인이 필요합니다.', FORBIDDEN:'이 문서에 접근할 권한이 없습니다.',
+                   NOT_FOUND:'문서를 찾을 수 없습니다.', DELETED:'삭제된 문서입니다.',
+                   NOT_YET:'아직 열람할 수 없는 문서입니다.' };
+    throw new Error(msgs[r.error] || ('문서를 불러오지 못했습니다. (' + (r.error || res.status) + ')'));
+  }
+  return r.url;
+}
+
+// 비공개 버킷에서 파일 내려받기
+async function fileBlob(path, signToken) {
+  const url = await fileUrl(path, signToken);
+  const res = await fetch(url);
+  if (!res.ok) throw new Error('파일을 내려받을 수 없습니다.');
+  return await res.blob();
+}
+
+// ----- 복구 링크에서 세션 확보 -----
+// Supabase 는 인증 후 토큰을 프래그먼트로 덧붙인다.
+// redirect_to 에 이미 프래그먼트(#reset)가 있으면
+// 최종 주소가 '#reset#access_token=...' 이 되어 토큰을 읽지 못한다.
+// 아래는 정상 형식과 그 잘못된 형식을 모두 처리한다.
+function parseAuthFragment() {
+  let raw = location.hash.replace(/^#/, '');
+  if (!raw) return {};
+  // '#reset#access_token=...' 형태 보정
+  const cut = raw.indexOf('#');
+  if (cut >= 0) raw = raw.slice(cut + 1);
+  const out = {};
+  new URLSearchParams(raw).forEach((v, k) => { out[k] = v; });
+  return out;
+}
+
+function isRecoveryEntry() {
+  const q = new URLSearchParams(location.search);
+  if (q.get('reset') === '1' || q.get('type') === 'recovery' || q.get('code')) return true;
+  const f = parseAuthFragment();
+  return f.type === 'recovery' || location.hash === '#reset' || !!f.access_token;
+}
+
+// 복구 세션을 확보한다. 성공 시 true.
+async function establishRecoverySession() {
+  const { data: cur } = await sb.auth.getSession();
+  if (cur?.session) return true;
+
+  const q = new URLSearchParams(location.search);
+  const f = parseAuthFragment();
+
+  // 1) 프래그먼트에 토큰이 실려 온 경우 (기본 흐름)
+  if (f.access_token && f.refresh_token) {
+    const { error } = await sb.auth.setSession({
+      access_token: f.access_token, refresh_token: f.refresh_token
+    });
+    if (!error) return true;
+    state.recoveryError = error.message;
+  }
+
+  // 2) PKCE 흐름 (?code=)
+  if (q.get('code')) {
+    const { error } = await sb.auth.exchangeCodeForSession(q.get('code'));
+    if (!error) return true;
+    state.recoveryError = error.message;
+  }
+
+  // 3) 이메일 링크가 token_hash 형태로 온 경우
+  const th = q.get('token_hash') || f.token_hash;
+  if (th) {
+    const { error } = await sb.auth.verifyOtp({ token_hash: th, type: 'recovery' });
+    if (!error) return true;
+    state.recoveryError = error.message;
+  }
+
+  // 4) 링크 자체가 오류를 담고 온 경우
+  const errDesc = f.error_description || q.get('error_description');
+  if (errDesc) state.recoveryError = decodeURIComponent(errDesc.replace(/\+/g, ' '));
+
+  return false;
+}
+
+function showRecoveryProblem() {
+  const el = document.getElementById('resetHint');
+  if (!el) return;
+  el.className = 'ret-banner danger';
+  el.style.display = 'block';
+  el.innerHTML =
+    '<b>이 링크로는 비밀번호를 변경할 수 없습니다.</b><br>' +
+    '재설정 링크는 한 번만 쓸 수 있고 일정 시간이 지나면 만료됩니다. ' +
+    '메일을 다시 요청해 주세요.' +
+    (state.recoveryError ? '<br><span style="font-size:12px;">사유: ' + esc(state.recoveryError) + '</span>' : '') +
+    '<div class="rb-act"><button class="btn-mini" onclick="goLoginAndForgot()">재설정 메일 다시 받기</button></div>';
+}
+
+function goLoginAndForgot() {
+  history.replaceState(null, '', APP_URL);
+  showPage('loginPage');
+  openForgot();
 }
 
 // ----- 복구 링크 진입 → 새 비밀번호 설정 -----
@@ -2932,8 +3054,23 @@ async function submitNewPassword() {
   const p2 = document.getElementById('npw2').value;
   if (p1.length < 8) { showToast('비밀번호는 8자 이상이어야 합니다.'); return; }
   if (p1 !== p2)     { showToast('두 비밀번호가 일치하지 않습니다.'); return; }
+  if (!(await establishRecoverySession())) {
+    showRecoveryProblem();
+    showToast('링크가 만료되었거나 이미 사용되었습니다.');
+    return;
+  }
+
   const { error } = await sb.auth.updateUser({ password: p1 });
-  if (error) { showToast('변경 실패: ' + error.message); return; }
+  if (error) {
+    if (/session|Auth session missing/i.test(error.message)) {
+      state.recoveryError = error.message;
+      showRecoveryProblem();
+      showToast('링크가 만료되었거나 이미 사용되었습니다.');
+    } else {
+      showToast('변경 실패: ' + error.message);
+    }
+    return;
+  }
   showToast('비밀번호가 변경되었습니다.', true);
   history.replaceState(null, '', APP_URL);
   setTimeout(async () => {
@@ -2967,7 +3104,7 @@ async function pwHelp(uid, mode) {
       body: JSON.stringify({
         action: mode === 'link' ? 'reset_link' : 'temp_password',
         user_id: uid,
-        redirect_to: APP_URL + '#reset'
+        redirect_to: APP_URL + '?reset=1'
       })
     });
     const out = await res.json();
@@ -6773,8 +6910,7 @@ function shareDoneKakao(url, name) {
 // 서명 합성 PDF 생성 (공통) — 저장 없이 즉석 생성
 // ============================================================
 async function composeSignedPdf(doc, signers, fields) {
-  const { data: pub } = sb.storage.from(BUCKET).getPublicUrl(doc.file_path);
-  const buf = await fetch(pub.publicUrl).then(r => {
+  const buf = await fetch(await fileUrl(doc.file_path)).then(r => {
     if (!r.ok) throw new Error('원본 문서를 불러올 수 없습니다.');
     return r.arrayBuffer();
   });
@@ -6878,8 +7014,7 @@ async function downloadSignedDoc(docId) {
     if (!doc.file_path) throw new Error('원본 파일이 없습니다.');
 
     if (doc.file_type !== 'pdf') {
-      const { data: blob } = await sb.storage.from(BUCKET).download(doc.file_path);
-      if (!blob) throw new Error('파일을 내려받을 수 없습니다.');
+      const blob = await fileBlob(doc.file_path);
       saveBlob(await blob.arrayBuffer(), doc.file_name || safeName(doc.title), blob.type);
       sb.rpc('esign_log_download', { p_document_id: docId, p_kind: 'original' });
       showToast('원본 파일을 내려받았습니다. (이 형식은 서명 합성을 지원하지 않습니다)');
@@ -8069,13 +8204,13 @@ async function openSignByToken(token) {
   // 문서 렌더링
   editor.innerHTML = '';
   if (d.file_path) {
-    const { data: pub } = sb.storage.from(BUCKET).getPublicUrl(d.file_path);
+    const docUrl = await fileUrl(d.file_path);
     if (d.file_type === 'pdf') {
-      await renderPdfFromUrl(pub.publicUrl, 'signPdfEditor');
+      await renderPdfFromUrl(docUrl, 'signPdfEditor');
       renderSignFields(data.fields, 'signPdfEditor');
     } else if (['jpg','jpeg','png'].includes(d.file_type)) {
       editor.innerHTML = '<div class="pdf-page" data-page="1">' +
-        '<img src="'+pub.publicUrl+'" style="max-width:'+(editor.clientWidth-48)+'px;">' + '</div>';
+        '<img src="'+docUrl+'" style="max-width:'+(editor.clientWidth-48)+'px;">' + '</div>';
       const im = editor.querySelector('img');
       await new Promise(r => { im.onload = r; im.onerror = r; });
       renderSignFields(data.fields, 'signPdfEditor');
@@ -8958,8 +9093,17 @@ async function handleRoute() {
   const hash = location.hash;
 
   // 비밀번호 복구 링크 진입
-  if (hash.includes('type=recovery') || hash === '#reset') {
+  if (isRecoveryEntry()) {
     showPage('resetPage');
+    const ok = await establishRecoverySession();
+    const hint = document.getElementById('resetHint');
+    if (ok) {
+      if (hint) { hint.style.display = 'none'; hint.className = 'ret-banner'; }
+      // 토큰이 주소창에 남지 않도록 정리
+      history.replaceState(null, '', APP_URL + '?reset=1');
+    } else {
+      showRecoveryProblem();
+    }
     return;
   }
 
