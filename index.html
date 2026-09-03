@@ -1172,6 +1172,7 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
     <button class="link-forgot" onclick="openForgot()">비밀번호를 잊으셨나요?</button>
     <p class="login-footer" style="line-height:1.8;">
       가입 후 관리자 승인이 완료되면 이용하실 수 있습니다.
+      <br><span style="font-size:11px;color:var(--text-muted);opacity:.7;">v<span class="build-tag"></span></span>
     </p>
   </div>
 
@@ -1217,7 +1218,9 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
       <input type="password" id="npw2" placeholder="다시 한 번 입력">
     </div>
     <button class="btn-primary" onclick="submitNewPassword()">비밀번호 변경</button>
-    <p class="login-footer">변경 후 새 비밀번호로 로그인됩니다.</p>
+    <p class="login-footer">변경 후 새 비밀번호로 로그인됩니다.
+      <br><span style="font-size:11px;color:var(--text-muted);opacity:.7;">v<span class="build-tag"></span></span>
+    </p>
   </div>
 </div>
 
@@ -2904,6 +2907,7 @@ async function routeByProfile() {
 // ============================================================
 const SB_FN_ADMIN = SB_URL + '/functions/v1/esign-admin';
 const APP_URL = shareBase();
+const BUILD = '2026-09-03.4';   // 배포 확인용. 화면 하단과 콘솔에 표시된다.
 
 // ----- 사용자: 재설정 메일 요청 -----
 function openForgot() {
@@ -9074,6 +9078,8 @@ function init() {
   const rl = document.getElementById('resetLogo'); if (rl) rl.src = LOGO_H;
   const _lpl = document.getElementById('lpLogo'); if (_lpl) _lpl.src = LOGO_H;
   document.getElementById('headerLogo').src = LOGO_W;
+  console.log('%cINTO OFFICE build ' + BUILD, 'color:#04b7dd;font-weight:700');
+  document.querySelectorAll('.build-tag').forEach(el => el.textContent = BUILD);
   renderLandingForms(null);
   lpSetCycle('m');
   document.querySelectorAll('.headerLogoClone').forEach(el => el.src = LOGO_W);
