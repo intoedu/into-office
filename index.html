@@ -2668,6 +2668,7 @@ async function confirmRemind() {
   if (!data?.ok) { showToast('기록 저장 실패'); return; }
   closeRemind();
   showToast('리마인드 ' + data.count + '건이 기록되었습니다.', true);
+  sendAlimtalk('remind', [state.remindDocId], { verbose: true });
   loadDocuments();
 }
 
@@ -3895,6 +3896,7 @@ async function bulkSend() {
     }
     state.bulkResult = data;
     showBulkResult(data, title, !!code);
+    sendAlimtalk('request', (data.items || []).map(i => i.document_id), { verbose: true });
     bulkReset(false);
     loadBulkBatches();
   } catch (e) {
@@ -7677,8 +7679,24 @@ async function loadBilling() {
 
   const pays = payRes.data?.payments || [];
   const orgs = orgsRes.data.orgs || [];
+  const { data: ret } = await sb.rpc('esign_admin_retention_status');
 
   box.innerHTML =
+    (ret?.ok
+      ? '<div class="org-grid">' +
+        '<div class="org-card"><div class="lbl">삭제 유예 중인 조직</div><div class="val">' + ret.in_grace + '개</div></div>' +
+        '<div class="org-card"><div class="lbl">가장 이른 삭제 예정</div><div class="val" style="font-size:14px;">' +
+          (ret.next_purge ? new Date(ret.next_purge).toLocaleDateString('ko-KR') : '없음') + '</div></div>' +
+        '<div class="org-card"><div class="lbl">스토리지 정리 대기</div><div class="val">' + ret.storage_pending + '건</div></div>' +
+        '<div class="org-card"><div class="lbl">알림톡 발송 / 미발송</div><div class="val" style="font-size:15px;">' +
+          ret.alimtalk.sent + ' / ' + ret.alimtalk.skipped + '</div></div>' +
+        '</div>' +
+        '<div style="margin-bottom:22px;"><button class="btn-mini" onclick="runRetention()">보관 배치 지금 실행</button>' +
+        (ret.storage_pending > 0
+          ? '<span style="font-size:12px;color:var(--text-muted);margin-left:10px;">' +
+            '스토리지 파일 ' + ret.storage_pending + '건은 esign-retention 함수가 정리합니다.</span>' : '') +
+        '</div>'
+      : '') +
     '<h3 style="font-size:15px;font-weight:650;margin-bottom:12px;">입금 확인 대기 ' + pays.length + '건</h3>' +
     (pays.length
       ? pays.map(p =>
@@ -7709,6 +7727,14 @@ async function loadBilling() {
       '</div></div>').join('');
 }
 
+async function runRetention() {
+  const { data } = await sb.rpc('esign_admin_run_retention');
+  if (!data?.ok) { showToast('실행 실패'); return; }
+  showToast('보관 배치 실행 완료 — 유예 시작 ' + data.grace_started +
+            '개 · 영구 삭제 ' + data.orgs_purged + '개 · 스토리지 대기 ' + data.storage_pending + '건', true);
+  loadBilling();
+}
+
 async function confirmPay(id) {
   if (!confirm('입금을 확인하고 구독을 활성화할까요?')) return;
   const { data } = await sb.rpc('esign_admin_confirm_payment', { p_payment_id: id });
@@ -7730,6 +7756,40 @@ async function reactivateOrg(id) {
   if (!data?.ok) { showToast('처리 실패'); return; }
   showToast('복구되었습니다. 삭제 예약이 취소되었습니다.', true);
   loadBilling();
+}
+
+
+// ── 알림톡 발송 ──────────────────────────────────────────────
+const SB_FN_NOTIFY = SB_URL + '/functions/v1/esign-notify';
+
+async function sendAlimtalk(kind, documentIds, opts = {}) {
+  const ids = (documentIds || []).filter(Boolean);
+  if (!ids.length) return null;
+  try {
+    const { data: sess } = await sb.auth.getSession();
+    const token = sess?.session?.access_token;
+    if (!token) return null;
+
+    const res = await fetch(SB_FN_NOTIFY, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({ kind, document_ids: ids })
+    });
+    const r = await res.json();
+
+    if (r.ok && r.sent > 0) {
+      showToast('알림톡 ' + r.sent + '건을 발송했습니다.', true);
+    } else if (r.ok && r.skipped > 0 && opts.verbose) {
+      showToast('알림톡 설정이 아직 없어 링크를 직접 전달해 주세요.');
+    } else if (!r.ok && opts.verbose) {
+      showToast('알림톡 발송에 실패했습니다. 링크를 직접 전달해 주세요.');
+    }
+    return r;
+  } catch (e) {
+    // 발송 실패가 문서 생성·리마인드 자체를 막지 않도록 한다
+    console.error('alimtalk', e);
+    return null;
+  }
 }
 
 function showPage(id) {
@@ -8568,6 +8628,7 @@ async function createDocument() {
     }
 
     state.lastCreated = data;
+    sendAlimtalk('request', [data.document_id]);
     // 4) 공유 모달
     const base = shareBase();
     const first = data.signers[0];
