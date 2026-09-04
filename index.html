@@ -2982,7 +2982,7 @@ async function routeByProfile() {
 // ============================================================
 const SB_FN_ADMIN = SB_URL + '/functions/v1/esign-admin';
 const APP_URL = shareBase();
-const BUILD = '2026-09-03.7';   // 배포 확인용. 화면 하단과 콘솔에 표시된다.
+const BUILD = '2026-09-04.1';   // 배포 확인용. 화면 하단과 콘솔에 표시된다.
 
 
 // ============================================================
@@ -9913,6 +9913,16 @@ async function handleRoute() {
     } else {
       showRecoveryProblem();
     }
+    return;
+  }
+
+  // 약관 · 방침 직접 링크 (?legal=terms|privacy|refund)
+  // 구글 OAuth 동의 화면 등 외부 서비스가 방침 '주소'를 요구하므로
+  // 모달을 URL 하나로 바로 열 수 있게 한다.
+  const legalKind = new URLSearchParams(location.search).get('legal');
+  if (legalKind && LEGAL_DOCS[legalKind]) {
+    showPage('landingPage');
+    openLegal(legalKind);
     return;
   }
 
