@@ -68,6 +68,16 @@ input,select,textarea { font-family:inherit; }
 .btn-primary:hover { background:var(--cyan-hover); }
 .btn-primary:active { transform:scale(0.98); }
 .login-footer { text-align:center; margin-top:20px; font-size:13px; color:var(--text-muted); }
+.btn-google { width:100%; display:flex; align-items:center; justify-content:center; gap:10px;
+  padding:12px; border:1.5px solid var(--border); border-radius:8px; background:#fff;
+  font-size:14.5px; font-weight:600; color:#3c4043; transition:all .2s; }
+.btn-google:hover { background:#f8f9fa; border-color:#c6c9cc; box-shadow:var(--shadow-sm); }
+.btn-google svg { width:18px; height:18px; flex-shrink:0; }
+.or-div { display:flex; align-items:center; gap:12px; margin:18px 0; color:var(--text-muted); font-size:12.5px; }
+.or-div::before, .or-div::after { content:''; flex:1; height:1px; background:var(--border); }
+.oauth-note { background:var(--info-bg,#f0f9ff); border:1px solid #bae6fd; border-radius:8px;
+  padding:13px 15px; font-size:13px; line-height:1.7; color:var(--text-secondary); margin-bottom:18px; }
+.oauth-note b { color:var(--text); }
 
 /* ===== 공개 사업자 정보 (비로그인 화면 노출 · 전자상거래법 표시 의무 및 채널 심사 증빙용) ===== */
 #loginPage { flex-direction:column; overflow-y:auto; padding:40px 20px; }
@@ -1204,6 +1214,8 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
     </div>
     <button class="btn-primary" onclick="doLogin()">로그인</button>
     <button class="btn-secondary" style="width:100%;margin-top:10px;" onclick="goSignup()">회원가입</button>
+    <div class="or-div">또는</div>
+    <button class="btn-google" onclick="signInWithGoogle()"><svg viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>구글 계정으로 계속하기</button>
     <button class="link-forgot" onclick="openForgot()">비밀번호를 잊으셨나요?</button>
     <p class="login-footer" style="line-height:1.8;">
       가입 후 관리자 승인이 완료되면 이용하실 수 있습니다.
@@ -1264,6 +1276,12 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
   <div class="signup-card">
     <div class="login-logo" style="margin-bottom:6px;"><img id="signupLogo" alt="INTO OFFICE" style="height:30px;width:auto;"></div>
     <p class="login-subtitle" style="margin-bottom:10px;">회원가입</p>
+
+    <div id="suOauthNote" class="oauth-note" style="display:none;"></div>
+    <div id="suGoogleWrap">
+      <button class="btn-google" onclick="signInWithGoogle()"><svg viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>구글 계정으로 계속하기</button>
+      <div class="or-div">또는 직접 입력</div>
+    </div>
 
     <div class="su-sec">계정 정보</div>
 
@@ -2743,6 +2761,7 @@ function goSignup() {
   document.getElementById('suUserBtn').classList.remove('done');
   document.getElementById('suEmailBtn').classList.remove('done');
   document.getElementById('suPwBar').style.width = '0';
+  prepSignupForm(false);
   showPage('signupPage');
 }
 function backToLogin() { showPage('loginPage'); }
@@ -2846,14 +2865,18 @@ async function submitSignup() {
   const birth = parseInt(document.getElementById('suBirth').value);
   const phone = document.getElementById('suPhone').value.trim();
 
+  const oauth = !!state.oauthSignup;
+
   if (!user)        { showToast('아이디를 입력해주세요.'); return; }
   if (!state.userOk){ showToast('아이디 중복 확인을 해주세요.'); return; }
-  if (!email)       { showToast('이메일을 입력해주세요.'); return; }
-  if (!state.emailOk){showToast('이메일 중복 확인을 해주세요.'); return; }
-  if (p1.length < 8){ showToast('비밀번호는 8자 이상이어야 합니다.'); return; }
-  if (!(/[a-zA-Z]/.test(p1) && /[0-9]/.test(p1))) {
-    showToast('비밀번호에 영문과 숫자를 함께 사용해주세요.'); return; }
-  if (p1 !== p2)    { showToast('비밀번호가 일치하지 않습니다.'); return; }
+  if (!oauth) {
+    if (!email)       { showToast('이메일을 입력해주세요.'); return; }
+    if (!state.emailOk){showToast('이메일 중복 확인을 해주세요.'); return; }
+    if (p1.length < 8){ showToast('비밀번호는 8자 이상이어야 합니다.'); return; }
+    if (!(/[a-zA-Z]/.test(p1) && /[0-9]/.test(p1))) {
+      showToast('비밀번호에 영문과 숫자를 함께 사용해주세요.'); return; }
+    if (p1 !== p2)    { showToast('비밀번호가 일치하지 않습니다.'); return; }
+  }
   if (!name)        { showToast('이름을 입력해주세요.'); return; }
   if (!birth || birth < 1930 || birth > 2020) {
     showToast('출생년도를 정확히 입력해주세요.'); return; }
@@ -2865,16 +2888,18 @@ async function submitSignup() {
   btn.disabled = true; btn.textContent = '가입 처리 중...';
 
   try {
-    // 1) 계정 생성
-    const { data: su, error: suErr } = await sb.auth.signUp({
-      email, password: p1, options: { data: { name } }
-    });
-    if (suErr) throw new Error(suErr.message);
-    if (!su.session) {
-      const { error: siErr } = await sb.auth.signInWithPassword({ email, password: p1 });
-      if (siErr) {
-        showToast('가입 확인 메일을 확인한 뒤 로그인해주세요.', true);
-        backToLogin(); return;
+    // 1) 계정 생성 — 구글로 이미 인증된 경우에는 건너뛴다
+    if (!oauth) {
+      const { data: su, error: suErr } = await sb.auth.signUp({
+        email, password: p1, options: { data: { name } }
+      });
+      if (suErr) throw new Error(suErr.message);
+      if (!su.session) {
+        const { error: siErr } = await sb.auth.signInWithPassword({ email, password: p1 });
+        if (siErr) {
+          showToast('가입 확인 메일을 확인한 뒤 로그인해주세요.', true);
+          backToLogin(); return;
+        }
       }
     }
     // 2) 프로필 등록
@@ -2909,7 +2934,17 @@ async function routeByProfile() {
   state.profile = data.profile;
   state.isAdmin = !!data.is_admin;
 
-  if (data.needs_signup) { showPage('signupPage'); return false; }
+  if (data.needs_signup) {
+    const { data: sess } = await sb.auth.getSession();
+    const u = sess?.session?.user;
+    // 세션이 이미 있다는 것은 구글 등 외부 로그인으로 들어왔다는 뜻이다
+    prepSignupForm(!!u, u);
+    if (u && !document.getElementById('suName').value) {
+      document.getElementById('suName').value = data.profile?.name || '';
+    }
+    showPage('signupPage');
+    return false;
+  }
 
   if (!data.approved) {
     const st = data.profile.status;
@@ -2947,7 +2982,66 @@ async function routeByProfile() {
 // ============================================================
 const SB_FN_ADMIN = SB_URL + '/functions/v1/esign-admin';
 const APP_URL = shareBase();
-const BUILD = '2026-09-03.6';   // 배포 확인용. 화면 하단과 콘솔에 표시된다.
+const BUILD = '2026-09-03.7';   // 배포 확인용. 화면 하단과 콘솔에 표시된다.
+
+
+// ============================================================
+// 구글 로그인
+//
+// 구글로 처음 들어온 사용자는 바로 이용할 수 없다.
+// esign_me() 가 needs_signup 을 돌려주면 가입 화면으로 보내
+// 필수 정보(아이디·이름·출생년도·연락처·개인정보 동의)를 받는다.
+// ============================================================
+async function signInWithGoogle() {
+  const { error } = await sb.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      redirectTo: APP_URL,
+      queryParams: { prompt: 'select_account' }
+    }
+  });
+  if (error) {
+    const msg = /provider is not enabled|Unsupported provider/i.test(error.message)
+      ? '구글 로그인이 아직 설정되지 않았습니다. 관리자에게 문의해주세요.'
+      : '구글 로그인에 실패했습니다: ' + error.message;
+    showToast(msg);
+  }
+}
+
+// 가입 화면을 상황에 맞게 준비한다.
+//   oauth = true  이미 구글로 인증된 상태 → 이메일·비밀번호 입력 불필요
+//   oauth = false 처음부터 직접 가입
+function prepSignupForm(oauth, user) {
+  state.oauthSignup = !!oauth;
+
+  const emailGroup = document.getElementById('suEmail')?.closest('.form-group');
+  const pw1Group   = document.getElementById('suPw1')?.closest('.form-group');
+  const pw2Group   = document.getElementById('suPw2')?.closest('.form-group');
+  const note       = document.getElementById('suOauthNote');
+  const gwrap      = document.getElementById('suGoogleWrap');
+  const btn        = document.getElementById('suBtn');
+
+  [emailGroup, pw1Group, pw2Group].forEach(el => { if (el) el.style.display = oauth ? 'none' : ''; });
+  if (gwrap) gwrap.style.display = oauth ? 'none' : '';
+
+  if (oauth) {
+    const email = user?.email || '';
+    const gname = user?.user_metadata?.full_name || user?.user_metadata?.name || '';
+    if (note) {
+      note.style.display = '';
+      note.innerHTML = '<b>' + esc(email) + '</b> 구글 계정으로 가입합니다.<br>' +
+        '서비스 이용을 위해 아래 정보를 입력해 주세요. 입력을 마쳐야 가입이 완료됩니다.';
+    }
+    if (gname && !document.getElementById('suName').value) {
+      document.getElementById('suName').value = gname;
+    }
+    state.emailOk = true;
+    if (btn) btn.textContent = '가입 완료';
+  } else {
+    if (note) note.style.display = 'none';
+    if (btn) btn.textContent = '가입하기';
+  }
+}
 
 // ----- 사용자: 재설정 메일 요청 -----
 function openForgot() {
@@ -3097,9 +3191,13 @@ function parseAuthFragment() {
 
 function isRecoveryEntry() {
   const q = new URLSearchParams(location.search);
-  if (q.get('reset') === '1' || q.get('type') === 'recovery' || q.get('code')) return true;
   const f = parseAuthFragment();
-  return f.type === 'recovery' || location.hash === '#reset' || !!f.access_token;
+  // 'recovery' 라고 명시된 경우에만 복구로 본다.
+  // access_token 이나 code 만 보고 판단하면 구글 로그인 직후에도 걸린다.
+  return f.type === 'recovery'
+      || q.get('type') === 'recovery'
+      || q.get('reset') === '1'
+      || location.hash === '#reset';
 }
 
 // 복구 세션을 확보한다. 성공 시 true.
