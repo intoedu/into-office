@@ -59,18 +59,17 @@ export function remainText(deadline: string | null | undefined): string {
   return `${Math.max(1, Math.floor(ms / 3_600_000))}시간`;
 }
 
-// 010-1234-5678 → 010-****-5678 (가운데를 가린다)
-export function maskPhone(p: string): string {
+// 휴대폰 끝 4자리만 남긴다 (010-1234-5678 → 5678)
+export function phoneTail(p: string): string {
   const d = digits(p);
-  if (d.length < 8) return "***";
-  return `${d.slice(0, 3)}-****-${d.slice(-4)}`;
+  return d.length >= 4 ? d.slice(-4) : "****";
 }
 
 // 서명 요청 템플릿의 #{서명자목록} — 함께 서명하는 사람 전원 (줄바꿈으로 구분)
-//   1. 홍길동 (010-****-1234)
-//   2. 김철수 (010-****-5678)
+//   · 홍길동 님 (끝자리 1234)
+//   · 김철수 님 (끝자리 5678)
 function signerLines(targets: Array<{ name: string; phone: string }>): string {
-  return targets.map((t, i) => `${i + 1}. ${t.name} (${maskPhone(t.phone)})`).join("\n");
+  return targets.map((t) => `· ${t.name} 님 (끝자리 ${phoneTail(t.phone)})`).join("\n");
 }
 
 export type Row = {
