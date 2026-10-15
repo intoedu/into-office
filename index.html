@@ -73,6 +73,12 @@ input,select,textarea { font-family:inherit; }
   font-size:14.5px; font-weight:600; color:#3c4043; transition:all .2s; }
 .btn-google:hover { background:#f8f9fa; border-color:#c6c9cc; box-shadow:var(--shadow-sm); }
 .btn-google svg { width:18px; height:18px; flex-shrink:0; }
+.btn-kakao { width:100%; display:flex; align-items:center; justify-content:center; gap:10px;
+  padding:12px; border:1.5px solid #FEE500; border-radius:8px; background:#FEE500;
+  font-size:14.5px; font-weight:600; color:rgba(0,0,0,.85); transition:all .2s; }
+.btn-kakao:hover { background:#f5dc00; border-color:#f5dc00; box-shadow:var(--shadow-sm); }
+.btn-kakao svg { width:18px; height:18px; flex-shrink:0; }
+.social-btns { display:flex; flex-direction:column; gap:10px; }
 .or-div { display:flex; align-items:center; gap:12px; margin:18px 0; color:var(--text-muted); font-size:12.5px; }
 .or-div::before, .or-div::after { content:''; flex:1; height:1px; background:var(--border); }
 .oauth-note { background:var(--info-bg,#f0f9ff); border:1px solid #bae6fd; border-radius:8px;
@@ -1200,6 +1206,11 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
       <img id="loginLogo" alt="INTO OFFICE">
     </div>
     <p class="login-subtitle">안전하고 빠른 전자서명 서비스</p>
+    <div class="social-btns">
+      <button class="btn-google" onclick="signInWithGoogle()"><svg viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>구글 계정으로 계속하기</button>
+      <button class="btn-kakao" onclick="signInWithKakao()"><svg viewBox="0 0 24 24"><path fill="#000" d="M12 3C6.48 3 2 6.48 2 10.78c0 2.77 1.86 5.2 4.66 6.58-.2.73-.74 2.66-.85 3.07-.13.51.19.5.4.37.16-.11 2.6-1.77 3.66-2.49.7.1 1.41.15 2.13.15 5.52 0 10-3.48 10-7.78S17.52 3 12 3z"/></svg>카카오로 계속하기</button>
+    </div>
+    <div class="or-div">또는 아이디로 로그인</div>
     <div class="form-group">
       <label>아이디 또는 이메일</label>
       <input type="text" id="loginEmail" placeholder="아이디를 입력하세요" autocomplete="username">
@@ -1214,8 +1225,6 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
     </div>
     <button class="btn-primary" onclick="doLogin()">로그인</button>
     <button class="btn-secondary" style="width:100%;margin-top:10px;" onclick="goSignup()">회원가입</button>
-    <div class="or-div">또는</div>
-    <button class="btn-google" onclick="signInWithGoogle()"><svg viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>구글 계정으로 계속하기</button>
     <button class="link-forgot" onclick="openForgot()">비밀번호를 잊으셨나요?</button>
     <p class="login-footer" style="line-height:1.8;">
       가입 후 관리자 승인이 완료되면 이용하실 수 있습니다.
@@ -1279,7 +1288,10 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
 
     <div id="suOauthNote" class="oauth-note" style="display:none;"></div>
     <div id="suGoogleWrap">
-      <button class="btn-google" onclick="signInWithGoogle()"><svg viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>구글 계정으로 계속하기</button>
+      <div class="social-btns">
+        <button class="btn-google" onclick="signInWithGoogle()"><svg viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>구글 계정으로 계속하기</button>
+        <button class="btn-kakao" onclick="signInWithKakao()"><svg viewBox="0 0 24 24"><path fill="#000" d="M12 3C6.48 3 2 6.48 2 10.78c0 2.77 1.86 5.2 4.66 6.58-.2.73-.74 2.66-.85 3.07-.13.51.19.5.4.37.16-.11 2.6-1.77 3.66-2.49.7.1 1.41.15 2.13.15 5.52 0 10-3.48 10-7.78S17.52 3 12 3z"/></svg>카카오로 계속하기</button>
+      </div>
       <div class="or-div">또는 직접 입력</div>
     </div>
 
@@ -2888,7 +2900,7 @@ async function submitSignup() {
   btn.disabled = true; btn.textContent = '가입 처리 중...';
 
   try {
-    // 1) 계정 생성 — 구글로 이미 인증된 경우에는 건너뛴다
+    // 1) 계정 생성 — 구글·카카오로 이미 인증된 경우에는 건너뛴다
     if (!oauth) {
       const { data: su, error: suErr } = await sb.auth.signUp({
         email, password: p1, options: { data: { name } }
@@ -2937,7 +2949,7 @@ async function routeByProfile() {
   if (data.needs_signup) {
     const { data: sess } = await sb.auth.getSession();
     const u = sess?.session?.user;
-    // 세션이 이미 있다는 것은 구글 등 외부 로그인으로 들어왔다는 뜻이다
+    // 세션이 이미 있다는 것은 구글·카카오 등 외부 로그인으로 들어왔다는 뜻이다
     prepSignupForm(!!u, u);
     if (u && !document.getElementById('suName').value) {
       document.getElementById('suName').value = data.profile?.name || '';
@@ -2982,34 +2994,53 @@ async function routeByProfile() {
 // ============================================================
 const SB_FN_ADMIN = SB_URL + '/functions/v1/esign-admin';
 const APP_URL = shareBase();
-const BUILD = '2026-09-03.7';   // 배포 확인용. 화면 하단과 콘솔에 표시된다.
+const BUILD = '2026-10-15.1';   // 배포 확인용. 화면 하단과 콘솔에 표시된다.
 
 
 // ============================================================
-// 구글 로그인
+// 소셜 로그인 (구글 · 카카오)
 //
-// 구글로 처음 들어온 사용자는 바로 이용할 수 없다.
+// 소셜 계정으로 처음 들어온 사용자는 바로 이용할 수 없다.
 // esign_me() 가 needs_signup 을 돌려주면 가입 화면으로 보내
 // 필수 정보(아이디·이름·출생년도·연락처·개인정보 동의)를 받는다.
 // ============================================================
-async function signInWithGoogle() {
-  const { error } = await sb.auth.signInWithOAuth({
-    provider: 'google',
-    options: {
-      redirectTo: APP_URL,
-      queryParams: { prompt: 'select_account' }
+const OAUTH_LABEL = { google: '구글', kakao: '카카오' };
+
+// 구글은 카카오톡·인스타그램 등의 인앱 브라우저에서 로그인을 막는다
+// (403 disallowed_useragent). 카카오톡이면 외부 브라우저로 다시 연다.
+function isInAppBrowser() {
+  return /KAKAOTALK|Instagram|FBAN|FBAV|Line\/|NAVER\(inapp|DaumApps|everytimeApp/i.test(navigator.userAgent);
+}
+
+async function signInWithProvider(provider) {
+  const label = OAUTH_LABEL[provider] || provider;
+
+  if (provider === 'google' && isInAppBrowser()) {
+    if (/KAKAOTALK/i.test(navigator.userAgent)) {
+      showToast('구글 로그인을 위해 외부 브라우저로 이동합니다.');
+      location.href = 'kakaotalk://web/openExternal?url=' + encodeURIComponent(location.href);
+    } else {
+      showToast('이 앱의 내장 브라우저에서는 구글 로그인이 되지 않습니다. 크롬이나 사파리에서 열어주세요.');
     }
-  });
+    return;
+  }
+
+  const options = { redirectTo: APP_URL };
+  if (provider === 'google') options.queryParams = { prompt: 'select_account' };
+
+  const { error } = await sb.auth.signInWithOAuth({ provider, options });
   if (error) {
     const msg = /provider is not enabled|Unsupported provider/i.test(error.message)
-      ? '구글 로그인이 아직 설정되지 않았습니다. 관리자에게 문의해주세요.'
-      : '구글 로그인에 실패했습니다: ' + error.message;
+      ? label + ' 로그인이 아직 설정되지 않았습니다. 관리자에게 문의해주세요.'
+      : label + ' 로그인에 실패했습니다: ' + error.message;
     showToast(msg);
   }
 }
+function signInWithGoogle() { return signInWithProvider('google'); }
+function signInWithKakao()  { return signInWithProvider('kakao'); }
 
 // 가입 화면을 상황에 맞게 준비한다.
-//   oauth = true  이미 구글로 인증된 상태 → 이메일·비밀번호 입력 불필요
+//   oauth = true  이미 구글·카카오로 인증된 상태 → 이메일·비밀번호 입력 불필요
 //   oauth = false 처음부터 직접 가입
 function prepSignupForm(oauth, user) {
   state.oauthSignup = !!oauth;
@@ -3026,10 +3057,14 @@ function prepSignupForm(oauth, user) {
 
   if (oauth) {
     const email = user?.email || '';
-    const gname = user?.user_metadata?.full_name || user?.user_metadata?.name || '';
+    const meta  = user?.user_metadata || {};
+    const gname = meta.full_name || meta.name || meta.nickname || '';
+    const label = OAUTH_LABEL[user?.app_metadata?.provider] || '소셜';
+    // 카카오는 비즈 앱이 아니면 이메일을 주지 않는다 → 표시 이름으로 대신 안내
+    const who   = email || gname;
     if (note) {
       note.style.display = '';
-      note.innerHTML = '<b>' + esc(email) + '</b> 구글 계정으로 가입합니다.<br>' +
+      note.innerHTML = (who ? '<b>' + esc(who) + '</b> ' : '') + label + ' 계정으로 가입합니다.<br>' +
         '서비스 이용을 위해 아래 정보를 입력해 주세요. 입력을 마쳐야 가입이 완료됩니다.';
     }
     if (gname && !document.getElementById('suName').value) {
