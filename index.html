@@ -164,6 +164,7 @@ input,select,textarea { font-family:inherit; }
 .lp-toggle button:last-child { border-radius:0 8px 8px 0; border-left:none; }
 .lp-toggle button.active { background:var(--navy); border-color:var(--navy); color:#fff; }
 .lp-toggle .save { font-size:11px; color:var(--cyan); margin-left:5px; font-weight:700; }
+.lp-aud-note { text-align:center; font-size:13px; color:var(--text-secondary); margin:0 0 18px; }
 .lp-plans { display:grid; grid-template-columns:repeat(auto-fit,minmax(232px,1fr)); gap:16px; align-items:stretch; }
 .lp-plan { background:var(--card); border:1.5px solid var(--border); border-radius:var(--radius-lg); padding:28px 22px;
   display:flex; flex-direction:column; }
@@ -493,6 +494,14 @@ input,select,textarea { font-family:inherit; }
 /* 결제 폼 (대기 화면 · 요금제 신청 창 공용) */
 #pendingPage .login-card:has(#pendPay .pf) { max-width:560px; }
 .pf { text-align:left; margin-top:24px; padding-top:22px; border-top:1px solid var(--border); }
+.invite-notice { background:rgba(4,183,221,.08); border:1px solid rgba(4,183,221,.35); border-radius:10px;
+  padding:12px 14px; font-size:13px; line-height:1.7; margin:4px 0 16px; text-align:left; }
+.pf-aud { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:14px; }
+.pf-aud button { padding:11px 10px; border:1.5px solid var(--border); border-radius:10px; font-size:14px; font-weight:700; background:var(--card); }
+.pf-aud button .d { display:block; font-size:11.5px; font-weight:500; color:var(--text-muted); margin-top:2px; }
+.pf-aud button.sel { border-color:var(--navy); background:var(--navy); color:#fff; }
+.pf-aud button.sel .d { color:rgba(255,255,255,.75); }
+.pf-aud button:disabled { opacity:.45; cursor:not-allowed; }
 .modal .pf { margin-top:0; padding-top:0; border-top:none; }
 .pf-head { font-size:15px; font-weight:700; margin-bottom:4px; }
 .pf-sub { font-size:12.5px; color:var(--text-muted); line-height:1.7; margin-bottom:16px; }
@@ -967,15 +976,84 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
   <section class="lp-section" id="lpPricing">
     <div class="lp-head">
       <h2>요금제</h2>
-      <p>월 6,900원부터. 표시 금액은 부가세 포함입니다.</p>
+      <p>개인은 월 3,900원, 조직 · 팀은 월 6,900원부터. 표시 금액은 부가세 포함입니다.</p>
     </div>
+
+    <div class="lp-toggle lp-aud" style="margin-bottom:14px;">
+      <button id="lpAudPersonal" onclick="lpSetAud('personal')">👤 개인</button>
+      <button id="lpAudOrg" class="active" onclick="lpSetAud('org')">🏢 조직 · 팀</button>
+    </div>
+    <p class="lp-aud-note" id="lpAudNote">조직장이 한 번 결제하면 팀원은 초대 링크로 가입해 별도 결제 없이 바로 이용합니다.</p>
 
     <div class="lp-toggle">
       <button id="lpTabMonthly" class="active" onclick="lpSetCycle('m')">월 결제</button>
       <button id="lpTabYearly" onclick="lpSetCycle('y')">연 결제<span class="save">2개월 무료</span></button>
     </div>
 
-    <div class="lp-plans">
+    <div class="lp-plans" id="lpPlansPersonal" style="display:none;">
+      <div class="lp-plan">
+        <h3>무료 체험</h3>
+        <div class="sub">서비스를 직접 써 보고 결정하세요</div>
+        <div class="price">0<small>원</small></div>
+        <div class="price-note">가입 후 30일간</div>
+        <ul>
+          <li>문서 10건</li>
+          <li>이용 인원 1명</li>
+          <li>양식 35종 전체 이용</li>
+          <li>감사추적인증서</li>
+          <li class="muted">카드 등록 불필요</li>
+        </ul>
+        <button class="lp-btn lp-btn-soft" onclick="goSignup()">무료로 시작</button>
+      </div>
+
+      <div class="lp-plan">
+        <h3>개인 라이트</h3>
+        <div class="sub">가끔 계약서 · 동의서를 보내는 개인</div>
+        <div class="price"><span data-price="pl">3,900</span><small>원 / 월</small></div>
+        <div class="price-note" data-note="pl">부가세 포함</div>
+        <ul>
+          <li><span data-quota="pl">문서 월 10건</span></li>
+          <li>이용 인원 1명</li>
+          <li>양식 35종 전체 이용</li>
+          <li>감사추적인증서</li>
+          <li class="muted">초과분 건당 300원</li>
+        </ul>
+        <button class="lp-btn lp-btn-soft" onclick="goSignup()">시작하기</button>
+      </div>
+
+      <div class="lp-plan featured">
+        <span class="lp-plan-badge">개인 추천</span>
+        <h3>개인 베이직</h3>
+        <div class="sub">매달 꾸준히 서명을 받는 프리랜서 · 강사</div>
+        <div class="price"><span data-price="pb">5,900</span><small>원 / 월</small></div>
+        <div class="price-note" data-note="pb">부가세 포함</div>
+        <ul>
+          <li><span data-quota="pb">문서 월 30건</span></li>
+          <li>이용 인원 1명</li>
+          <li>대량 발송</li>
+          <li>문서 접근 암호</li>
+          <li class="muted">초과분 건당 250원</li>
+        </ul>
+        <button class="lp-btn lp-btn-primary" onclick="goSignup()">시작하기</button>
+      </div>
+
+      <div class="lp-plan">
+        <h3>개인 프로</h3>
+        <div class="sub">발송이 많은 1인 사업자</div>
+        <div class="price"><span data-price="pp">9,900</span><small>원 / 월</small></div>
+        <div class="price-note" data-note="pp">부가세 포함</div>
+        <ul>
+          <li><span data-quota="pp">문서 월 80건</span></li>
+          <li>이용 인원 1명</li>
+          <li>개인 베이직 기능 전체</li>
+          <li>감사추적인증서</li>
+          <li class="muted">초과분 건당 200원</li>
+        </ul>
+        <button class="lp-btn lp-btn-soft" onclick="goSignup()">시작하기</button>
+      </div>
+    </div>
+
+    <div class="lp-plans" id="lpPlansOrg">
       <div class="lp-plan">
         <h3>무료 체험</h3>
         <div class="sub">서비스를 직접 써 보고 결정하세요</div>
@@ -1163,11 +1241,16 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
       </div>
       <div id="inviteResult" style="display:none;text-align:center;padding:8px 0;">
         <p style="font-size:13.5px;color:var(--text-secondary);margin-bottom:14px;">
-          아래 초대 코드를 전달해 주세요.<br>초대받은 분이 가입 후 코드를 입력하면 팀에 합류합니다.
+          아래 링크나 코드를 팀원에게 보내 주세요.<br>
+          팀원이 링크로 가입하거나 가입할 때 코드를 넣으면<br><b>관리자 승인 없이 바로 팀에 합류</b>합니다.
         </p>
         <div class="invite-code" id="invCode">------------</div>
-        <p style="font-size:12px;color:var(--text-muted);margin-top:12px;">유효기간 14일</p>
-        <button class="btn-secondary" style="margin-top:14px;" onclick="copyText(document.getElementById('invCode').textContent)">코드 복사</button>
+        <p style="font-size:12px;color:var(--text-muted);margin-top:12px;">유효기간 14일 · 한 사람만 사용할 수 있습니다</p>
+        <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:14px;">
+          <button class="btn-secondary" style="width:auto;padding:10px 16px;" onclick="copyInviteMessage()">초대 메시지 복사</button>
+          <button class="btn-secondary" style="width:auto;padding:10px 16px;" onclick="copyText(inviteLink(document.getElementById('invCode').textContent))">링크만 복사</button>
+          <button class="btn-secondary" style="width:auto;padding:10px 16px;" onclick="copyText(document.getElementById('invCode').textContent)">코드만 복사</button>
+        </div>
       </div>
     </div>
     <div class="modal-footer">
@@ -1284,6 +1367,7 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
       <img id="loginLogo" alt="INTO OFFICE">
     </div>
     <p class="login-subtitle">안전하고 빠른 전자서명 서비스</p>
+    <div class="invite-notice" style="display:none;"></div>
     <div class="social-btns">
       <button class="btn-google" onclick="signInWithGoogle()"><svg viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>구글 계정으로 계속하기</button>
       <button class="btn-kakao" onclick="signInWithKakao()"><svg viewBox="0 0 24 24"><path fill="#000" d="M12 3C6.48 3 2 6.48 2 10.78c0 2.77 1.86 5.2 4.66 6.58-.2.73-.74 2.66-.85 3.07-.13.51.19.5.4.37.16-.11 2.6-1.77 3.66-2.49.7.1 1.41.15 2.13.15 5.52 0 10-3.48 10-7.78S17.52 3 12 3z"/></svg>카카오로 계속하기</button>
@@ -1365,6 +1449,7 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
   <div class="signup-card">
     <div class="login-logo" style="margin-bottom:6px;"><img id="signupLogo" alt="INTO OFFICE" style="height:30px;width:auto;"></div>
     <p class="login-subtitle" style="margin-bottom:10px;">회원가입</p>
+    <div class="invite-notice" style="display:none;"></div>
 
     <div id="suOauthNote" class="oauth-note" style="display:none;"></div>
     <div id="suGoogleWrap">
@@ -1459,6 +1544,12 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
       <input type="text" id="suSourceEtc" maxlength="100" placeholder="알게 된 경로를 적어주세요" style="display:none;margin-top:8px;">
     </div>
 
+    <div class="su-sec">팀 초대 코드 <span style="font-weight:500;color:var(--text-muted);">(선택)</span></div>
+    <div class="form-group">
+      <input type="text" id="suInvite" maxlength="20" placeholder="조직장에게 받은 코드가 있으면 입력하세요" style="letter-spacing:1.5px;text-transform:uppercase;">
+      <div class="fld-msg hint">코드를 입력하면 가입과 동시에 그 팀으로 합류해 <b>승인 없이 바로</b> 이용할 수 있습니다.</div>
+    </div>
+
     <div class="su-sec">약관 동의</div>
 
     <div class="agree-box">
@@ -1497,6 +1588,14 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
       <p style="font-size:13.5px;color:var(--text-secondary);line-height:1.85;" id="pendMsg">
         가입 신청이 접수되었습니다.<br>관리자 승인 후 서비스를 이용하실 수 있습니다.
       </p>
+      <div id="pendJoin" class="pf" style="display:none;">
+        <div class="pf-head">팀 초대 코드가 있으신가요?</div>
+        <div class="pf-sub">조직장에게 받은 코드를 입력하면 그 팀으로 합류해 바로 이용할 수 있습니다.</div>
+        <div style="display:flex;gap:8px;">
+          <input type="text" id="pendInvite" maxlength="20" placeholder="초대 코드" style="flex:1;min-width:0;padding:11px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;letter-spacing:1.5px;text-transform:uppercase;">
+          <button class="btn-mini primary" style="white-space:nowrap;padding:0 18px;font-size:13.5px;" onclick="joinFromPending()">합류하기</button>
+        </div>
+      </div>
       <div id="pendPay"></div>
       <button class="btn-secondary" style="margin-top:22px;width:100%;" onclick="location.reload()">새로고침</button>
       <button class="btn-secondary" style="margin-top:8px;width:100%;" onclick="goLanding()">홈으로 돌아가기</button>
@@ -3183,13 +3282,73 @@ async function submitSignup() {
       throw new Error(m[data?.error] || '프로필 등록 실패');
     }
     state.user = email;
+    const inv = document.getElementById('suInvite')?.value.trim();
+    if (inv) storeInvite(inv);
     showToast('가입이 완료되었습니다.', true);
-    await routeByProfile();
+    if (await routeByProfile()) { showPage('dashPage'); await loadDocuments(); }
   } catch (e) {
     showToast(/already registered/i.test(e.message)
       ? '이미 가입된 이메일입니다.' : '가입 실패: ' + e.message);
   } finally {
     btn.disabled = false; btn.textContent = '가입하기';
+  }
+}
+
+// ── 팀 초대 코드 ─────────────────────────────────────────────
+// ?invite=코드 링크로 들어오거나 가입 화면에 코드를 넣으면 저장해 두었다가,
+// 로그인 · 가입이 끝난 직후(routeByProfile) 수락한다. 구글 · 카카오 로그인으로 페이지를 떠났다 와도 남는다.
+const INVITE_KEY = 'io_invite_code';
+function storeInvite(code) {
+  const c = String(code || '').trim().toUpperCase();
+  try { c ? localStorage.setItem(INVITE_KEY, c) : localStorage.removeItem(INVITE_KEY); } catch (e) {}
+  state.inviteCode = c || null;
+}
+function storedInvite() {
+  try { return state.inviteCode || localStorage.getItem(INVITE_KEY) || null; } catch (e) { return state.inviteCode || null; }
+}
+function inviteLink(code) { return APP_URL + '?invite=' + encodeURIComponent(code); }
+const INVITE_ERR = {
+  INVALID_CODE: '유효하지 않은 초대 코드입니다.', USED: '이미 사용된 초대 코드입니다.',
+  EXPIRED: '만료된 초대 코드입니다. 조직장에게 새 코드를 받아 주세요.',
+  SEAT_LIMIT: '팀 인원이 가득 찼습니다. 조직장에게 문의해 주세요.',
+  ORG_INACTIVE: '초대한 팀의 이용이 중지된 상태입니다. 조직장에게 문의해 주세요.',
+  ALREADY_IN_ORG: '이미 다른 조직(또는 개인 요금제)에 속해 있어 합류할 수 없습니다.',
+  FORBIDDEN: '합류할 수 없는 계정 상태입니다. 관리자에게 문의해 주세요.'
+};
+
+// 로그인 · 가입 화면 위에 「○○ 팀에서 초대했습니다」
+async function renderInviteNotice() {
+  const code = storedInvite();
+  const boxes = document.querySelectorAll('.invite-notice');
+  const su = document.getElementById('suInvite');
+  if (su && code && !su.value) su.value = code;
+  if (!code) { boxes.forEach(b => b.style.display = 'none'); return; }
+  const { data } = await sb.rpc('esign_invite_peek', { p_code: code });
+  const html = data?.ok
+    ? '🤝 <b>' + esc(data.org_name) + '</b> 팀에서 초대했습니다.<br>' +
+      '가입(또는 로그인)하면 <b>승인 없이 바로</b> 팀에 합류합니다. <span style="color:var(--text-muted);">초대 코드 ' + esc(code) + '</span>'
+    : '⚠️ ' + (INVITE_ERR[data?.error] || '초대 코드를 확인할 수 없습니다.');
+  boxes.forEach(b => { b.innerHTML = html; b.style.display = ''; });
+}
+
+// 저장된 초대 코드를 수락한다. 합류했으면 true
+async function acceptStoredInvite() {
+  const code = storedInvite();
+  if (!code) return false;
+  const { data, error } = await sb.rpc('esign_org_accept_invite', { p_code: code });
+  if (error) return false;                // 네트워크 오류 — 코드는 남겨 두고 다음에 다시 시도
+  storeInvite(null);
+  if (!data?.ok) { showToast('팀 합류 실패: ' + (INVITE_ERR[data?.error] || data?.error)); return false; }
+  showToast((data.org_name || '팀') + '에 합류했습니다. 바로 이용하실 수 있습니다.', true);
+  return true;
+}
+
+async function joinFromPending() {
+  const code = document.getElementById('pendInvite').value.trim();
+  if (!code) { showToast('초대 코드를 입력해 주세요.'); return; }
+  storeInvite(code);
+  if (await acceptStoredInvite() && await routeByProfile()) {
+    showPage('dashPage'); await loadDocuments();
   }
 }
 
@@ -3209,7 +3368,13 @@ async function routeByProfile() {
       document.getElementById('suName').value = data.profile?.name || '';
     }
     showPage('signupPage');
+    renderInviteNotice();
     return false;
+  }
+
+  // 초대 링크 · 코드로 들어온 사람은 여기서 팀에 합류하고 (승인 대기였다면 바로 승인) 다시 분기한다
+  if (storedInvite() && ['pending','active'].includes(data.profile?.status)) {
+    if (await acceptStoredInvite()) return routeByProfile();
   }
 
   if (!data.approved) {
@@ -3226,7 +3391,9 @@ async function routeByProfile() {
     const pp = document.getElementById('pendPay');
     if (pp) pp.innerHTML = '';
     showPage('pendingPage');
-    // 승인 대기 회원은 유료 요금제를 결제해 바로 시작할 수 있다 (거절 · 정지는 제외)
+    // 승인 대기 회원은 초대 코드로 팀에 합류하거나, 유료 요금제를 결제해 바로 시작할 수 있다 (거절 · 정지는 제외)
+    const pj = document.getElementById('pendJoin');
+    if (pj) pj.style.display = st === 'pending' ? '' : 'none';
     if (st === 'pending') renderPendingPay();
     return false;
   }
@@ -3252,7 +3419,7 @@ async function routeByProfile() {
 // ============================================================
 const SB_FN_ADMIN = SB_URL + '/functions/v1/esign-admin';
 const APP_URL = shareBase();
-const BUILD = '2026-10-15.9';   // 배포 확인용. 화면 하단과 콘솔에 표시된다.
+const BUILD = '2026-10-15.10';   // 배포 확인용. 화면 하단과 콘솔에 표시된다.
 
 
 // ============================================================
@@ -8769,19 +8936,25 @@ const LP_PRICING = {
     std:  { price:'6,900',  note:'부가세 포함',              quota:'문서 월 30건' },
     team: { price:'19,900', note:'부가세 포함',              quota:'문서 월 120건' },
     biz:  { price:'49,900', note:'부가세 포함',              quota:'문서 월 400건' },
+    pl:   { price:'3,900',  note:'부가세 포함',              quota:'문서 월 10건' },
+    pb:   { price:'5,900',  note:'부가세 포함',              quota:'문서 월 30건' },
+    pp:   { price:'9,900',  note:'부가세 포함',              quota:'문서 월 80건' },
     foot: '결제는 계좌이체로 진행되며, 입금 확인 후 이용이 시작됩니다.<br>세금계산서 및 현금영수증을 발행해 드립니다.'
   },
   y: {
     std:  { price:'5,750',  note:'연 69,000원 일시 납부',     quota:'문서 연 360건 · 몰아쓰기 자유' },
     team: { price:'16,583', note:'연 199,000원 일시 납부',    quota:'문서 연 1,440건 · 몰아쓰기 자유' },
     biz:  { price:'41,583', note:'연 499,000원 일시 납부',    quota:'문서 연 4,800건 · 몰아쓰기 자유' },
+    pl:   { price:'3,250',  note:'연 39,000원 일시 납부',     quota:'문서 연 120건 · 몰아쓰기 자유' },
+    pb:   { price:'4,917',  note:'연 59,000원 일시 납부',     quota:'문서 연 360건 · 몰아쓰기 자유' },
+    pp:   { price:'8,250',  note:'연 99,000원 일시 납부',     quota:'문서 연 960건 · 몰아쓰기 자유' },
     foot: '<b style="color:var(--text-secondary);">연 결제는 월별 한도가 없습니다.</b> 신학기나 행사철처럼 특정 시기에 발송이 몰려도 연간 총량 안에서 자유롭게 사용하실 수 있습니다.<br>결제는 계좌이체로 진행되며, 세금계산서 및 현금영수증을 발행해 드립니다.'
   }
 };
 
 function lpSetCycle(c) {
   const d = LP_PRICING[c];
-  ['std','team','biz'].forEach(k => {
+  ['std','team','biz','pl','pb','pp'].forEach(k => {
     const p = document.querySelector('[data-price="' + k + '"]');
     const n = document.querySelector('[data-note="' + k + '"]');
     const q = document.querySelector('[data-quota="' + k + '"]');
@@ -8792,6 +8965,16 @@ function lpSetCycle(c) {
   document.getElementById('lpPricingFoot').innerHTML = d.foot;
   document.getElementById('lpTabMonthly').classList.toggle('active', c === 'm');
   document.getElementById('lpTabYearly').classList.toggle('active', c === 'y');
+}
+
+function lpSetAud(a) {
+  document.getElementById('lpPlansPersonal').style.display = a === 'personal' ? '' : 'none';
+  document.getElementById('lpPlansOrg').style.display = a === 'org' ? '' : 'none';
+  document.getElementById('lpAudPersonal').classList.toggle('active', a === 'personal');
+  document.getElementById('lpAudOrg').classList.toggle('active', a === 'org');
+  document.getElementById('lpAudNote').textContent = a === 'personal'
+    ? '나 혼자 쓰는 요금제입니다. 팀원과 함께 쓰려면 조직 · 팀 요금제를 선택하세요.'
+    : '조직장이 한 번 결제하면 팀원은 초대 링크로 가입해 별도 결제 없이 바로 이용합니다.';
 }
 
 function lpScroll(id) {
@@ -8897,10 +9080,12 @@ async function loadPlan() {
   if (!o || !o.has_org) {
     box.innerHTML =
       '<div class="usage-wrap" style="text-align:center;padding:44px 24px;">' +
-      '<p style="font-size:15px;font-weight:600;margin-bottom:8px;">아직 소속된 조직이 없습니다</p>' +
+      '<p style="font-size:15px;font-weight:600;margin-bottom:8px;">아직 요금제가 없습니다</p>' +
       '<p style="font-size:13px;color:var(--text-secondary);line-height:1.75;margin-bottom:20px;">' +
-      '조직을 만들면 30일 무료 체험이 시작됩니다.<br>초대를 받으셨다면 코드로 합류하실 수 있습니다.</p>' +
-      '<button class="btn-primary" style="width:auto;padding:12px 24px;" onclick="openOrgModal()">조직 만들기</button> ' +
+      '<b>개인</b> 또는 <b>조직 · 팀</b> 요금제를 결제하면 바로 시작됩니다.<br>' +
+      '조직만 먼저 만들면 30일 무료 체험이 시작되고, 초대를 받으셨다면 코드로 합류하실 수 있습니다.</p>' +
+      '<button class="btn-primary" style="width:auto;padding:12px 24px;" onclick="openPay()">요금제 선택 · 결제</button> ' +
+      '<button class="btn-secondary" style="width:auto;padding:12px 24px;" onclick="openOrgModal()">조직 만들기 (무료 체험)</button> ' +
       '<button class="btn-secondary" style="width:auto;padding:12px 24px;" onclick="openJoin()">초대 코드로 합류</button></div>';
     return;
   }
@@ -8914,7 +9099,7 @@ async function loadPlan() {
   box.innerHTML =
     '<div class="usage-wrap">' +
       '<div class="usage-top">' +
-        '<div><div class="usage-plan">' + esc(p.name || '-') +
+        '<div><div class="usage-plan">' + (org.kind === 'personal' ? '👤 ' : '🏢 ') + esc(p.name || '-') +
           '<span class="badge">' + (yearly ? '연 결제' : '월 결제') + '</span>' +
           '<span class="st-pill st-' + esc(org.status) + '" style="margin-left:6px;">' +
             (ORG_STATUS_KO[org.status] || org.status) + '</span></div>' +
@@ -9040,13 +9225,23 @@ async function submitInvite() {
   });
   if (!data?.ok) {
     showToast({ SEAT_LIMIT:'요금제의 이용 인원을 모두 사용했습니다. 상위 요금제로 변경해주세요.',
+                PERSONAL_PLAN:'개인 요금제는 팀원을 초대할 수 없습니다. 조직 요금제로 바꾸면 초대할 수 있어요.',
                 FORBIDDEN:'초대 권한이 없습니다.', NO_ORG:'조직이 없습니다.' }[data?.error] || '초대 실패');
     return;
   }
   document.getElementById('invCode').textContent = data.code;
+  state.inviteOrgName = data.org_name || '';
   document.getElementById('inviteForm').style.display = 'none';
   document.getElementById('inviteResult').style.display = '';
   document.getElementById('invBtn').style.display = 'none';
+}
+
+function copyInviteMessage() {
+  const code = document.getElementById('invCode').textContent;
+  copyText('[인투오피스] ' + (state.inviteOrgName || '우리 팀') + ' 팀 초대\n\n' +
+    '아래 링크로 가입하면 관리자 승인 없이 바로 팀에 합류합니다.\n' + inviteLink(code) + '\n\n' +
+    '이미 가입하셨다면 로그인 후 「요금제 → 초대 코드로 합류」에 코드를 넣어 주세요.\n' +
+    '초대 코드: ' + code + ' (14일 유효)');
 }
 
 function openJoin() { document.getElementById('joinCode').value = ''; document.getElementById('joinModal').classList.add('active'); }
@@ -9056,8 +9251,7 @@ async function submitJoin() {
   if (!code) { showToast('초대 코드를 입력해주세요.'); return; }
   const { data } = await sb.rpc('esign_org_accept_invite', { p_code: code });
   if (!data?.ok) {
-    showToast({ INVALID_CODE:'유효하지 않은 코드입니다.', EXPIRED:'만료된 초대입니다.',
-                SEAT_LIMIT:'해당 조직의 인원이 가득 찼습니다.' }[data?.error] || '합류 실패');
+    showToast(INVITE_ERR[data?.error] || '합류 실패');
     return;
   }
   closeJoin();
@@ -9067,6 +9261,7 @@ async function submitJoin() {
 
 // ── 팀원 화면 ────────────────────────────────────────────────
 async function loadTeam() {
+  if (!state.org) await loadOrg();
   const { data } = await sb.rpc('esign_org_members');
   const box = document.getElementById('teamBody');
   if (!data?.ok || !data.has_org) {
@@ -9075,6 +9270,19 @@ async function loadTeam() {
   }
   const canManage = ['owner','admin'].includes(data.my_role);
   const isOwner = data.my_role === 'owner';
+  // 개인 요금제는 팀원 초대가 없다 — 조직 요금제로 바꾸도록 안내
+  const personal = state.org?.org?.kind === 'personal';
+  const invBtn = document.querySelector('#viewTeam .board-head .btn-primary');
+  if (invBtn) invBtn.style.display = personal ? 'none' : '';
+  if (personal) {
+    box.innerHTML = '<div class="usage-wrap" style="text-align:center;padding:36px 24px;">' +
+      '<p style="font-size:15px;font-weight:600;margin-bottom:8px;">개인 요금제를 사용 중입니다</p>' +
+      '<p style="font-size:13px;color:var(--text-secondary);line-height:1.75;margin-bottom:18px;">' +
+      '팀원을 초대하려면 조직 · 팀 요금제로 바꿔 주세요.<br>바꾸면 지금까지의 문서는 그대로 이어집니다.</p>' +
+      (isOwner ? '<button class="btn-primary" style="width:auto;padding:12px 24px;" onclick="openPay()">조직 · 팀 요금제 보기</button>' : '') +
+      '</div>';
+    return;
+  }
 
   box.innerHTML =
     (data.invites.length
@@ -9138,7 +9346,7 @@ async function revokeInvite(id) {
 // 무통장은 관리자가 「입금 확인」을 누를 때 같은 처리가 된다.
 const SB_FN_PAY = SB_URL + '/functions/v1/esign-pay';
 const TOSS_SDK = 'https://js.tosspayments.com/v2/standard';
-const PAY = { cycle: 'monthly', plan: 'standard', method: null, box: null, needOrg: false, pending: null,
+const PAY = { cycle: 'monthly', plan: null, aud: null, method: null, box: null, needOrg: false, pending: null,
               orgName: null, dep: null };
 const PAY_ERR = {
   ALREADY_PENDING: '이미 입금 확인을 기다리는 신청이 있습니다. 취소한 뒤 다시 신청해 주세요.',
@@ -9148,14 +9356,30 @@ const PAY_ERR = {
   DEPOSITOR_REQUIRED: '입금자명을 입력해 주세요.',
   CARD_NOT_AVAILABLE: '지금은 카드 결제를 사용할 수 없습니다.',
   BAD_PLAN: '요금제를 다시 선택해 주세요.',
+  PERSONAL_HAS_MEMBERS: '팀원이 있는 조직은 개인 요금제로 바꿀 수 없습니다. 조직 요금제를 선택해 주세요.',
+  ALREADY_IN_ORG: '이미 다른 조직에 속해 있습니다.',
   FORBIDDEN: '결제할 수 없는 계정 상태입니다. 관리자에게 문의해 주세요.'
 };
 
-function payPlans() {
+function payPlans(aud) {
   const ps = state.payCfg?.plans;
-  if (!ps?.length) return PLAN_LIST;
-  return ps.map(p => ({ code: p.code, name: p.name, m: p.price_monthly, y: p.price_yearly,
-    qm: p.doc_quota_monthly, qy: p.doc_quota_yearly, seats: p.seat_quota }));
+  const all = ps?.length
+    ? ps.map(p => ({ code: p.code, name: p.name, m: p.price_monthly, y: p.price_yearly, aud: p.audience || 'org',
+        qm: p.doc_quota_monthly, qy: p.doc_quota_yearly, seats: p.seat_quota, desc: p.description }))
+    : PLAN_LIST.map(p => ({ ...p, aud: 'org' }));
+  return aud ? all.filter(p => p.aud === aud) : all;
+}
+
+// 개인 / 조직 기본 선택 — 이미 조직이 있으면 그 종류, 없으면 가입 때 고른 회원 유형
+function payDefaultAud() {
+  const o = state.payCfg?.org;
+  if (o) return o.kind === 'personal' ? 'personal' : 'org';
+  return state.profile?.member_type === 'business' ? 'org' : 'personal';
+}
+// 팀원이 있는 조직은 개인 요금제를 고를 수 없다
+function payPersonalLocked() {
+  const o = state.payCfg?.org;
+  return !!(o && o.kind !== 'personal' && o.members > 1);
 }
 
 async function loadPayState() {
@@ -9170,7 +9394,8 @@ async function openPay() {
   document.getElementById('payModal').classList.add('active');
   document.getElementById('payForm').innerHTML = '<div class="sign-loading">불러오는 중…</div>';
   await loadPayState();
-  PAY.needOrg = false;
+  PAY.needOrg = !state.payCfg?.org;
+  PAY.aud = null;
   renderPayForm('payForm');
 }
 function closePay() { document.getElementById('payModal').classList.remove('active'); }
@@ -9204,7 +9429,10 @@ function renderPayForm(boxId) {
     return;
   }
   if (!methods.some(m => m[0] === PAY.method)) PAY.method = methods[0][0];
-  const plans = payPlans();
+  const lockPersonal = payPersonalLocked();
+  if (!PAY.aud || (PAY.aud === 'personal' && lockPersonal)) PAY.aud = lockPersonal ? 'org' : payDefaultAud();
+  if (!payPlans('personal').length) PAY.aud = 'org';
+  const plans = payPlans(PAY.aud);
   if (!plans.some(p => p.code === PAY.plan)) PAY.plan = plans[0].code;
   const sel = plans.find(p => p.code === PAY.plan);
   const amount = PAY.cycle === 'yearly' ? sel.y : sel.m;
@@ -9225,7 +9453,16 @@ function renderPayForm(boxId) {
           (cfg.card ? ' 아래에서 카드로 결제하면 이 신청은 자동으로 취소됩니다.' : '') + '</span><br>' +
         '<button class="btn-mini" style="margin-top:8px;" onclick="cancelPendingPay(\'' + p.payment.id + '\')">신청 취소</button>' +
       '</div>' : '') +
-    (PAY.needOrg
+    (payPlans('personal').length
+      ? '<div class="pf-aud">' +
+          '<button class="' + (PAY.aud === 'personal' ? 'sel' : '') + '" ' + (lockPersonal ? 'disabled title="팀원이 있는 조직은 개인 요금제로 바꿀 수 없습니다"' : '') +
+            ' onclick="paySetAud(\'personal\')">👤 개인<span class="d">혼자 사용 · 1명</span></button>' +
+          '<button class="' + (PAY.aud === 'org' ? 'sel' : '') + '" onclick="paySetAud(\'org\')">🏢 조직 · 팀<span class="d">조직장이 결제 · 팀원 초대</span></button>' +
+        '</div>' : '') +
+    (PAY.aud === 'org'
+      ? '<div class="pf-sub" style="margin:-4px 0 12px;">조직장이 한 번 결제하면, 팀원은 조직장이 보낸 <b>초대 링크 · 코드</b>로 가입해 별도 결제 없이 바로 이용합니다.</div>'
+      : '<div class="pf-sub" style="margin:-4px 0 12px;">나 혼자 쓰는 요금제입니다. 팀원을 초대하려면 조직 · 팀 요금제를 선택해 주세요.</div>') +
+    (PAY.needOrg && PAY.aud === 'org'
       ? '<div class="form-group"><label>조직(상호) 이름 *</label>' +
         '<input type="text" id="pfOrg" maxlength="60" value="' + esc(PAY.orgName ?? (prof.biz_name || prof.name || '')) + '" placeholder="예) 인투학원"></div>' : '') +
     '<div class="lp-toggle">' +
@@ -9237,7 +9474,7 @@ function renderPayForm(boxId) {
       '<div class="pn">' + esc(pl.name) + '</div>' +
       '<div class="pp">' + won(PAY.cycle === 'yearly' ? pl.y : pl.m) + '</div>' +
       '<div class="pq">' + (PAY.cycle === 'yearly' ? '연 ' + pl.qy + '건' : '월 ' + pl.qm + '건') +
-        ' · ' + (pl.seats == null ? '인원 무제한' : pl.seats + '명') + '</div></div>').join('') +
+        ' · ' + (pl.aud === 'personal' ? '1명' : pl.seats == null ? '인원 무제한' : pl.seats + '명') + '</div></div>').join('') +
     '</div>' +
     '<div class="pf-methods">' + methods.map(m =>
       '<button class="pf-method' + (m[0] === PAY.method ? ' sel' : '') + '" onclick="paySetMethod(\'' + m[0] + '\')">' +
@@ -9260,6 +9497,7 @@ function renderPayForm(boxId) {
 }
 
 function paySetCycle(c) { PAY.cycle = c; keepPayInputs(); renderPayForm(PAY.box); }
+function paySetAud(a) { PAY.aud = a; PAY.plan = null; keepPayInputs(); renderPayForm(PAY.box); }
 function paySelect(code) { PAY.plan = code; keepPayInputs(); renderPayForm(PAY.box); }
 function paySetMethod(m) { PAY.method = m; keepPayInputs(); renderPayForm(PAY.box); }
 // 다시 그리기 전에 입력값을 보관해 둔다
@@ -9272,7 +9510,7 @@ function keepPayInputs() {
 async function submitPay() {
   const btn = document.getElementById('pfGo');
   const orgName = document.getElementById('pfOrg')?.value.trim() || null;
-  if (PAY.needOrg && !orgName) { showToast(PAY_ERR.NO_ORG); return; }
+  if (PAY.needOrg && PAY.aud === 'org' && !orgName) { showToast(PAY_ERR.NO_ORG); return; }
   const dep = document.getElementById('pfDepositor')?.value.trim() || null;
   if (PAY.method === 'transfer' && !dep) { showToast(PAY_ERR.DEPOSITOR_REQUIRED); return; }
   if (btn) btn.disabled = true;
@@ -10888,6 +11126,13 @@ async function handleRoute() {
 
   const qToken = qs.get('s');
   if (qToken) { await openSignByToken(qToken); return; }
+
+  // 팀 초대 링크 (?invite=코드) — 저장해 두고 주소를 정리한다
+  const qInvite = qs.get('invite');
+  if (qInvite) {
+    storeInvite(qInvite);
+    history.replaceState(null, '', location.pathname);
+  }
   if (hash.startsWith('#sign/')) {
     await openSignByToken(hash.slice(6));
     return;
@@ -10903,6 +11148,10 @@ async function handleRoute() {
       showPage('dashPage'); await loadDocuments();
       if (state.openPlanAfterLogin) { state.openPlanAfterLogin = false; switchView('plan'); }
     }
+  } else if (qInvite) {
+    // 초대받은 사람은 바로 가입 화면으로 (이미 회원이면 「로그인」으로 이동)
+    goSignup();
+    renderInviteNotice();
   } else {
     showPage('landingPage');
   }
