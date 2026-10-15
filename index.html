@@ -320,6 +320,7 @@ input,select,textarea { font-family:inherit; }
 .btn-tool.active { border-color:var(--cyan); background:rgba(4,183,221,0.08); color:var(--cyan); }
 .btn-tool svg { width:16px; height:16px; }
 .sig-field { position:absolute; border:2px dashed var(--cyan); background:rgba(4,183,221,0.08); cursor:move; display:flex; align-items:center; justify-content:center; font-size:11px; color:var(--cyan); font-weight:600; border-radius:4px; user-select:none; }
+.sig-field.sig-done { border-style:solid; border-color:#10b981; background:rgba(16,185,129,.08); color:#047857; }
 .sig-field .resize-handle { position:absolute; bottom:-4px; right:-4px; width:12px; height:12px; background:var(--cyan); border-radius:50%; cursor:nwse-resize; }
 .sig-field .remove-field { position:absolute; top:-8px; right:-8px; width:18px; height:18px; background:var(--danger); color:#fff; border-radius:50%; font-size:10px; display:flex; align-items:center; justify-content:center; cursor:pointer; opacity:0; transition:opacity .2s; }
 .sig-field:hover .remove-field { opacity:1; }
@@ -2565,7 +2566,8 @@ async function downloadSignedForSigner() {
       return;
     }
 
-    const bytes = await composeSignedPdf(doc, data.signers, data.fields);
+    // 화면에 띄운 합성본이 있으면 그대로 쓴다 (화면과 파일이 같도록)
+    const bytes = state.signedPdf?.bytes || await composeSignedPdf(doc, data.signers, data.fields);
     saveBlob(bytes, safeName(doc.title) + '_서명완료.pdf');
     showToast('완료 문서를 내려받았습니다.', true);
   } catch (e) {
@@ -2576,7 +2578,15 @@ async function downloadSignedForSigner() {
   }
 }
 
+// 새 창에서 열기 — 서명이 합성된 완료본을 연다 (원본을 열면 서명이 없어 보인다)
 async function openSignedInBrowser() {
+  if (state.signedPdf?.bytes) {
+    const url = URL.createObjectURL(new Blob([state.signedPdf.bytes], { type: 'application/pdf' }));
+    const w = window.open(url, '_blank');
+    if (!w) showToast('팝업이 차단되었습니다. 「완료 문서 다운로드」를 이용해주세요.');
+    setTimeout(() => URL.revokeObjectURL(url), 60000);
+    return;
+  }
   if (!state.signOrigPath) { showToast('원본 문서를 찾을 수 없습니다.'); return; }
   try {
     window.open(await fileUrl(state.signOrigPath), '_blank');
@@ -3057,7 +3067,7 @@ async function routeByProfile() {
 // ============================================================
 const SB_FN_ADMIN = SB_URL + '/functions/v1/esign-admin';
 const APP_URL = shareBase();
-const BUILD = '2026-10-15.3';   // 배포 확인용. 화면 하단과 콘솔에 표시된다.
+const BUILD = '2026-10-15.4';   // 배포 확인용. 화면 하단과 콘솔에 표시된다.
 
 
 // ============================================================
@@ -9029,6 +9039,7 @@ function goCreate() {
 // 서명자용: 토큰으로 서명 페이지 로딩 (로그인 불필요)
 async function openSignByToken(token) {
   state.signToken = token;
+  state.signedPdf = null;
   showPage('signPage');
   const editor = document.getElementById('signPdfEditor');
   editor.innerHTML = '<div class="sign-loading">문서를 불러오는 중...</div>';
@@ -9126,18 +9137,37 @@ async function openSignByToken(token) {
   }
 
   // 문서 렌더링
+  // 모든 서명이 끝난 문서는 다운로드와 똑같은 서명 합성본을 보여준다.
+  // (원본 위에 빈 서명란을 그리면 서명이 안 된 것처럼 보인다)
   editor.innerHTML = '';
+  const completed = d.status === 'complete' ? await loadCompletedDoc(token) : null;
   if (d.file_path) {
-    const docUrl = await fileUrl(d.file_path);
-    if (d.file_type === 'pdf') {
-      await renderPdfFromUrl(docUrl, 'signPdfEditor');
-      renderSignFields(data.fields, 'signPdfEditor');
+    if (d.file_type === 'pdf' && completed) {
+      let shown = false;
+      try {
+        state.signedPdf = {
+          bytes: await composeSignedPdf(completed.document, completed.signers, completed.fields),
+          title: completed.document.title
+        };
+        shown = (await renderPdfFromUrl({ data: state.signedPdf.bytes.slice() }, 'signPdfEditor')) > 0;
+      } catch (e) {
+        console.error('완료본 표시 오류:', e);
+      }
+      if (!shown) {   // 합성에 실패하면 원본 + 서명 이미지 덧그리기로 대신한다
+        await renderPdfFromUrl(await fileUrl(d.file_path), 'signPdfEditor');
+        renderSignedFields(completed.fields, completed.signers, 'signPdfEditor');
+      }
+    } else if (d.file_type === 'pdf') {
+      await renderPdfFromUrl(await fileUrl(d.file_path), 'signPdfEditor');
+      renderSignFields(data.fields, 'signPdfEditor', s.status === 'signed');
     } else if (['jpg','jpeg','png'].includes(d.file_type)) {
+      const docUrl = await fileUrl(d.file_path);
       editor.innerHTML = '<div class="pdf-page" data-page="1">' +
         '<img src="'+docUrl+'" style="max-width:'+(editor.clientWidth-48)+'px;">' + '</div>';
       const im = editor.querySelector('img');
       await new Promise(r => { im.onload = r; im.onerror = r; });
-      renderSignFields(data.fields, 'signPdfEditor');
+      if (completed) renderSignedFields(completed.fields, completed.signers, 'signPdfEditor');
+      else renderSignFields(data.fields, 'signPdfEditor', s.status === 'signed');
     } else {
       editor.innerHTML = '<div class="sign-loading">이 형식은 미리보기를 지원하지 않습니다.<br>' +
         '<a href="'+pub.publicUrl+'" target="_blank" style="color:var(--cyan);">문서 다운로드</a></div>';
@@ -9152,7 +9182,8 @@ async function openSignByToken(token) {
   }).catch(() => {});
 }
 
-// URL로부터 PDF 전체 페이지 렌더링
+// PDF 전체 페이지 렌더링 — src 는 URL 문자열 또는 { data: Uint8Array }
+// (pdf.js 는 data 로 받은 버퍼를 넘겨받아 비우므로, 다시 쓸 버퍼는 복사본을 넘긴다)
 async function renderPdfFromUrl(url, editorId) {
   const editor = document.getElementById(editorId);
   editor.innerHTML = '';
@@ -9192,21 +9223,59 @@ async function renderPdfFromUrl(url, editorId) {
 }
 
 // 서명란 표시 (페이지별, 비율 → 픽셀)
-function renderSignFields(fields, editorId) {
+//   signedByMe = true  이 서명자는 이미 서명함 → 다른 서명자를 기다리는 중이므로 '서명 완료'로 표시
+function renderSignFields(fields, editorId, signedByMe) {
   if (!fields) return;
   fields.forEach(f => {
     const pg = document.querySelector('#' + editorId + ' .pdf-page[data-page="' + (f.page || 1) + '"]');
     if (!pg) return;
     const el = document.createElement('div');
-    el.className = 'sig-field';
+    el.className = 'sig-field' + (signedByMe ? ' sig-done' : '');
     el.id = 'sf_' + f.id;
     el.style.cssText =
       'left:' + (f.x * pg.offsetWidth) + 'px;' +
       'top:' + (f.y * pg.offsetHeight) + 'px;' +
       'width:' + (f.w * pg.offsetWidth) + 'px;' +
       'height:' + (f.h * pg.offsetHeight) + 'px;cursor:default;';
-    el.textContent = f.field_type === 'date' ? '날짜' : '서명';
+    el.textContent = signedByMe ? '✓ 서명 완료' : (f.field_type === 'date' ? '날짜' : '서명');
     pg.appendChild(el);
+  });
+}
+
+// 완료 문서 데이터 (서명 이미지 포함). 실패하면 null.
+async function loadCompletedDoc(token) {
+  try {
+    const { data, error } = await sb.rpc('esign_get_completed_doc', { p_token: token });
+    return (!error && data?.ok) ? data : null;
+  } catch { return null; }
+}
+
+// 서명란 자리에 실제 서명 · 날짜를 그린다 (이미지 문서, 또는 PDF 합성 실패 시)
+function renderSignedFields(fields, signers, editorId) {
+  const sm = {};
+  (signers || []).forEach(x => { sm[x.id] = x; });
+  (fields || []).forEach(f => {
+    const sg = sm[f.signer_id];
+    if (!sg || sg.status !== 'signed') return;
+    const pg = document.querySelector('#' + editorId + ' .pdf-page[data-page="' + (f.page || 1) + '"]');
+    if (!pg) return;
+    const w = f.w * pg.offsetWidth, h = f.h * pg.offsetHeight;
+    let src = null;
+    if (f.field_type === 'date') {
+      src = typedSigToPng(sg.signed_at ? new Date(sg.signed_at).toLocaleDateString('ko-KR') : '', w, h);
+    } else if (sg.sig_method === 'typed') {
+      src = typedSigToPng((sg.sig_data || '').replace(/^TYPED:/, '') || sg.name, w, h);
+    } else if (sg.sig_data && sg.sig_data.startsWith('data:image')) {
+      src = sg.sig_data;
+    }
+    if (!src) return;
+    const im = document.createElement('img');
+    im.src = src;
+    im.alt = sg.name + ' 서명';
+    im.style.cssText = 'position:absolute;object-fit:contain;pointer-events:none;' +
+      'left:' + (f.x * pg.offsetWidth) + 'px;top:' + (f.y * pg.offsetHeight) + 'px;' +
+      'width:' + w + 'px;height:' + h + 'px;';
+    pg.appendChild(im);
   });
 }
 
