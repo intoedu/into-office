@@ -235,6 +235,7 @@ input,select,textarea { font-family:inherit; }
 .legal-doc table { width:100%; border-collapse:collapse; margin:10px 0 16px; font-size:12.5px; }
 .legal-doc th, .legal-doc td { border:1px solid var(--border); padding:8px 10px; text-align:left; }
 .legal-doc th { background:var(--bg); font-weight:600; color:var(--text); }
+.legal-doc .biz-tbl td:first-child { white-space:nowrap; width:1%; }
 
 @media (max-width:820px) {
   .lp-nav-menu { display:none; }
@@ -1027,14 +1028,17 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
           <button onclick="goLogin()">로그인</button>
         </div>
       </div>
+      <!-- 🔴 사업자 정보 블록 — 카카오 비즈니스(비즈 앱) 심사에서 「운영 주체」 확인 근거입니다.
+           사업자등록증(306-24-53380, 인투마케팅) 기재 내용 기준. 지우거나 임의로 바꾸지 마세요. -->
       <div class="lp-biz">
-        인투오피스는 <b>인투마케팅</b>이 운영하는 전자서명 서비스입니다.<br>
-        상호 인투마케팅<span class="lp-sep">|</span>대표자 양회광<span class="lp-sep">|</span>사업자등록번호 306-24-53380<br>
-        주소 대전광역시 유성구 은구비남로33번길 13-8, 3397호 (지족동, 양지빌딩)<br>
-        전화 010-4254-2270<span class="lp-sep">|</span>이메일 intoffice1@gmail.com<br>
-        카카오톡 채널 <a href="http://pf.kakao.com/_KvxgxaX" target="_blank" rel="noopener">인투오피스 (@intoffice)</a>
+        <b>운영 주체 : 인투마케팅</b> — 인투오피스는 인투마케팅이 직접 운영하는 전자계약 · 전자서명 서비스입니다.<br>
+        상호 : <b>인투마케팅</b><span class="lp-sep">|</span>대표자 : <b>양회광</b><br>
+        사업자등록번호 : 306-24-53380 <a href="https://www.ftc.go.kr/bizCommPop.do?wrkr_no=3062453380" target="_blank" rel="noopener">사업자정보확인</a><span class="lp-sep">|</span>통신판매업 신고번호 : 2026-대전유성-1694<br>
+        주소 : 대전광역시 유성구 은구비남로33번길 13-8, 3397호 (지족동, 양지빌딩)<br>
+        전화 : 010-4254-2270<span class="lp-sep">|</span>이메일 : intoffice1@gmail.com<br>
+        카카오톡 채널 : <a href="http://pf.kakao.com/_KvxgxaX" target="_blank" rel="noopener">인투오피스 (@intoffice)</a><span class="lp-sep">|</span>운영사 홈페이지 : <a href="https://intomarketing.co.kr/" target="_blank" rel="noopener">intomarketing.co.kr</a>
       </div>
-      <div class="lp-copy">© 2026 인투마케팅. All rights reserved.</div>
+      <div class="lp-copy">© 2026 인투마케팅 (INTO MARKETING). All rights reserved.</div>
     </div>
   </footer>
 </div>
@@ -1247,14 +1251,16 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
     </div>
     <div class="pi-biz">
       <div class="pi-operator">
-        인투오피스는 <b>인투마케팅</b>이 운영하는 전자서명 서비스입니다.
+        운영 주체 : <b>인투마케팅</b> — 인투오피스는 인투마케팅이 직접 운영하는 서비스입니다.
       </div>
       상호 인투마케팅<span class="pi-sep">|</span>대표자 양회광<br>
-      사업자등록번호 306-24-53380<br>
+      사업자등록번호 306-24-53380 <a href="https://www.ftc.go.kr/bizCommPop.do?wrkr_no=3062453380" target="_blank" rel="noopener">사업자정보확인</a><br>
+      통신판매업 신고번호 2026-대전유성-1694<br>
       주소 대전광역시 유성구 은구비남로33번길 13-8, 3397호 (지족동, 양지빌딩)<br>
       전화 010-4254-2270<span class="pi-sep">|</span>이메일 intoffice1@gmail.com<br>
       카카오톡 채널
-      <a href="http://pf.kakao.com/_KvxgxaX" target="_blank" rel="noopener">인투오피스 (@intoffice)</a>
+      <a href="http://pf.kakao.com/_KvxgxaX" target="_blank" rel="noopener">인투오피스 (@intoffice)</a><br>
+      <a href="javascript:void(0)" onclick="openLegal('terms')">이용약관</a><span class="pi-sep">|</span><a href="javascript:void(0)" onclick="openLegal('privacy')"><b>개인정보처리방침</b></a><span class="pi-sep">|</span><a href="javascript:void(0)" onclick="openLegal('refund')">환불규정</a><span class="pi-sep">|</span><a href="https://intomarketing.co.kr/" target="_blank" rel="noopener">운영사 홈페이지</a>
     </div>
   </div>
 </div>
@@ -2994,7 +3000,7 @@ async function routeByProfile() {
 // ============================================================
 const SB_FN_ADMIN = SB_URL + '/functions/v1/esign-admin';
 const APP_URL = shareBase();
-const BUILD = '2026-10-15.1';   // 배포 확인용. 화면 하단과 콘솔에 표시된다.
+const BUILD = '2026-10-15.2';   // 배포 확인용. 화면 하단과 콘솔에 표시된다.
 
 
 // ============================================================
@@ -8016,6 +8022,23 @@ function formatDate(d) {
 // ============================================================
 const LEGAL_EFFECTIVE = '2026년 9월 3일';
 
+// 🔴 카카오 비즈니스 심사가 「약관 · 개인정보처리방침에 사업자 정보 기재」를 요구합니다.
+//    세 문서 끝에 모두 이 블록이 붙습니다. 사업자등록증 기재 내용 기준이니 지우지 마세요.
+const LEGAL_BIZ_INFO = `
+<h3>사업자 정보</h3>
+<table class="biz-tbl">
+<tr><th>구분</th><th>내용</th></tr>
+<tr><td>서비스명</td><td>인투오피스 (INTO OFFICE)</td></tr>
+<tr><td>운영 주체(상호)</td><td>인투마케팅</td></tr>
+<tr><td>대표자</td><td>양회광</td></tr>
+<tr><td>사업자등록번호</td><td>306-24-53380</td></tr>
+<tr><td>통신판매업 신고번호</td><td>2026-대전유성-1694</td></tr>
+<tr><td>주소</td><td>대전광역시 유성구 은구비남로33번길 13-8, 3397호 (지족동, 양지빌딩)</td></tr>
+<tr><td>전화</td><td>010-4254-2270</td></tr>
+<tr><td>이메일</td><td>intoffice1@gmail.com</td></tr>
+</table>
+`;
+
 const LEGAL_DOCS = {
 terms: { title: '이용약관', body: `
 <h3>제1조 (목적)</h3>
@@ -8108,7 +8131,7 @@ terms: { title: '이용약관', body: `
 
 <h3>부칙</h3>
 <p>본 약관은 ` + LEGAL_EFFECTIVE + `부터 시행합니다.</p>
-` },
+` + LEGAL_BIZ_INFO },
 
 privacy: { title: '개인정보처리방침', body: `
 <p>인투마케팅(이하 "회사")은 「개인정보 보호법」에 따라 이용자의 개인정보를 보호하고 이와 관련한 고충을 신속히 처리할 수 있도록 다음과 같이 개인정보처리방침을 수립·공개합니다.</p>
@@ -8196,7 +8219,7 @@ privacy: { title: '개인정보처리방침', body: `
 
 <h3>11. 개인정보처리방침의 변경</h3>
 <p>본 방침은 ` + LEGAL_EFFECTIVE + `부터 적용됩니다. 내용의 추가·삭제 및 수정이 있을 경우 시행 7일 전부터 서비스 화면을 통하여 공지합니다.</p>
-` },
+` + LEGAL_BIZ_INFO },
 
 refund: { title: '환불규정', body: `
 <h3>1. 무료 체험</h3>
@@ -8246,15 +8269,10 @@ refund: { title: '환불규정', body: `
 <p>이용계약이 해지되면 <b>30일 동안 문서와 감사추적인증서를 내려받을 수 있는 기간</b>이 제공됩니다. 이 기간이 지나면 문서는 복구할 수 없도록 삭제되므로, 해지 전에 필요한 문서를 반드시 내려받으시기 바랍니다. 장기 보관이 필요한 경우 해지 전에 별도로 문의해 주십시오.</p>
 
 <h3>9. 문의처</h3>
-<table>
-<tr><th>구분</th><th>내용</th></tr>
-<tr><td>상호</td><td>인투마케팅</td></tr>
-<tr><td>전화</td><td>010-4254-2270</td></tr>
-<tr><td>이메일</td><td>intoffice1@gmail.com</td></tr>
-</table>
+<p>환불 신청과 문의는 아래 사업자 정보의 전화 또는 이메일로 접수합니다.</p>
 
 <p style="margin-top:18px;">본 규정은 ` + LEGAL_EFFECTIVE + `부터 시행합니다.</p>
-` }
+` + LEGAL_BIZ_INFO }
 };
 
 // ============================================================
@@ -9953,6 +9971,16 @@ async function handleRoute() {
 
   // 서명 링크 (?s=토큰 우선, 기존 #sign/토큰 도 지원)
   const qs = new URLSearchParams(location.search);
+
+  // 약관 바로가기 (?legal=terms | privacy | refund)
+  // 심사·안내용으로 문서를 주소 하나로 열 수 있게 한다. 로그인 여부와 무관하게 랜딩 위에 띄운다.
+  const legal = qs.get('legal');
+  if (legal && LEGAL_DOCS[legal]) {
+    showPage('landingPage');
+    openLegal(legal);
+    return;
+  }
+
   const qToken = qs.get('s');
   if (qToken) { await openSignByToken(qToken); return; }
   if (hash.startsWith('#sign/')) {
