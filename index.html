@@ -714,6 +714,27 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
 .st-past_due  { background:#fff7ed; color:#c2410c; }
 .st-suspended { background:var(--bg); color:var(--text-muted); }
 
+/* 회원 관리 표 — 팀원 탭의 .mem-row 카드 스타일과 이름이 겹쳐 따로 고정한다 */
+#viewMembers .mem-row { grid-template-columns:1.5fr 1fr 1fr 64px 76px 170px; padding:14px 18px; margin:0;
+  border:none; border-bottom:1px solid var(--border); border-radius:0; background:transparent; }
+#viewMembers .mem-row:last-child { border-bottom:none; }
+.mem-acts { display:flex; align-items:center; justify-content:flex-end; gap:6px; }
+.btn-approve, .btn-reject { height:30px; padding:0 12px; border-radius:8px; font-size:12.5px; font-weight:700; white-space:nowrap; transition:all .15s; }
+.btn-approve { background:#059669; color:#fff; }
+.btn-approve:hover { background:#047857; }
+.btn-reject { background:var(--card); color:var(--danger); border:1px solid var(--border); }
+.btn-reject:hover { background:var(--danger-bg); border-color:var(--danger); }
+.btn-approve:disabled, .btn-reject:disabled { opacity:.5; cursor:default; }
+.mem-bulk { display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
+  padding:12px 16px; margin-bottom:12px; border-radius:var(--radius); background:#fffbeb; border:1px solid #fde68a;
+  font-size:13px; color:#92400e; }
+
+@media (max-width:860px) {
+  #viewMembers .mem-row { grid-template-columns:1fr auto; row-gap:8px; }
+  #viewMembers .mem-row > :nth-child(2), #viewMembers .mem-row > :nth-child(3), #viewMembers .mem-row > :nth-child(4) { display:none; }
+  #viewMembers .mem-row > :last-child { grid-column:1 / -1; }
+}
+
 @media (max-width:760px) {
   .mem-row { grid-template-columns:1fr 92px; row-gap:8px; }
   .pay-row { grid-template-columns:1fr 110px; row-gap:8px; }
@@ -1787,6 +1808,7 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
         </div>
       </div>
       <div class="stats-row" id="memStats"></div>
+      <div class="mem-bulk" id="memBulk" style="display:none;"></div>
       <div class="doc-list">
         <div class="mem-row" style="border-bottom:1px solid var(--border);font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;">
           <span>이름 · 이메일</span><span>연락처</span><span>사업 정보</span><span>권한</span><span>상태</span><span style="text-align:right;">메뉴</span>
@@ -3230,7 +3252,7 @@ async function routeByProfile() {
 // ============================================================
 const SB_FN_ADMIN = SB_URL + '/functions/v1/esign-admin';
 const APP_URL = shareBase();
-const BUILD = '2026-10-15.7';   // 배포 확인용. 화면 하단과 콘솔에 표시된다.
+const BUILD = '2026-10-15.8';   // 배포 확인용. 화면 하단과 콘솔에 표시된다.
 
 
 // ============================================================
@@ -3718,6 +3740,16 @@ function renderMembers() {
   if (state.memFilter === 'blocked') ms = ms.filter(m => ['suspended','rejected'].includes(m.status));
   else if (state.memFilter) ms = ms.filter(m => m.status === state.memFilter);
 
+  // 승인 대기가 있으면 목록 위에 한 번에 승인하는 줄을 보여준다
+  const pend = (state.members || []).filter(m => m.status === 'pending' && !m.is_me);
+  const bulk = document.getElementById('memBulk');
+  if (bulk) {
+    const show = pend.length > 1 && (!state.memFilter || state.memFilter === 'pending');
+    bulk.style.display = show ? '' : 'none';
+    if (show) bulk.innerHTML = '<span>⏳ 승인 대기 <strong>' + pend.length + '명</strong>이 있습니다.</span>' +
+      '<button class="btn-approve" onclick="approveAllPending(this)">대기 ' + pend.length + '명 모두 승인</button>';
+  }
+
   if (!ms.length) { list.innerHTML = '<div class="empty-sm">해당 회원이 없습니다.</div>'; return; }
 
   list.innerHTML = ms.map(m => {
@@ -3737,12 +3769,58 @@ function renderMembers() {
         (m.biz_type ? '<div class="mem-sub">' + esc(m.biz_type) + '</div>' : '') + '</div>' +
       '<div><span class="pill p-' + m.role + '">' + (m.role === 'admin' ? '관리자' : '일반') + '</span></div>' +
       '<div><span class="pill p-' + m.status + '">' + (MEM_ST[m.status] || m.status) + '</span></div>' +
-      '<div class="row-menu-wrap">' +
+      '<div class="row-menu-wrap mem-acts">' +
         (m.is_me ? '<span class="mem-sub">—</span>' :
+          (m.status === 'pending'
+            ? '<button class="btn-approve" onclick="quickApprove(\'' + uid + '\',this)">승인</button>' +
+              '<button class="btn-reject" onclick="memAct(\'' + uid + '\',\'rejected\')">거절</button>'
+            : '') +
           '<button class="btn-dots" onclick="openMemberMenu(event,\'' + uid + '\')">•••</button>') +
       '</div>' +
     '</div>';
   }).join('');
+}
+
+// 승인 대기 회원을 메뉴 · 확인창 없이 바로 승인한다 (거절은 사유를 받으려고 확인창을 거친다)
+async function approveMember(uid) {
+  const { data } = await sb.rpc('esign_set_member_status', { p_user_id: uid, p_status: 'active', p_reason: null });
+  if (!data?.ok) throw new Error(data?.error || '처리 실패');
+  sendApproveAlimtalk(uid);
+}
+
+async function quickApprove(uid, btn) {
+  const m = (state.members || []).find(x => x.user_id === uid);
+  if (!m || m.status !== 'pending') return;
+  const row = btn.closest('.mem-acts');
+  row?.querySelectorAll('button').forEach(b => b.disabled = true);
+  btn.textContent = '처리 중…';
+  try {
+    await approveMember(uid);
+    showToast((m.name || m.email) + ' 님의 가입을 승인했습니다.', true);
+    loadMembers();
+  } catch (e) {
+    showToast('승인 실패: ' + e.message);
+    row?.querySelectorAll('button').forEach(b => b.disabled = false);
+    btn.textContent = '승인';
+  }
+}
+
+async function approveAllPending(btn) {
+  const pend = (state.members || []).filter(m => m.status === 'pending' && !m.is_me);
+  if (!pend.length) return;
+  if (!confirm('승인 대기 ' + pend.length + '명을 모두 승인할까요?\n\n' +
+    pend.map(m => '· ' + (m.name || m.email)).join('\n'))) return;
+  btn.disabled = true;
+  let ok = 0;
+  const failed = [];
+  for (const m of pend) {
+    btn.textContent = '승인 중… (' + (ok + failed.length + 1) + '/' + pend.length + ')';
+    try { await approveMember(m.user_id); ok++; }
+    catch (e) { failed.push(m.name || m.email); }
+  }
+  showToast(failed.length ? ok + '명 승인 · ' + failed.length + '명 실패 (' + failed.join(', ') + ')'
+                          : ok + '명의 가입을 모두 승인했습니다.', !failed.length);
+  loadMembers();
 }
 
 function memAct(uid, act) {
