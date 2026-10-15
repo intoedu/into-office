@@ -1,0 +1,21 @@
+# Supabase 무료 플랜은 활동이 없으면 프로젝트를 일시정지한다.
+# 이틀에 한 번 가벼운 DB 조회를 보내 정지를 예방한다.
+# (공개 키만 쓰며, 아이디 중복 확인 RPC 로 데이터를 바꾸지 않는다)
+name: Supabase keep-alive
+
+on:
+  schedule:
+    - cron: '17 0 */2 * *'
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping database
+        run: |
+          SB_URL=https://lplektkqodrncigysfan.supabase.co
+          SB_KEY=sb_publishable_NNVZHW3M63z_F1KjksNQEA_DSrnk31P
+          curl -fsS -X POST "$SB_URL/rest/v1/rpc/esign_check_username" \
+            -H "apikey: $SB_KEY" -H "Content-Type: application/json" \
+            -d '{"p_username":"keepalive_ping"}'
