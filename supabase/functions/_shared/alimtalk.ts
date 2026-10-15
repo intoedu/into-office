@@ -79,6 +79,20 @@ export type Row = {
   vars: Record<string, string>;
 };
 
+// 가입 승인 안내 1건 — esign_member_notify_info 결과로 만든다. 연락처가 없으면 null.
+export async function approveRow(admin: SupabaseClient, userId: string): Promise<Row | null> {
+  const { data: m } = await admin.rpc("esign_member_notify_info", { p_user_id: userId });
+  if (!m?.ok || m.status !== "active" || digits(m.phone ?? "").length < 10) return null;
+  return {
+    org_id: null, doc_id: null, phone: m.phone,
+    vars: {
+      "#{이름}": m.name || "회원",
+      "#{아이디}": m.username || m.email || "-",
+      "#{승인일시}": fmtDate(m.approved_at),
+    },
+  };
+}
+
 // 문서 기반 발송(요청 · 리마인드 · 완료)의 수신자와 변수를 만든다
 export async function collectDocRows(admin: SupabaseClient, kind: Kind, ids: string[]) {
   const rows: Row[] = [];

@@ -490,6 +490,25 @@ input,select,textarea { font-family:inherit; }
 .agree-detail { font-size:11.5px; color:var(--text-muted); line-height:1.75; background:var(--bg); border-radius:8px; padding:11px 13px; margin-top:7px; max-height:110px; overflow-y:auto; }
 .pending-wrap { text-align:center; padding:48px 32px; }
 .pending-wrap .pi { font-size:52px; margin-bottom:14px; }
+/* 결제 폼 (대기 화면 · 요금제 신청 창 공용) */
+#pendingPage .login-card:has(#pendPay .pf) { max-width:560px; }
+.pf { text-align:left; margin-top:24px; padding-top:22px; border-top:1px solid var(--border); }
+.modal .pf { margin-top:0; padding-top:0; border-top:none; }
+.pf-head { font-size:15px; font-weight:700; margin-bottom:4px; }
+.pf-sub { font-size:12.5px; color:var(--text-muted); line-height:1.7; margin-bottom:16px; }
+.pf .lp-toggle { margin-bottom:14px; }
+.pf .plan-pick { grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; }
+.pf .plan-opt { padding:13px; }
+.pf .plan-opt .pp { font-size:17px; }
+.pf-methods { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:10px; margin:16px 0 4px; }
+.pf-method { border:1.5px solid var(--border); border-radius:var(--radius); padding:12px 14px; cursor:pointer; text-align:left; background:var(--card); transition:all .15s; }
+.pf-method .t { font-size:14px; font-weight:700; }
+.pf-method .d { font-size:12px; color:var(--text-muted); margin-top:3px; line-height:1.55; }
+.pf-method.sel { border-color:var(--cyan); background:rgba(4,183,221,.05); }
+.pf-box { background:var(--bg); border-radius:8px; padding:14px 16px; font-size:13px; line-height:1.85; margin-top:12px; }
+.pf-go { margin-top:16px; }
+.pay-overlay { position:fixed; inset:0; background:rgba(15,23,42,.55); z-index:9999; display:flex; align-items:center; justify-content:center; }
+.pay-overlay > div { background:var(--card); border-radius:14px; padding:28px 30px; text-align:center; font-size:14px; line-height:1.8; max-width:340px; }
 
 /* ===== TAB NAV ===== */
 .tabs { display:flex; gap:2px; border-bottom:2px solid var(--border); margin-bottom:24px;
@@ -1216,32 +1235,8 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
       <h3>요금제 신청</h3>
       <button class="modal-close" onclick="closePay()">✕</button>
     </div>
-    <div class="modal-body" style="max-height:70vh;overflow-y:auto;">
-      <div class="lp-toggle" style="margin-bottom:20px;">
-        <button id="payCycM" class="active" onclick="paySetCycle('monthly')">월 결제</button>
-        <button id="payCycY" onclick="paySetCycle('yearly')">연 결제<span class="save">2개월 무료</span></button>
-      </div>
-      <div class="plan-pick" id="payPlans"></div>
-      <div class="form-group" style="margin-top:20px;">
-        <label>입금자명 *</label>
-        <input type="text" id="payDepositor" placeholder="입금하실 분의 성함">
-      </div>
-      <div class="form-group">
-        <label>증빙</label>
-        <select id="payReceipt" class="signer-select" style="width:100%;padding:11px 12px;font-size:14px;">
-          <option value="none">필요 없음</option>
-          <option value="tax_invoice">세금계산서</option>
-          <option value="cash_receipt">현금영수증</option>
-        </select>
-      </div>
-      <div id="payAccount" style="background:var(--bg);border-radius:8px;padding:16px;font-size:13px;line-height:1.85;">
-        신청하시면 입금 계좌를 안내해 드립니다.<br>
-        <span style="color:var(--text-muted);">입금 확인 후 이용이 시작되며, 확인에는 영업일 기준 1일이 걸릴 수 있습니다.</span>
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn-secondary" onclick="closePay()">취소</button>
-      <button class="btn-primary" style="width:auto;padding:11px 20px;" onclick="submitPay()">신청하기</button>
+    <div class="modal-body" style="max-height:72vh;overflow-y:auto;">
+      <div id="payForm"><div class="sign-loading">불러오는 중…</div></div>
     </div>
   </div>
 </div>
@@ -1488,7 +1483,7 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
     </div>
 
     <button class="btn-primary" style="margin-top:18px;" id="suBtn" onclick="submitSignup()">가입하기</button>
-    <p class="login-footer" style="margin-top:14px;">가입 후 관리자 승인이 완료되면 이용하실 수 있습니다.</p>
+    <p class="login-footer" style="margin-top:14px;">무료 체험은 관리자 승인 후, 유료 요금제는 결제 즉시 이용하실 수 있습니다.</p>
     <button class="btn-logout" style="color:var(--text-muted);width:100%;margin-top:4px;" onclick="backToLogin()">← 로그인으로 돌아가기</button>
   </div>
 </div>
@@ -1502,6 +1497,7 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
       <p style="font-size:13.5px;color:var(--text-secondary);line-height:1.85;" id="pendMsg">
         가입 신청이 접수되었습니다.<br>관리자 승인 후 서비스를 이용하실 수 있습니다.
       </p>
+      <div id="pendPay"></div>
       <button class="btn-secondary" style="margin-top:22px;width:100%;" onclick="location.reload()">새로고침</button>
       <button class="btn-secondary" style="margin-top:8px;width:100%;" onclick="goLanding()">홈으로 돌아가기</button>
       <button class="btn-logout" style="color:var(--text-muted);width:100%;margin-top:8px;" onclick="doLogout()">로그아웃</button>
@@ -3227,7 +3223,11 @@ async function routeByProfile() {
     document.getElementById('pendTitle').textContent = cfg[1];
     document.getElementById('pendMsg').innerHTML = cfg[2] +
       (state.profile.reject_reason ? '<br><br><b>사유</b><br>' + esc(state.profile.reject_reason) : '');
+    const pp = document.getElementById('pendPay');
+    if (pp) pp.innerHTML = '';
     showPage('pendingPage');
+    // 승인 대기 회원은 유료 요금제를 결제해 바로 시작할 수 있다 (거절 · 정지는 제외)
+    if (st === 'pending') renderPendingPay();
     return false;
   }
 
@@ -3252,7 +3252,7 @@ async function routeByProfile() {
 // ============================================================
 const SB_FN_ADMIN = SB_URL + '/functions/v1/esign-admin';
 const APP_URL = shareBase();
-const BUILD = '2026-10-15.8';   // 배포 확인용. 화면 하단과 콘솔에 표시된다.
+const BUILD = '2026-10-15.9';   // 배포 확인용. 화면 하단과 콘솔에 표시된다.
 
 
 // ============================================================
@@ -8204,7 +8204,7 @@ function closeSendDone() {
       p_document_id: state.doneDocId,
       p_signed_path: null,
       p_message: document.getElementById('doneMsg').value
-    });
+    }).then(() => {});   // supabase-js 는 then 을 붙여야 요청을 보낸다
   }
 }
 
@@ -8349,14 +8349,14 @@ async function downloadSignedDoc(docId) {
     if (doc.file_type !== 'pdf') {
       const blob = await fileBlob(doc.file_path);
       saveBlob(await blob.arrayBuffer(), doc.file_name || safeName(doc.title), blob.type);
-      sb.rpc('esign_log_download', { p_document_id: docId, p_kind: 'original' });
+      sb.rpc('esign_log_download', { p_document_id: docId, p_kind: 'original' }).then(() => {});
       showToast('원본 파일을 내려받았습니다. (이 형식은 서명 합성을 지원하지 않습니다)');
       return;
     }
 
     const bytes = await composeSignedPdf(doc, data.signers, data.fields);
     saveBlob(bytes, safeName(doc.title) + '_서명완료.pdf');
-    sb.rpc('esign_log_download', { p_document_id: docId, p_kind: 'signed_pdf' });
+    sb.rpc('esign_log_download', { p_document_id: docId, p_kind: 'signed_pdf' }).then(() => {});
     showToast('서명 문서가 다운로드되었습니다.', true);
   } catch (e) {
     console.error('서명 합성 오류:', e);
@@ -8478,7 +8478,7 @@ async function downloadCertificate(docId) {
 <div class="ft"><span>발행: INTO OFFICE (인투오피스)</span><span>발행일시: ${fmt(data.issued_at)}</span></div>
 </body></html>`);
   w.document.close();
-  sb.rpc('esign_log_download', { p_document_id: docId, p_kind: 'certificate' });
+  sb.rpc('esign_log_download', { p_document_id: docId, p_kind: 'certificate' }).then(() => {});
   showToast('인증서 창에서 "PDF로 저장"을 눌러주세요.', true);
 }
 
@@ -8991,7 +8991,7 @@ async function loadPayHistory() {
   if (!rows.length) { box.innerHTML = '<p style="font-size:13px;color:var(--text-muted);">아직 결제 내역이 없습니다.</p>'; return; }
   box.innerHTML = rows.map(p =>
     '<div class="pay-row"><div><div class="nm">' + esc(p.memo || '-') + '</div>' +
-    '<div class="em">' + new Date(p.created_at).toLocaleString('ko-KR') +
+    '<div class="em">' + (p.method === 'card' ? '카드 · ' : '계좌이체 · ') + new Date(p.created_at).toLocaleString('ko-KR') +
       (p.depositor_name ? ' · 입금자 ' + esc(p.depositor_name) : '') + '</div></div>' +
     '<div>' + won(p.amount) + '</div>' +
     '<div><span class="st-pill st-' + esc(p.status) + '">' +
@@ -9132,62 +9132,253 @@ async function revokeInvite(id) {
   showToast('초대를 취소했습니다.', true); loadTeam();
 }
 
-// ── 결제 신청 ────────────────────────────────────────────────
-let payCycle = 'monthly', paySel = 'standard';
+// ── 결제 신청 (무통장 · 카드) ─────────────────────────────────
+// 대기 화면(#pendPay)과 요금제 신청 창(#payForm)이 같은 폼을 쓴다.
+// 카드 결제는 토스페이먼츠 결제창 → 이 페이지로 돌아와 esign-pay 가 승인 · 구독 활성화 · 가입 승인까지 한다.
+// 무통장은 관리자가 「입금 확인」을 누를 때 같은 처리가 된다.
+const SB_FN_PAY = SB_URL + '/functions/v1/esign-pay';
+const TOSS_SDK = 'https://js.tosspayments.com/v2/standard';
+const PAY = { cycle: 'monthly', plan: 'standard', method: null, box: null, needOrg: false, pending: null,
+              orgName: null, dep: null };
+const PAY_ERR = {
+  ALREADY_PENDING: '이미 입금 확인을 기다리는 신청이 있습니다. 취소한 뒤 다시 신청해 주세요.',
+  OWNER_ONLY: '조직 소유자만 결제할 수 있습니다.',
+  NO_ORG: '조직(상호) 이름을 입력해 주세요.',
+  NAME_REQUIRED: '조직(상호) 이름을 입력해 주세요.',
+  DEPOSITOR_REQUIRED: '입금자명을 입력해 주세요.',
+  CARD_NOT_AVAILABLE: '지금은 카드 결제를 사용할 수 없습니다.',
+  BAD_PLAN: '요금제를 다시 선택해 주세요.',
+  FORBIDDEN: '결제할 수 없는 계정 상태입니다. 관리자에게 문의해 주세요.'
+};
+
+function payPlans() {
+  const ps = state.payCfg?.plans;
+  if (!ps?.length) return PLAN_LIST;
+  return ps.map(p => ({ code: p.code, name: p.name, m: p.price_monthly, y: p.price_yearly,
+    qm: p.doc_quota_monthly, qy: p.doc_quota_yearly, seats: p.seat_quota }));
+}
+
+async function loadPayState() {
+  const [cfg, info] = await Promise.all([sb.rpc('esign_pay_config'), sb.rpc('esign_payment_info')]);
+  state.payCfg = cfg.data?.ok ? cfg.data : null;
+  PAY.pending = info.data?.ok && info.data.has_pending ? info.data : null;
+  return state.payCfg;
+}
+
+// 요금제 신청 창 (대시보드)
 async function openPay() {
-  paySetCycle('monthly');
   document.getElementById('payModal').classList.add('active');
-  const { data } = await sb.rpc('esign_payment_info');
-  renderPayAccount(data);
+  document.getElementById('payForm').innerHTML = '<div class="sign-loading">불러오는 중…</div>';
+  await loadPayState();
+  PAY.needOrg = false;
+  renderPayForm('payForm');
 }
-
-function renderPayAccount(info) {
-  const el = document.getElementById('payAccount');
-  if (!el) return;
-  if (!info?.ok || !info.has_pending) {
-    el.innerHTML = '신청하시면 입금 계좌를 안내해 드립니다.<br>' +
-      '<span style="color:var(--text-muted);">입금 확인 후 이용이 시작되며, 확인에는 영업일 기준 1일이 걸릴 수 있습니다.</span>';
-    return;
-  }
-  const p = info.payment;
-  el.innerHTML =
-    '<div style="font-weight:650;margin-bottom:8px;">신청하신 내역이 있습니다 — ' + esc(p.memo || '') + ' ' + won(p.amount) + '</div>' +
-    (info.configured
-      ? '입금 계좌<br><b style="font-size:15px;">' + esc(info.bank) + ' ' + esc(info.account) + '</b><br>' +
-        '예금주 ' + esc(info.holder) + '<br>' +
-        '<span style="color:var(--text-muted);">' + esc(info.notice || '') + '</span>'
-      : '<span style="color:var(--danger);">입금 계좌가 아직 등록되지 않았습니다. 운영자에게 문의해 주세요.</span>');
-}
-
-
 function closePay() { document.getElementById('payModal').classList.remove('active'); }
-function paySetCycle(c) {
-  payCycle = c;
-  document.getElementById('payCycM').classList.toggle('active', c === 'monthly');
-  document.getElementById('payCycY').classList.toggle('active', c === 'yearly');
-  document.getElementById('payPlans').innerHTML = PLAN_LIST.map(p =>
-    '<div class="plan-opt' + (paySel === p.code ? ' sel' : '') + '" onclick="paySelect(\'' + p.code + '\')">' +
-    '<div class="pn">' + p.name + '</div>' +
-    '<div class="pp">' + won(c === 'yearly' ? p.y : p.m) + '</div>' +
-    '<div class="pq">' + (c === 'yearly' ? '연 ' + p.qy + '건 · 몰아쓰기' : '월 ' + p.qm + '건') +
-      ' · ' + (p.seats == null ? '인원 무제한' : p.seats + '명') + '</div></div>').join('');
+
+// 승인 대기 화면 — 결제 수단이 하나라도 준비돼 있을 때만 보인다
+async function renderPendingPay() {
+  const box = document.getElementById('pendPay');
+  if (!box) return;
+  box.innerHTML = '';
+  const cfg = await loadPayState();
+  if (!cfg || (!cfg.card && !cfg.transfer)) return;
+  const { data: org } = await sb.rpc('esign_my_org');
+  if (org?.ok && org.has_org && org.my_role !== 'owner') return;
+  PAY.needOrg = !(org?.ok && org.has_org);
+  document.getElementById('pendMsg').innerHTML =
+    '가입 신청이 접수되었습니다.<br>무료 체험은 관리자 승인 후 시작됩니다.<br>' +
+    '<b>유료 요금제를 결제하면 승인을 기다리지 않고 바로 이용</b>하실 수 있어요.';
+  renderPayForm('pendPay');
 }
-function paySelect(code) { paySel = code; paySetCycle(payCycle); }
-async function submitPay() {
-  const dep = document.getElementById('payDepositor').value.trim();
-  if (!dep) { showToast('입금자명을 입력해주세요.'); return; }
-  const { data } = await sb.rpc('esign_request_payment', {
-    p_plan_code: paySel, p_cycle: payCycle, p_depositor_name: dep,
-    p_receipt_type: document.getElementById('payReceipt').value
-  });
-  if (!data?.ok) {
-    showToast({ ALREADY_PENDING:'이미 확인 대기 중인 신청이 있습니다.',
-                OWNER_ONLY:'조직 소유자만 신청할 수 있습니다.' }[data?.error] || '신청 실패');
+
+function renderPayForm(boxId) {
+  PAY.box = boxId;
+  const box = document.getElementById(boxId);
+  if (!box) return;
+  const cfg = state.payCfg || {};
+  const methods = [];
+  if (cfg.card) methods.push(['card', '💳 카드 결제', '결제가 끝나는 즉시 이용이 시작됩니다']);
+  if (cfg.transfer) methods.push(['transfer', '🏦 계좌이체', '입금이 확인되면 자동으로 시작되고 알림톡으로 알려드립니다']);
+  if (!methods.length) {
+    box.innerHTML = '<div class="pf"><p class="pf-sub">결제 수단이 아직 준비되지 않았습니다. 운영자에게 문의해 주세요.</p></div>';
     return;
   }
-  closePay();
-  showToast(data.plan + ' ' + won(data.amount) + ' 신청이 접수되었습니다. 입금 안내를 확인해주세요.', true);
+  if (!methods.some(m => m[0] === PAY.method)) PAY.method = methods[0][0];
+  const plans = payPlans();
+  if (!plans.some(p => p.code === PAY.plan)) PAY.plan = plans[0].code;
+  const sel = plans.find(p => p.code === PAY.plan);
+  const amount = PAY.cycle === 'yearly' ? sel.y : sel.m;
+  const p = PAY.pending;
+  const prof = state.profile || {};
+
+  box.innerHTML = '<div class="pf">' +
+    (boxId === 'pendPay'
+      ? '<div class="pf-head">요금제를 고르고 바로 시작하기</div>' +
+        '<div class="pf-sub">결제한 계정은 관리자 승인 없이 바로 이용할 수 있습니다.</div>' : '') +
+    (p ? '<div class="pf-box" style="margin:0 0 16px;background:#fffbeb;">' +
+        '<b>입금 확인을 기다리는 신청이 있습니다</b> — ' + esc(p.payment.memo || '') + ' ' + won(p.payment.amount) + '<br>' +
+        (p.configured
+          ? '입금 계좌 <b>' + esc(p.bank) + ' ' + esc(p.account) + '</b> (예금주 ' + esc(p.holder) + ')<br>' +
+            (p.notice ? '<span style="color:var(--text-muted);">' + esc(p.notice) + '</span><br>' : '')
+          : '<span style="color:var(--danger);">입금 계좌가 아직 등록되지 않았습니다. 운영자에게 문의해 주세요.</span><br>') +
+        '<span style="color:var(--text-muted);">입금이 확인되면 자동으로 이용이 시작됩니다.' +
+          (cfg.card ? ' 아래에서 카드로 결제하면 이 신청은 자동으로 취소됩니다.' : '') + '</span><br>' +
+        '<button class="btn-mini" style="margin-top:8px;" onclick="cancelPendingPay(\'' + p.payment.id + '\')">신청 취소</button>' +
+      '</div>' : '') +
+    (PAY.needOrg
+      ? '<div class="form-group"><label>조직(상호) 이름 *</label>' +
+        '<input type="text" id="pfOrg" maxlength="60" value="' + esc(PAY.orgName ?? (prof.biz_name || prof.name || '')) + '" placeholder="예) 인투학원"></div>' : '') +
+    '<div class="lp-toggle">' +
+      '<button class="' + (PAY.cycle === 'monthly' ? 'active' : '') + '" onclick="paySetCycle(\'monthly\')">월 결제</button>' +
+      '<button class="' + (PAY.cycle === 'yearly' ? 'active' : '') + '" onclick="paySetCycle(\'yearly\')">연 결제<span class="save">2개월 무료</span></button>' +
+    '</div>' +
+    '<div class="plan-pick">' + plans.map(pl =>
+      '<div class="plan-opt' + (pl.code === PAY.plan ? ' sel' : '') + '" onclick="paySelect(\'' + pl.code + '\')">' +
+      '<div class="pn">' + esc(pl.name) + '</div>' +
+      '<div class="pp">' + won(PAY.cycle === 'yearly' ? pl.y : pl.m) + '</div>' +
+      '<div class="pq">' + (PAY.cycle === 'yearly' ? '연 ' + pl.qy + '건' : '월 ' + pl.qm + '건') +
+        ' · ' + (pl.seats == null ? '인원 무제한' : pl.seats + '명') + '</div></div>').join('') +
+    '</div>' +
+    '<div class="pf-methods">' + methods.map(m =>
+      '<button class="pf-method' + (m[0] === PAY.method ? ' sel' : '') + '" onclick="paySetMethod(\'' + m[0] + '\')">' +
+      '<div class="t">' + m[1] + '</div><div class="d">' + m[2] + '</div></button>').join('') +
+    '</div>' +
+    (PAY.method === 'transfer'
+      ? '<div class="form-group" style="margin-top:14px;"><label>입금자명 *</label>' +
+          '<input type="text" id="pfDepositor" maxlength="40" value="' + esc(PAY.dep ?? (prof.name || '')) + '" placeholder="입금하실 분의 성함"></div>' +
+        '<div class="form-group"><label>증빙</label>' +
+          '<select id="pfReceipt" class="signer-select" style="width:100%;padding:11px 12px;font-size:14px;">' +
+          '<option value="none">필요 없음</option><option value="tax_invoice">세금계산서</option>' +
+          '<option value="cash_receipt">현금영수증</option></select></div>'
+      : '') +
+    '<button class="btn-primary pf-go" id="pfGo" onclick="submitPay()">' +
+      (PAY.method === 'card' ? '💳 ' + won(amount) + ' 카드로 결제하기' : won(amount) + ' 계좌이체 신청하기') + '</button>' +
+    (PAY.method === 'card'
+      ? '<p class="pf-sub" style="margin:10px 0 0;">결제는 토스페이먼츠 결제창에서 안전하게 진행됩니다. 환불 기준은 ' +
+        '<a href="?legal=refund" target="_blank" rel="noopener">환불 정책</a>을 따릅니다.</p>' : '') +
+  '</div>';
+}
+
+function paySetCycle(c) { PAY.cycle = c; keepPayInputs(); renderPayForm(PAY.box); }
+function paySelect(code) { PAY.plan = code; keepPayInputs(); renderPayForm(PAY.box); }
+function paySetMethod(m) { PAY.method = m; keepPayInputs(); renderPayForm(PAY.box); }
+// 다시 그리기 전에 입력값을 보관해 둔다
+function keepPayInputs() {
+  const org = document.getElementById('pfOrg'), dep = document.getElementById('pfDepositor');
+  if (org) PAY.orgName = org.value;
+  if (dep) PAY.dep = dep.value;
+}
+
+async function submitPay() {
+  const btn = document.getElementById('pfGo');
+  const orgName = document.getElementById('pfOrg')?.value.trim() || null;
+  if (PAY.needOrg && !orgName) { showToast(PAY_ERR.NO_ORG); return; }
+  const dep = document.getElementById('pfDepositor')?.value.trim() || null;
+  if (PAY.method === 'transfer' && !dep) { showToast(PAY_ERR.DEPOSITOR_REQUIRED); return; }
+  if (btn) btn.disabled = true;
+  try {
+    const { data } = await sb.rpc('esign_request_payment_v2', {
+      p_plan_code: PAY.plan, p_cycle: PAY.cycle, p_method: PAY.method,
+      p_depositor_name: dep, p_receipt_type: document.getElementById('pfReceipt')?.value || 'none',
+      p_org_name: PAY.needOrg ? orgName : null
+    });
+    if (!data?.ok) { showToast(PAY_ERR[data?.error] || '신청 실패 (' + (data?.error || '알 수 없음') + ')'); return; }
+    if (data.method === 'card') { await startTossPayment(data); return; }
+    showToast(data.plan + ' ' + won(data.amount) + ' 신청이 접수되었습니다. 입금 계좌를 확인해 주세요.', true);
+    await afterPayChange();
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+
+async function afterPayChange() {
+  if (PAY.box === 'pendPay') { await renderPendingPay(); return; }
+  await loadPayState();
+  renderPayForm('payForm');
   loadPlan();
+}
+
+async function cancelPendingPay(id) {
+  if (!confirm('입금 대기 중인 신청을 취소할까요?')) return;
+  const { data } = await sb.rpc('esign_cancel_payment', { p_payment_id: id });
+  showToast(data?.ok ? '신청을 취소했습니다.' : '취소하지 못했습니다.', !!data?.ok);
+  await afterPayChange();
+}
+
+function loadTossSdk() {
+  if (window.TossPayments) return Promise.resolve();
+  return new Promise((res, rej) => {
+    const s = document.createElement('script');
+    s.src = TOSS_SDK; s.onload = () => res(); s.onerror = () => rej(new Error('결제 모듈을 불러오지 못했습니다.'));
+    document.head.appendChild(s);
+  });
+}
+
+async function startTossPayment(d) {
+  try {
+    await loadTossSdk();
+    const toss = TossPayments(d.client_key);
+    const payment = toss.payment({ customerKey: TossPayments.ANONYMOUS || '@@ANONYMOUS' });
+    // 결제창은 이 페이지로 돌아온다. 성공: ?paymentKey&orderId&amount / 실패: ?code&message&orderId
+    const back = location.origin + location.pathname;
+    await payment.requestPayment({
+      method: 'CARD',
+      amount: { currency: 'KRW', value: d.amount },
+      orderId: d.order_id,
+      orderName: d.order_name,
+      successUrl: back,
+      failUrl: back,
+      customerName: d.customer_name || undefined,
+      customerEmail: d.customer_email || undefined,
+      customerMobilePhone: d.customer_phone || undefined
+    });
+  } catch (e) {
+    // 결제창을 닫았거나 열지 못했다 — 주문을 닫아 둔다
+    sb.rpc('esign_cancel_payment', { p_order_id: d.order_id }).then(() => {});
+    showToast(e?.code === 'USER_CANCEL' ? '결제를 취소했습니다.' : '결제창을 열지 못했습니다: ' + (e?.message || e));
+  }
+}
+
+// 결제창에서 돌아왔을 때 (init 에서 로그인 확인 직후 호출)
+async function handlePayReturn() {
+  const q = new URLSearchParams(location.search);
+  const paymentKey = q.get('paymentKey'), orderId = q.get('orderId'), amount = q.get('amount');
+  const failCode = q.get('code');
+  if (!orderId || (!paymentKey && !failCode)) return;
+  history.replaceState(null, '', location.pathname);
+
+  if (!paymentKey) {
+    sb.rpc('esign_cancel_payment', { p_order_id: orderId }).then(() => {});
+    showToast(failCode === 'PAY_PROCESS_CANCELED' ? '결제를 취소했습니다.'
+      : '결제가 완료되지 않았습니다: ' + (q.get('message') || failCode));
+    return;
+  }
+
+  const ov = document.createElement('div');
+  ov.className = 'pay-overlay';
+  ov.innerHTML = '<div>💳 <b>결제를 확인하고 있습니다</b><br>잠시만 기다려 주세요. 창을 닫지 마세요.</div>';
+  document.body.appendChild(ov);
+  try {
+    const { data: sess } = await sb.auth.getSession();
+    const res = await fetch(SB_FN_PAY, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (sess?.session?.access_token || '') },
+      body: JSON.stringify({ paymentKey, orderId, amount: Number(amount) })
+    });
+    const r = await res.json().catch(() => ({}));
+    if (r.ok) {
+      showToast('결제가 완료되었습니다. 바로 이용하실 수 있습니다.', true);
+      state.openPlanAfterLogin = true;
+    } else if (r.paid) {
+      showToast('결제는 완료됐지만 이용 시작 처리에 문제가 생겼습니다. 운영자가 확인 후 바로 처리해 드립니다.');
+    } else {
+      showToast('결제가 승인되지 않았습니다: ' + (r.message || r.error || '알 수 없는 오류'));
+    }
+  } catch (e) {
+    showToast('결제 확인 중 오류가 발생했습니다. 잠시 후 새로고침해 주세요.');
+  } finally {
+    ov.remove();
+  }
 }
 
 // ── 플랫폼 관리자: 조직 · 입금 ────────────────────────────────
@@ -9219,19 +9410,25 @@ async function loadBilling() {
             '스토리지 파일 ' + ret.storage_pending + '건은 esign-retention 함수가 정리합니다.</span>' : '') +
         '</div>'
       : '') +
-    '<h3 style="font-size:15px;font-weight:650;margin-bottom:12px;">입금 계좌 설정</h3>' +
+    '<h3 style="font-size:15px;font-weight:650;margin-bottom:12px;">결제 설정 (계좌 · 카드)</h3>' +
     '<div class="usage-wrap" id="settingsBox" style="margin-bottom:26px;">불러오는 중…</div>' +
-    '<h3 style="font-size:15px;font-weight:650;margin-bottom:12px;">입금 확인 대기 ' + pays.length + '건</h3>' +
+    '<h3 style="font-size:15px;font-weight:650;margin-bottom:12px;">결제 확인 대기 ' + pays.length + '건</h3>' +
     (pays.length
       ? pays.map(p =>
-        '<div class="pay-row"><div><div class="nm">' + esc(p.org_name) + '</div>' +
+        '<div class="pay-row"><div><div class="nm">' + esc(p.org_name) +
+          (p.owner_status === 'pending' ? ' <span class="pill p-pending">소유자 승인 대기</span>' : '') + '</div>' +
         '<div class="em">' + esc(p.memo || '') +
           (p.depositor_name ? ' · 입금자 ' + esc(p.depositor_name) : '') +
-          ' · ' + new Date(p.created_at).toLocaleString('ko-KR') + '</div></div>' +
+          (p.owner_name ? ' · 소유자 ' + esc(p.owner_name) : '') +
+          ' · ' + new Date(p.created_at).toLocaleString('ko-KR') + '</div>' +
+          (p.method === 'card'
+            ? '<div class="em" style="color:var(--danger);">카드 결제 승인 후 이용 시작 처리가 끝나지 않은 건입니다. ' +
+              '토스페이먼츠 상점관리자에서 결제 완료를 확인한 뒤 눌러 주세요.</div>' : '') + '</div>' +
         '<div>' + won(p.amount) + '</div>' +
         '<div style="font-size:12px;color:var(--text-muted);">' +
           ({tax_invoice:'세금계산서', cash_receipt:'현금영수증', none:'증빙 없음'}[p.receipt_type] || '-') + '</div>' +
-        '<div style="text-align:right;"><button class="btn-mini" onclick="confirmPay(\'' + p.id + '\')">입금 확인</button></div>' +
+        '<div style="text-align:right;"><button class="btn-mini" onclick="confirmPay(\'' + p.id + '\')">' +
+          (p.method === 'card' ? '결제 확인' : '입금 확인') + '</button></div>' +
         '</div>').join('')
       : '<p style="font-size:13px;color:var(--text-muted);">대기 중인 신청이 없습니다.</p>') +
 
@@ -9271,18 +9468,30 @@ async function loadSettings() {
     '</div>' +
     '<div class="form-group"><label>입금 안내 문구</label>' +
       '<input type="text" id="setNotice" value="' + esc(v('pay_notice')) + '"></div>' +
+    '<div class="form-group" style="margin-top:18px;"><label>카드 결제 — 토스페이먼츠 클라이언트 키</label>' +
+      '<input type="text" id="setTossCk" value="' + esc(v('toss_client_key')) + '" placeholder="test_ck_… 또는 live_ck_… (비우면 카드 결제 끔)"></div>' +
     '<button class="btn-mini primary" onclick="saveSettings()">저장</button>' +
     '<p style="font-size:12px;color:var(--text-muted);margin-top:10px;line-height:1.75;">' +
     '계좌 정보는 <b>공개 페이지에 노출되지 않습니다.</b> 요금제를 신청한 조직의 소유자에게만 보입니다.<br>' +
+    '클라이언트 키는 결제창을 여는 공개 키입니다. <b>시크릿 키(…_sk_…)는 여기 넣지 말고</b> ' +
+    'Supabase → Edge Functions → Secrets 의 <code>TOSS_SECRET_KEY</code> 에만 넣으세요. ' +
+    '<b>API 개별 연동 키</b>를 쓰고, 두 키는 같은 상점 · 같은 모드(테스트/라이브)여야 합니다.<br>' +
     '여기서 수정하면 배포 없이 바로 반영됩니다.</p>';
 }
 
 async function saveSettings() {
+  const ck = document.getElementById('setTossCk').value.trim();
+  // 시크릿 키가 공개 설정에 들어가면 모든 회원에게 노출된다 — 저장 자체를 막는다
+  if (/_g?sk_/i.test(ck)) { showToast('시크릿 키는 여기에 넣으면 안 됩니다. Supabase Secrets 의 TOSS_SECRET_KEY 에 넣어 주세요.'); return; }
+  if (ck && !/^(test|live)_ck_[A-Za-z0-9]+$/.test(ck)) {
+    showToast('클라이언트 키 형식이 아닙니다. test_ck_ 또는 live_ck_ 로 시작하는 「API 개별 연동 키」를 넣어 주세요.'); return;
+  }
   const { data } = await sb.rpc('esign_admin_save_settings', { p_values: {
     bank_name:    document.getElementById('setBank').value,
     bank_account: document.getElementById('setAcc').value,
     bank_holder:  document.getElementById('setHolder').value,
-    pay_notice:   document.getElementById('setNotice').value
+    pay_notice:   document.getElementById('setNotice').value,
+    toss_client_key: ck
   }});
   showToast(data?.ok ? '저장되었습니다.' : '저장 실패', !!data?.ok);
 }
@@ -9296,13 +9505,18 @@ async function runRetention() {
 }
 
 async function confirmPay(id) {
-  if (!confirm('입금을 확인하고 구독을 활성화할까요?')) return;
+  if (!confirm('입금을 확인하고 구독을 활성화할까요?\n승인 대기 중인 조직 소유자는 가입도 함께 승인됩니다.')) return;
   const { data } = await sb.rpc('esign_admin_confirm_payment', { p_payment_id: id });
   if (!data?.ok) { showToast('처리 실패: ' + (data?.error || '')); return; }
+  // 이번 결제로 가입이 승인된 소유자에게 승인 안내 알림톡
+  const approved = data.approved_user_ids || [];
+  approved.forEach(uid => sendApproveAlimtalk(uid));
   showToast('구독이 활성화되었습니다. (' +
     new Date(data.period_start).toLocaleDateString('ko-KR') + ' ~ ' +
-    new Date(data.period_end).toLocaleDateString('ko-KR') + ')', true);
+    new Date(data.period_end).toLocaleDateString('ko-KR') + ')' +
+    (approved.length ? ' · 가입 승인 ' + approved.length + '명' : ''), true);
   loadBilling();
+  if (state.members) loadMembers();
 }
 async function terminateOrg(id, name) {
   if (!confirm(name + ' 조직을 해지할까요?\n31일 유예 후 문서가 영구 삭제됩니다.')) return;
@@ -10681,10 +10895,14 @@ async function handleRoute() {
   const { data } = await sb.auth.getSession();
   if (data.session) {
     state.session = data.session;
+    await handlePayReturn();
     const ok = await routeByProfile();
     if (!ok) return;
     if (hash === '#create') { goCreate(); }
-    else { showPage('dashPage'); await loadDocuments(); }
+    else {
+      showPage('dashPage'); await loadDocuments();
+      if (state.openPlanAfterLogin) { state.openPlanAfterLogin = false; switchView('plan'); }
+    }
   } else {
     showPage('landingPage');
   }
