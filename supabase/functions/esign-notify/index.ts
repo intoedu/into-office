@@ -14,7 +14,7 @@
 // esign_alimtalk_log)로 한다.
 // ============================================================
 import { createClient } from "npm:@supabase/supabase-js@2.47.10";
-import { collectDocRows, fmtDate, isKind, sendRows, type Row } from "../_shared/alimtalk.ts";
+import { approveRow, collectDocRows, isKind, sendRows } from "../_shared/alimtalk.ts";
 
 const MAX_DOCS = 500;
 
@@ -62,16 +62,9 @@ Deno.serve(async (req) => {
     if (!m?.ok) return json({ ok: false, error: m?.error ?? "NOT_FOUND" }, 404);
     if (m.status !== "active") return json({ ok: false, error: "NOT_APPROVED" }, 400);
 
-    const rows: Row[] = (m.phone && m.phone.replace(/[^0-9]/g, "").length >= 10) ? [{
-      org_id: null, doc_id: null, phone: m.phone,
-      vars: {
-        "#{이름}": m.name || "회원",
-        "#{아이디}": m.username || m.email || "-",
-        "#{승인일시}": fmtDate(m.approved_at),
-      },
-    }] : [];
-    if (!rows.length) return json({ ok: true, sent: 0, note: "연락처가 없어 발송하지 않았습니다" });
-    return json(await sendRows(admin, kind, rows));
+    const row = await approveRow(admin, body.user_id);
+    if (!row) return json({ ok: true, sent: 0, note: "연락처가 없어 발송하지 않았습니다" });
+    return json(await sendRows(admin, kind, [row]));
   }
 
   // ---------- 문서 기반 발송 ----------
