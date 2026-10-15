@@ -4,6 +4,7 @@
 
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
+import { collectDocRows, sendRows } from "../_shared/alimtalk.ts";
 
 const CORS = {
   "Access-Control-Allow-Origin": "*",
@@ -99,6 +100,19 @@ Deno.serve(async (req: Request) => {
         p_device_browser: browser,
       });
       if (error) return json({ ok: false, error: error.message }, 400);
+
+      // 마지막 서명이면 서명 완료 알림톡. 실패해도 서명 결과에는 영향을 주지 않는다.
+      if (data?.ok && data.all_completed) {
+        try {
+          const { data: done } = await supabase.rpc("esign_get_completed_doc", { p_token: token });
+          if (done?.ok && done.document?.id) {
+            const { rows } = await collectDocRows(supabase, "done", [done.document.id]);
+            await sendRows(supabase, "done", rows);
+          }
+        } catch (e) {
+          console.error("done alimtalk", e);
+        }
+      }
       return json({ ...data, ip, device: { os, browser } });
     }
 

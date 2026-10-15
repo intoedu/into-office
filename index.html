@@ -3067,7 +3067,7 @@ async function routeByProfile() {
 // ============================================================
 const SB_FN_ADMIN = SB_URL + '/functions/v1/esign-admin';
 const APP_URL = shareBase();
-const BUILD = '2026-10-15.4';   // 배포 확인용. 화면 하단과 콘솔에 표시된다.
+const BUILD = '2026-10-15.5';   // 배포 확인용. 화면 하단과 콘솔에 표시된다.
 
 
 // ============================================================
@@ -3627,6 +3627,9 @@ async function doMemAction() {
       p_reason: document.getElementById('memReason').value.trim() || null
     });
     if (!res.data?.ok) throw new Error(res.data?.error || '처리 실패');
+    // 가입 신청을 처음 승인할 때만 승인 안내 알림톡 (정지 해제 등에는 보내지 않는다)
+    const before = (state.members || []).find(x => x.user_id === uid);
+    if (act === 'active' && before?.status === 'pending') sendApproveAlimtalk(uid);
     closeMemModal();
     showToast('처리되었습니다.', true);
     loadMembers();
@@ -8937,6 +8940,24 @@ async function sendAlimtalk(kind, documentIds, opts = {}) {
     // 발송 실패가 문서 생성·리마인드 자체를 막지 않도록 한다
     console.error('alimtalk', e);
     return null;
+  }
+}
+
+// 가입 승인 안내 — 실패해도 승인 처리에는 영향을 주지 않는다
+async function sendApproveAlimtalk(userId) {
+  try {
+    const { data: sess } = await sb.auth.getSession();
+    const token = sess?.session?.access_token;
+    if (!token) return;
+    const res = await fetch(SB_FN_NOTIFY, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({ kind: 'approve', user_id: userId })
+    });
+    const r = await res.json().catch(() => ({}));
+    if (r.ok && r.sent > 0) showToast('승인 안내 알림톡을 발송했습니다.', true);
+  } catch (e) {
+    console.error('alimtalk approve', e);
   }
 }
 
