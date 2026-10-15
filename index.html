@@ -726,6 +726,35 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
 .btn-add-signer { display:flex; align-items:center; gap:6px; padding:8px 14px; border:1.5px dashed var(--border); border-radius:8px; font-size:13px; color:var(--text-secondary); width:100%; justify-content:center; transition:all .2s; margin-top:4px; }
 .btn-add-signer:hover { border-color:var(--cyan); color:var(--cyan); background:rgba(4,183,221,0.04); }
 .btn-add-signer:disabled { opacity:.4; cursor:not-allowed; }
+.signer-head { display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:12px; flex-wrap:wrap; }
+.btn-pick { padding:8px 14px; font-size:13px; }
+.save-signers { display:flex; align-items:center; gap:8px; margin-top:12px; font-size:13px; color:var(--text-secondary); cursor:pointer; }
+.save-signers span { color:var(--text-muted); font-size:12px; }
+.board-seg { display:flex; gap:8px; margin-bottom:18px; border-bottom:1.5px solid var(--border); }
+.board-seg-btn { padding:10px 16px; font-size:14px; font-weight:600; color:var(--text-muted); border-bottom:2.5px solid transparent; margin-bottom:-1.5px; }
+.board-seg-btn.active { color:var(--navy); border-bottom-color:var(--cyan); }
+.board-panel { display:none; }
+.board-panel.active { display:block; }
+.contact-add { display:grid; grid-template-columns:1fr 1fr 1.6fr auto; gap:8px; margin-bottom:12px; }
+.contact-add input, .contact-tools input { padding:10px 12px; border:1.5px solid var(--border); border-radius:8px; font-size:14px; }
+.contact-tools { display:flex; gap:8px; margin-bottom:10px; }
+.contact-tools input { flex:1; }
+.contact-list { border:1.5px solid var(--border); border-radius:10px; overflow:hidden; background:var(--card); }
+.contact-list.picker { max-height:46vh; overflow-y:auto; }
+.contact-row { display:grid; grid-template-columns:22px 1fr 1.2fr 1.6fr auto; gap:10px; align-items:center; padding:11px 14px; border-bottom:1px solid var(--border); font-size:14px; cursor:pointer; }
+.contact-list.picker .contact-row { grid-template-columns:22px 1fr 1.2fr 1.4fr; }
+.contact-row:last-child { border-bottom:none; }
+.contact-row:hover { background:var(--bg); }
+.ct-name { font-weight:600; }
+.ct-phone { color:var(--text-secondary); }
+.ct-memo { color:var(--text-muted); font-size:12.5px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.contact-list .empty-sm { padding:28px 14px; text-align:center; line-height:1.8; }
+@media (max-width:640px) {
+  .contact-add { grid-template-columns:1fr 1fr; }
+  .contact-row { grid-template-columns:22px 1fr 1fr auto; }
+  .contact-row .ct-memo { display:none; }
+  .contact-list.picker .contact-row { grid-template-columns:22px 1fr 1fr; }
+}
 .doc-meta-row { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:16px; }
 /* Signer field colors */
 .sig-field[data-signer="0"] { border-color:var(--s1); background:rgba(4,183,221,0.08); color:var(--s1); }
@@ -1455,8 +1484,8 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
       <button class="tab" data-view="bulk" onclick="switchView('bulk')">📮 대량발송</button>
       <button class="tab" data-view="templates" onclick="switchView('templates')">📋 템플릿</button>
       <button class="tab" data-view="signs" onclick="switchView('signs')">✍️ 사인 · 도장</button>
-      <button class="tab" data-view="notices" onclick="switchView('notices')">📢 공지</button>
-      <button class="tab" data-view="requests" onclick="switchView('requests')">💬 문의<span class="tab-badge" id="reqBadge" style="display:none;">0</span></button>
+      <button class="tab" data-view="contacts" onclick="switchView('contacts')">📇 서명자 주소록</button>
+      <button class="tab" data-view="board" onclick="switchView('board')">📢 공지 · 문의<span class="tab-badge" id="reqBadge" style="display:none;">0</span></button>
       <button class="tab" data-view="plan" onclick="switchView('plan')">💳 요금제</button>
       <button class="tab" data-view="team" onclick="switchView('team')">🤝 팀원</button>
       <button class="tab" data-view="members" id="tabMembers" style="display:none;" onclick="switchView('members')">👥 회원<span class="tab-badge" id="memBadge" style="display:none;">0</span></button>
@@ -1653,8 +1682,14 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
       <div id="billingBody"><div class="sign-loading">불러오는 중…</div></div>
     </div>
 
-    <!-- ===== 공지 · 안내 ===== -->
-    <div class="view" id="viewNotices">
+    <!-- ===== 공지 · 문의 (하나의 탭) ===== -->
+    <div class="view" id="viewBoard">
+      <div class="board-seg">
+        <button class="board-seg-btn active" id="segNotices" onclick="switchBoard('notices')">📢 공지 · 안내</button>
+        <button class="board-seg-btn" id="segRequests" onclick="switchBoard('requests')">💬 요청 · 문의<span class="tab-badge" id="reqBadge2" style="display:none;">0</span></button>
+      </div>
+
+    <div class="board-panel active" id="viewNotices">
       <div class="board-head">
         <h2>공지 · 안내</h2>
         <div style="display:flex;gap:10px;align-items:center;">
@@ -1670,13 +1705,37 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
       <div class="card-list" id="noticeList"></div>
     </div>
 
-    <!-- ===== 요청 · 문의 ===== -->
-    <div class="view" id="viewRequests">
+    <div class="board-panel" id="viewRequests">
       <div class="board-head">
         <h2>요청 · 문의</h2>
         <button class="btn-new-doc" onclick="openRequestEditor()">＋ 요청 등록</button>
       </div>
       <div class="card-list" id="requestList"></div>
+    </div>
+    </div><!-- /viewBoard -->
+
+    <!-- ===== 서명자 주소록 (계정별) ===== -->
+    <div class="view" id="viewContacts">
+      <div class="board-head">
+        <h2>서명자 주소록</h2>
+        <span class="mem-sub" id="contactCount"></span>
+      </div>
+      <p style="font-size:13px;color:var(--text-secondary);line-height:1.8;margin-bottom:16px;">
+        자주 서명을 받는 분을 저장해 두면, 서명 요청을 만들 때 <b>「📇 주소록에서 불러오기」</b>로 바로 넣을 수 있습니다.
+        주소록은 <b>내 계정에만</b> 보이며 최대 500명까지 저장됩니다.
+      </p>
+      <div class="contact-add">
+        <input type="text" id="ctName" placeholder="이름 *" maxlength="50">
+        <input type="tel" id="ctPhone" placeholder="연락처 *" maxlength="20">
+        <input type="text" id="ctMemo" placeholder="메모 (예: 3학년 학부모)" maxlength="100"
+               onkeydown="if(event.key==='Enter')addContact()">
+        <button class="btn-action" onclick="addContact()">＋ 저장</button>
+      </div>
+      <div class="contact-tools">
+        <input type="search" id="ctSearch" placeholder="이름 · 연락처 · 메모 검색" oninput="renderContacts()">
+        <button class="btn-secondary" id="ctDelSel" onclick="deleteContacts()" disabled>선택 삭제</button>
+      </div>
+      <div class="contact-list" id="contactList"></div>
     </div>
 
     <!-- ===== 회원 관리 (관리자) ===== -->
@@ -1737,9 +1796,16 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
       <!-- Step 2: Signer Info (2~5 signers) -->
       <div id="createStep2" class="create-card" style="display:none">
         <h3>서명자 정보를 입력하세요</h3>
-        <p style="font-size:13px;color:var(--text-muted);margin-bottom:14px;">기본 2명, 최대 5명까지 추가할 수 있습니다.</p>
+        <div class="signer-head">
+          <p style="font-size:13px;color:var(--text-muted);">기본 2명, 최대 5명까지 추가할 수 있습니다.</p>
+          <button class="btn-secondary btn-pick" onclick="openContactPicker()">📇 주소록에서 불러오기</button>
+        </div>
         <div id="signerList"></div>
         <button class="btn-add-signer" id="btnAddSigner" onclick="addSigner()">+ 서명자 추가</button>
+        <label class="save-signers">
+          <input type="checkbox" id="saveSignersToggle">
+          이번에 입력한 서명자를 주소록에 저장 <span>(이미 저장된 분은 건너뜁니다)</span>
+        </label>
         <div class="doc-meta-row">
           <div class="form-group">
             <label>문서 제목</label>
@@ -2032,6 +2098,26 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
 </div>
 
 <!-- ===== MEMBER ACTION MODAL ===== -->
+<!-- ===== 주소록에서 서명자 불러오기 ===== -->
+<div class="modal-overlay" id="contactPickModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>📇 주소록에서 불러오기</h3>
+      <button class="modal-close" onclick="closeContactPicker()">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="search" id="ctPickSearch" placeholder="이름 · 연락처 · 메모 검색" oninput="renderContactPicker()"
+             style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;margin-bottom:10px;">
+      <div class="contact-list picker" id="ctPickList"></div>
+      <p class="mem-sub" id="ctPickInfo" style="margin-top:10px;"></p>
+    </div>
+    <div class="modal-footer" style="display:flex;gap:8px;justify-content:flex-end;padding:14px 20px;">
+      <button class="btn-secondary" onclick="closeContactPicker()">취소</button>
+      <button class="btn-action" onclick="applyContactPick()">선택한 서명자 넣기</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="memModal">
   <div class="modal">
     <div class="modal-header">
@@ -3067,7 +3153,7 @@ async function routeByProfile() {
 // ============================================================
 const SB_FN_ADMIN = SB_URL + '/functions/v1/esign-admin';
 const APP_URL = shareBase();
-const BUILD = '2026-10-15.5';   // 배포 확인용. 화면 하단과 콘솔에 표시된다.
+const BUILD = '2026-10-15.6';   // 배포 확인용. 화면 하단과 콘솔에 표시된다.
 
 
 // ============================================================
@@ -3642,20 +3728,183 @@ async function doMemAction() {
 // 탭 전환
 // ============================================================
 function switchView(v) {
+  // 공지 · 문의는 한 탭(board) 안의 두 화면이다
+  if (v === 'notices' || v === 'requests') { const sub = v; v = 'board'; state.boardSub = sub; }
   document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.view === v));
-  ['docs','bulk','templates','signs','notices','requests','members','plan','team','billing'].forEach(k =>
+  ['docs','bulk','templates','signs','contacts','board','members','plan','team','billing'].forEach(k =>
     document.getElementById('view' + k.charAt(0).toUpperCase() + k.slice(1)).classList.toggle('active', k === v));
   if (v === 'templates') renderTemplates();
   if (v === 'signs') loadSignVault();
   if (v === 'bulk') loadBulkBatches();
-  if (v === 'notices') loadNotices();
-  if (v === 'requests') loadRequests();
+  if (v === 'contacts') loadContacts();
+  if (v === 'board') { switchBoard(state.boardSub || 'notices'); state.boardSub = null; }
   if (v === 'members') loadMembers();
   if (v === 'plan') loadPlan();
   if (v === 'team') loadTeam();
   if (v === 'billing') loadBilling();
 }
 
+
+// 공지 · 문의 탭 안에서 화면 전환
+function switchBoard(sub) {
+  const isReq = sub === 'requests';
+  document.getElementById('viewNotices').classList.toggle('active', !isReq);
+  document.getElementById('viewRequests').classList.toggle('active', isReq);
+  document.getElementById('segNotices').classList.toggle('active', !isReq);
+  document.getElementById('segRequests').classList.toggle('active', isReq);
+  if (isReq) loadRequests(); else { loadNotices(); loadRequests(true); }
+}
+
+// ============================================================
+// 서명자 주소록 (계정별)
+// ============================================================
+async function loadContacts(silent) {
+  const list = document.getElementById('contactList');
+  if (!silent && list) list.innerHTML = '<div class="empty-sm">불러오는 중...</div>';
+  const { data } = await sb.rpc('esign_saved_signers_list');
+  state.contacts = data?.ok ? (data.items || []) : [];
+  state.contactSel = new Set();
+  if (!data?.ok && list) { list.innerHTML = '<div class="empty-sm">주소록을 불러오지 못했습니다.</div>'; return []; }
+  renderContacts();
+  return state.contacts;
+}
+
+function contactMatches(c, q) {
+  if (!q) return true;
+  const d = q.replace(/[^0-9]/g, '');
+  return (c.name || '').includes(q) || (c.memo || '').includes(q) ||
+         (d && (c.phone || '').replace(/[^0-9]/g, '').includes(d));
+}
+
+function renderContacts() {
+  const list = document.getElementById('contactList');
+  if (!list) return;
+  const all = state.contacts || [];
+  const cnt = document.getElementById('contactCount');
+  if (cnt) cnt.textContent = all.length + ' / 500명';
+  const q = (document.getElementById('ctSearch')?.value || '').trim();
+  const items = all.filter(c => contactMatches(c, q));
+  const del = document.getElementById('ctDelSel');
+  if (del) del.disabled = !(state.contactSel && state.contactSel.size);
+  if (!items.length) {
+    list.innerHTML = '<div class="empty-sm">' + (all.length ? '검색 결과가 없습니다.' : '저장된 서명자가 없습니다. 위에서 추가해 주세요.') + '</div>';
+    return;
+  }
+  list.innerHTML = items.map(c =>
+    '<label class="contact-row">' +
+      '<input type="checkbox" ' + (state.contactSel.has(c.id) ? 'checked ' : '') +
+        'onchange="toggleContactSel(\'' + c.id + '\', this.checked)">' +
+      '<span class="ct-name">' + esc(c.name) + '</span>' +
+      '<span class="ct-phone">' + esc(c.phone) + '</span>' +
+      '<span class="ct-memo">' + esc(c.memo || '') + '</span>' +
+      '<button class="btn-mini" onclick="event.preventDefault();deleteContacts([\'' + c.id + '\'])">삭제</button>' +
+    '</label>').join('');
+}
+
+function toggleContactSel(id, on) {
+  if (on) state.contactSel.add(id); else state.contactSel.delete(id);
+  const del = document.getElementById('ctDelSel');
+  if (del) del.disabled = !state.contactSel.size;
+}
+
+async function addContact() {
+  const name = document.getElementById('ctName').value.trim();
+  const phone = document.getElementById('ctPhone').value.trim();
+  const memo = document.getElementById('ctMemo').value.trim();
+  if (!name) { showToast('이름을 입력해주세요.'); return; }
+  if (phone.replace(/[^0-9]/g, '').length < 9) { showToast('연락처를 정확히 입력해주세요.'); return; }
+  const { data } = await sb.rpc('esign_saved_signers_add', { p_items: [{ name, phone, memo }] });
+  if (data?.error === 'LIMIT_REACHED') { showToast('주소록은 최대 500명까지 저장할 수 있습니다.'); return; }
+  if (!data?.ok) { showToast('저장하지 못했습니다.'); return; }
+  if (!data.added) { showToast('이미 같은 이름과 번호로 저장되어 있습니다.'); return; }
+  ['ctName','ctPhone','ctMemo'].forEach(i => document.getElementById(i).value = '');
+  document.getElementById('ctName').focus();
+  showToast('주소록에 저장했습니다.', true);
+  loadContacts(true);
+}
+
+async function deleteContacts(ids) {
+  ids = ids || [...(state.contactSel || [])];
+  if (!ids.length) return;
+  if (!confirm(ids.length + '명을 주소록에서 삭제할까요?')) return;
+  const { data, error } = await sb.rpc('esign_saved_signers_delete', { p_ids: ids });
+  if (error || !data?.ok) { showToast('삭제하지 못했습니다. 잠시 후 다시 시도해주세요.'); return; }
+  showToast(data.deleted + '명을 삭제했습니다.', true);
+  loadContacts(true);
+}
+
+// ----- 서명 요청 만들기: 주소록에서 불러오기 -----
+async function openContactPicker() {
+  const items = await loadContacts(true);
+  state.pickSel = new Set();
+  document.getElementById('ctPickSearch').value = '';
+  renderContactPicker();
+  document.getElementById('contactPickModal').classList.add('active');
+  if (!items.length) {
+    document.getElementById('ctPickList').innerHTML =
+      '<div class="empty-sm">저장된 서명자가 없습니다.<br>「📇 서명자 주소록」 탭에서 추가하거나,<br>이번에 입력한 서명자를 저장해 두세요.</div>';
+  }
+}
+function closeContactPicker() { document.getElementById('contactPickModal').classList.remove('active'); }
+
+function renderContactPicker() {
+  const q = (document.getElementById('ctPickSearch')?.value || '').trim();
+  const items = (state.contacts || []).filter(c => contactMatches(c, q));
+  const room = 5 - state.signers.filter(s => s.name.trim() || s.phone.trim()).length;
+  document.getElementById('ctPickInfo').textContent =
+    '선택 ' + state.pickSel.size + '명 · 추가 가능 ' + Math.max(0, room) + '명';
+  document.getElementById('ctPickList').innerHTML = items.length ? items.map(c =>
+    '<label class="contact-row">' +
+      '<input type="checkbox" ' + (state.pickSel.has(c.id) ? 'checked ' : '') +
+        'onchange="togglePick(\'' + c.id + '\', this)">' +
+      '<span class="ct-name">' + esc(c.name) + '</span>' +
+      '<span class="ct-phone">' + esc(c.phone) + '</span>' +
+      '<span class="ct-memo">' + esc(c.memo || '') + '</span>' +
+    '</label>').join('') : '<div class="empty-sm">검색 결과가 없습니다.</div>';
+}
+
+function togglePick(id, el) {
+  const room = 5 - state.signers.filter(s => s.name.trim() || s.phone.trim()).length;
+  if (el.checked && state.pickSel.size >= room) {
+    el.checked = false;
+    showToast('서명자는 최대 5명까지입니다.');
+    return;
+  }
+  if (el.checked) state.pickSel.add(id); else state.pickSel.delete(id);
+  renderContactPicker();
+}
+
+function applyContactPick() {
+  const picked = (state.contacts || []).filter(c => state.pickSel.has(c.id));
+  if (!picked.length) { closeContactPicker(); return; }
+  // 빈 칸부터 채우고, 모자라면 줄을 늘린다 (최대 5명)
+  for (const c of picked) {
+    const already = state.signers.some(s => s.name.trim() === c.name &&
+      s.phone.replace(/[^0-9]/g, '') === c.phone.replace(/[^0-9]/g, ''));
+    if (already) continue;
+    let slot = state.signers.find(s => !s.name.trim() && !s.phone.trim());
+    if (!slot) {
+      if (state.signers.length >= 5) break;
+      slot = { name: '', phone: '' };
+      state.signers.push(slot);
+    }
+    slot.name = c.name; slot.phone = c.phone;
+  }
+  renderSignerList();
+  closeContactPicker();
+  showToast(picked.length + '명을 불러왔습니다.', true);
+}
+
+// 문서를 보낸 뒤, 체크해 두었으면 이번 서명자를 주소록에 저장
+async function saveSignersToContacts(signers) {
+  if (!document.getElementById('saveSignersToggle')?.checked) return;
+  try {
+    const { data } = await sb.rpc('esign_saved_signers_add', {
+      p_items: signers.map(s => ({ name: s.name.trim(), phone: s.phone.trim() }))
+    });
+    if (data?.ok && data.added) showToast('서명자 ' + data.added + '명을 주소록에 저장했습니다.', true);
+  } catch (e) { console.error('contacts', e); }
+}
 
 // ============================================================
 // 사인 · 도장 보관함
@@ -7645,20 +7894,22 @@ const REQ_CAT = { inquiry:['일반 문의','cat-inquiry'], contract:['계약 관
                   feature:['기능 요청','cat-feature'], bug:['오류 신고','cat-bug'], etc:['기타','cat-etc'] };
 const REQ_ST  = { open:'접수', in_progress:'처리 중', answered:'답변 완료', closed:'종료' };
 
-async function loadRequests() {
+async function loadRequests(badgeOnly) {
   const list = document.getElementById('requestList');
-  list.innerHTML = '<div class="empty-sm">불러오는 중...</div>';
+  if (!badgeOnly) list.innerHTML = '<div class="empty-sm">불러오는 중...</div>';
   const { data } = await sb.rpc('esign_list_requests');
   if (!data?.ok) { list.innerHTML = '<div class="empty-sm">불러오지 못했습니다.</div>'; return; }
   state.isAdmin = !!data.is_admin;
   state.requests = data.requests || [];
 
   const openCnt = state.requests.filter(r => r.status === 'open').length;
-  const badge = document.getElementById('reqBadge');
-  if (badge) {
+  ['reqBadge','reqBadge2'].forEach(id => {
+    const badge = document.getElementById(id);
+    if (!badge) return;
     if (state.isAdmin && openCnt > 0) { badge.style.display = ''; badge.textContent = openCnt; }
     else badge.style.display = 'none';
-  }
+  });
+  if (badgeOnly) return;
 
   if (!state.requests.length) {
     list.innerHTML = '<div class="empty-sm">등록된 요청이 없습니다.</div>';
@@ -9403,8 +9654,8 @@ function renderSignerList() {
   if (!list) return;
   list.innerHTML = state.signers.map((s,i) => 
     '<div class="signer-entry"><span class="signer-num" style="background:'+SIGNER_COLORS[i]+'">'+(i+1)+'</span>' +
-    '<input type="text" placeholder="이름 *" value="'+(s.name||'')+'" onchange="state.signers['+i+'].name=this.value">' +
-    '<input type="tel" placeholder="연락처 *" value="'+(s.phone||'')+'" onchange="state.signers['+i+'].phone=this.value">' +
+    '<input type="text" placeholder="이름 *" value="'+esc(s.name||'')+'" onchange="state.signers['+i+'].name=this.value">' +
+    '<input type="tel" placeholder="연락처 *" value="'+esc(s.phone||'')+'" onchange="state.signers['+i+'].phone=this.value">' +
     (state.signers.length > 2 ? '<button class="btn-remove-signer" onclick="removeSigner('+i+')">✕</button>' : '<span></span>') +
     '</div>'
   ).join('');
@@ -9858,6 +10109,7 @@ async function createDocument() {
 
     state.lastCreated = data;
     sendAlimtalk('request', [data.document_id]);
+    saveSignersToContacts(signers);
     // 4) 공유 모달
     const base = shareBase();
     const first = data.signers[0];
