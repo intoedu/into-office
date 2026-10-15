@@ -451,6 +451,15 @@ input,select,textarea { font-family:inherit; }
 .pw-meter i { display:block; height:100%; width:0; border-radius:3px; transition:all .25s; }
 .su-sec { font-size:12px; font-weight:700; color:var(--navy); margin:22px 0 12px; padding-left:9px; border-left:3px solid var(--cyan); letter-spacing:.3px; }
 .su-sec:first-of-type { margin-top:6px; }
+.choice-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:8px; }
+.choice-grid.cols-2 { grid-template-columns:1fr 1fr; }
+.choice { position:relative; display:block; cursor:pointer; }
+.choice input { position:absolute; opacity:0; pointer-events:none; }
+.choice span { display:block; text-align:center; padding:11px 8px; border:1.5px solid var(--border); border-radius:8px;
+  font-size:13.5px; color:var(--text-secondary); background:var(--card); transition:all .15s; }
+.choice:hover span { border-color:#c6c9cc; }
+.choice input:checked + span { border-color:var(--cyan); background:rgba(4,183,221,.07); color:var(--navy); font-weight:600; }
+.choice input:focus-visible + span { box-shadow:0 0 0 3px rgba(4,183,221,.25); }
 
 /* ===== SIGNUP ===== */
 .signup-card { background:var(--card); border-radius:var(--radius-lg); padding:40px 36px; width:520px; max-width:94vw; box-shadow:var(--shadow-lg); position:relative; z-index:1; max-height:92vh; overflow-y:auto; }
@@ -1344,6 +1353,14 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
 
     <div class="su-sec">회원 정보</div>
 
+    <div class="form-group">
+      <label>회원 유형 *</label>
+      <div class="choice-grid cols-2">
+        <label class="choice"><input type="radio" name="suMemberType" value="individual"><span>개인</span></label>
+        <label class="choice"><input type="radio" name="suMemberType" value="business"><span>사업자</span></label>
+      </div>
+    </div>
+
     <div class="su-row">
       <div class="form-group"><label>이름 *</label><input type="text" id="suName" placeholder="홍길동"></div>
       <div class="form-group"><label>출생년도 *</label><input type="number" id="suBirth" placeholder="1990" min="1930" max="2020"></div>
@@ -1362,6 +1379,21 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
       </div>
     </div>
 
+    <div class="form-group">
+      <label>인투오피스를 알게 된 경로 *</label>
+      <div class="choice-grid">
+        <label class="choice"><input type="radio" name="suSource" value="지인 소개" onchange="onSourceChange()"><span>지인 소개</span></label>
+        <label class="choice"><input type="radio" name="suSource" value="네이버 검색" onchange="onSourceChange()"><span>네이버 검색</span></label>
+        <label class="choice"><input type="radio" name="suSource" value="구글 검색" onchange="onSourceChange()"><span>구글 검색</span></label>
+        <label class="choice"><input type="radio" name="suSource" value="블로그 · 카페" onchange="onSourceChange()"><span>블로그 · 카페</span></label>
+        <label class="choice"><input type="radio" name="suSource" value="인스타그램 · 유튜브" onchange="onSourceChange()"><span>인스타그램 · 유튜브</span></label>
+        <label class="choice"><input type="radio" name="suSource" value="카카오톡 채널" onchange="onSourceChange()"><span>카카오톡 채널</span></label>
+        <label class="choice"><input type="radio" name="suSource" value="인투마케팅 안내" onchange="onSourceChange()"><span>인투마케팅 안내</span></label>
+        <label class="choice"><input type="radio" name="suSource" value="기타" onchange="onSourceChange()"><span>기타</span></label>
+      </div>
+      <input type="text" id="suSourceEtc" maxlength="100" placeholder="알게 된 경로를 적어주세요" style="display:none;margin-top:8px;">
+    </div>
+
     <div class="su-sec">약관 동의</div>
 
     <div class="agree-box">
@@ -1374,8 +1406,8 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
         <label for="agPrivacy"><span class="agree-req">[필수]</span> 개인정보 수집 · 이용 동의</label>
       </div>
       <div class="agree-detail">
-        <b>수집 항목</b> 아이디, 이메일, 이름, 출생년도, 연락처, 사업명, 업종<br>
-        <b>수집 목적</b> 회원 식별 및 관리, 전자서명 서비스 제공, 계약 당사자 확인, 문의 응대<br>
+        <b>수집 항목</b> 아이디, 이메일, 이름, 출생년도, 연락처, 회원 유형(개인·사업자), 알게 된 경로, 사업명, 업종<br>
+        <b>수집 목적</b> 회원 식별 및 관리, 전자서명 서비스 제공, 계약 당사자 확인, 문의 응대, 서비스 개선을 위한 유입 경로 분석<br>
         <b>보유 기간</b> 회원 탈퇴 시까지. 단, 전자서명 관련 기록은 「전자문서 및 전자거래 기본법」에 따라 계약 종료 후 5년간 보관<br>
         <b>거부 권리</b> 동의를 거부할 권리가 있으나, 필수 항목 미동의 시 서비스 이용이 불가합니다.
       </div>
@@ -1401,6 +1433,7 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
         가입 신청이 접수되었습니다.<br>관리자 승인 후 서비스를 이용하실 수 있습니다.
       </p>
       <button class="btn-secondary" style="margin-top:22px;width:100%;" onclick="location.reload()">새로고침</button>
+      <button class="btn-secondary" style="margin-top:8px;width:100%;" onclick="goLanding()">홈으로 돌아가기</button>
       <button class="btn-logout" style="color:var(--text-muted);width:100%;margin-top:8px;" onclick="doLogout()">로그아웃</button>
     </div>
   </div>
@@ -2770,6 +2803,8 @@ function goSignup() {
     const el = document.getElementById(i); if (el) el.value = '';
   });
   document.getElementById('suBizType').value = '';
+  document.querySelectorAll('input[name="suMemberType"], input[name="suSource"]').forEach(r => r.checked = false);
+  const etc = document.getElementById('suSourceEtc'); if (etc) { etc.value = ''; etc.style.display = 'none'; }
   ['agAll','agPrivacy','agMarketing'].forEach(i => document.getElementById(i).checked = false);
   state.userOk = false; state.emailOk = false;
   setMsg('suUserMsg','hint','영문으로 시작하며 4~20자로 입력해주세요.');
@@ -2873,6 +2908,14 @@ function syncAgree() {
     document.getElementById('agPrivacy').checked && document.getElementById('agMarketing').checked;
 }
 
+// 알게 된 경로 — 「기타」를 고르면 직접 입력칸을 보여준다
+function onSourceChange() {
+  const v = document.querySelector('input[name="suSource"]:checked')?.value;
+  const etc = document.getElementById('suSourceEtc');
+  etc.style.display = v === '기타' ? '' : 'none';
+  if (v === '기타') etc.focus();
+}
+
 // ----- 가입 처리 -----
 async function submitSignup() {
   const user  = document.getElementById('suUser').value.trim().toLowerCase();
@@ -2899,6 +2942,13 @@ async function submitSignup() {
   if (!birth || birth < 1930 || birth > 2020) {
     showToast('출생년도를 정확히 입력해주세요.'); return; }
   if (!phone)       { showToast('연락처를 입력해주세요.'); return; }
+  const memberType = document.querySelector('input[name="suMemberType"]:checked')?.value || '';
+  const source     = document.querySelector('input[name="suSource"]:checked')?.value || '';
+  const sourceEtc  = document.getElementById('suSourceEtc').value.trim();
+  if (!memberType)  { showToast('회원 유형(개인 · 사업자)을 선택해주세요.'); return; }
+  if (!source)      { showToast('인투오피스를 알게 된 경로를 선택해주세요.'); return; }
+  if (source === '기타' && !sourceEtc) {
+    showToast('알게 된 경로를 직접 적어주세요.'); document.getElementById('suSourceEtc').focus(); return; }
   if (!document.getElementById('agPrivacy').checked) {
     showToast('개인정보 수집·이용 동의는 필수입니다.'); return; }
 
@@ -2926,12 +2976,18 @@ async function submitSignup() {
       p_biz_name: document.getElementById('suBizName').value.trim(),
       p_biz_type: document.getElementById('suBizType').value,
       p_privacy: true,
-      p_marketing: document.getElementById('agMarketing').checked
+      p_marketing: document.getElementById('agMarketing').checked,
+      p_member_type: memberType,
+      p_signup_source: source,
+      p_signup_source_etc: source === '기타' ? sourceEtc : null
     });
     if (error || !data?.ok) {
       const m = { USERNAME_TAKEN:'이미 사용 중인 아이디입니다.',
                   PRIVACY_REQUIRED:'개인정보 수집·이용 동의는 필수입니다.',
-                  REQUIRED_FIELDS:'필수 항목을 모두 입력해주세요.' };
+                  REQUIRED_FIELDS:'필수 항목을 모두 입력해주세요.',
+                  MEMBER_TYPE_REQUIRED:'회원 유형(개인 · 사업자)을 선택해주세요.',
+                  SOURCE_REQUIRED:'인투오피스를 알게 된 경로를 선택해주세요.',
+                  SOURCE_ETC_REQUIRED:'알게 된 경로를 직접 적어주세요.' };
       throw new Error(m[data?.error] || '프로필 등록 실패');
     }
     state.user = email;
@@ -3000,7 +3056,7 @@ async function routeByProfile() {
 // ============================================================
 const SB_FN_ADMIN = SB_URL + '/functions/v1/esign-admin';
 const APP_URL = shareBase();
-const BUILD = '2026-10-15.2';   // 배포 확인용. 화면 하단과 콘솔에 표시된다.
+const BUILD = '2026-10-15.3';   // 배포 확인용. 화면 하단과 콘솔에 표시된다.
 
 
 // ============================================================
@@ -3480,6 +3536,8 @@ async function loadMembers() {
   renderMembers();
 }
 
+const MEM_TYPE = { individual: '개인', business: '사업자' };
+
 function renderMembers() {
   const list = document.getElementById('memberList');
   let ms = state.members || [];
@@ -3494,7 +3552,12 @@ function renderMembers() {
       '<div><div class="mem-name">' + esc(m.name || '-') +
         (m.is_me ? ' <span class="post-meta">(나)</span>' : '') + '</div>' +
         '<div class="mem-sub">' + (m.username ? '@' + esc(m.username) + ' · ' : '') + esc(m.email) +
-        (m.birth_year ? ' · ' + m.birth_year + '년생' : '') + '</div></div>' +
+        (m.birth_year ? ' · ' + m.birth_year + '년생' : '') + '</div>' +
+        ((m.member_type || m.signup_source) ? '<div class="mem-sub">' +
+          [m.member_type ? (MEM_TYPE[m.member_type] || m.member_type) : '',
+           m.signup_source ? '경로: ' + esc(m.signup_source === '기타' && m.signup_source_etc
+                                        ? '기타(' + m.signup_source_etc + ')' : m.signup_source) : '']
+          .filter(Boolean).join(' · ') + '</div>' : '') + '</div>' +
       '<div class="mem-cell">' + esc(m.phone || '-') + '</div>' +
       '<div class="mem-cell">' + esc(m.biz_name || '-') +
         (m.biz_type ? '<div class="mem-sub">' + esc(m.biz_type) + '</div>' : '') + '</div>' +
@@ -8139,7 +8202,7 @@ privacy: { title: '개인정보처리방침', body: `
 <h3>1. 수집하는 개인정보 항목</h3>
 <table>
 <tr><th>구분</th><th>수집 항목</th></tr>
-<tr><td>회원가입 (필수)</td><td>아이디, 비밀번호, 이름, 이메일, 연락처, 출생연도</td></tr>
+<tr><td>회원가입 (필수)</td><td>아이디, 비밀번호, 이름, 이메일, 연락처, 출생연도, 회원 유형(개인·사업자), 서비스를 알게 된 경로</td></tr>
 <tr><td>회원가입 (선택)</td><td>사업장명, 업종</td></tr>
 <tr><td>서명자 정보</td><td>이름, 휴대전화번호, 서명 이미지, 서명 일시</td></tr>
 <tr><td>자동 수집</td><td>접속 IP, 접속 일시, 기기·브라우저 정보, 서비스 이용 기록</td></tr>
