@@ -65,7 +65,7 @@ export function phoneTail(p: string): string {
   return d.length >= 4 ? d.slice(-4) : "****";
 }
 
-// 서명 요청 템플릿의 #{서명자목록} — 함께 서명하는 사람 전원 (줄바꿈으로 구분)
+// 서명 요청 · 완료 템플릿의 #{서명자목록} — 함께 서명하는 사람 전원 (줄바꿈으로 구분)
 //   · 홍길동 님 (끝자리 1234)
 //   · 김철수 님 (끝자리 5678)
 function signerLines(targets: Array<{ name: string; phone: string }>): string {
@@ -90,8 +90,8 @@ export async function collectDocRows(admin: SupabaseClient, kind: Kind, ids: str
     if (!info?.ok) { notFound.push(id); continue; }
 
     const doc = info.document;
-    // 서명 요청 시점에는 아직 아무도 서명하지 않았으므로 targets 가 곧 서명자 전원이다
-    const allSigners = kind === "request" ? signerLines(info.targets ?? []) : "";
+    // 서명 요청 시점(아직 아무도 서명 안 함)과 완료 통지(kind=done)에는 targets 가 곧 서명자 전원이다
+    const allSigners = (kind === "request" || kind === "done") ? signerLines(info.targets ?? []) : "";
     for (const t of info.targets ?? []) {
       if (digits(t.phone).length < 10) continue;
       const common = {
@@ -104,7 +104,7 @@ export async function collectDocRows(admin: SupabaseClient, kind: Kind, ids: str
         kind === "request" ? { ...common, "#{요청자}": doc.requester_name, "#{기한}": fmtDate(doc.deadline),
                                "#{서명자목록}": allSigners }
         : kind === "remind" ? { ...common, "#{남은기간}": remainText(doc.deadline), "#{기한}": fmtDate(doc.deadline) }
-        : { ...common, "#{완료일시}": fmtDate(doc.completed_at), "#{서명자목록}": doc.signer_names ?? t.name };
+        : { ...common, "#{완료일시}": fmtDate(doc.completed_at), "#{서명자목록}": allSigners || doc.signer_names || t.name };
       rows.push({ org_id: doc.org_id, doc_id: doc.id, phone: t.phone, vars });
     }
   }
