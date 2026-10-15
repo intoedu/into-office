@@ -2971,7 +2971,7 @@ async function submitSignup() {
       }
     }
     // 2) 프로필 등록
-    const { data, error } = await sb.rpc('esign_complete_signup', {
+    const { data, error } = await sb.rpc('esign_complete_signup_v2', {
       p_username: user, p_name: name, p_birth_year: birth, p_phone: phone,
       p_biz_name: document.getElementById('suBizName').value.trim(),
       p_biz_type: document.getElementById('suBizType').value,
@@ -2987,7 +2987,8 @@ async function submitSignup() {
                   REQUIRED_FIELDS:'필수 항목을 모두 입력해주세요.',
                   MEMBER_TYPE_REQUIRED:'회원 유형(개인 · 사업자)을 선택해주세요.',
                   SOURCE_REQUIRED:'인투오피스를 알게 된 경로를 선택해주세요.',
-                  SOURCE_ETC_REQUIRED:'알게 된 경로를 직접 적어주세요.' };
+                  SOURCE_ETC_REQUIRED:'알게 된 경로를 직접 적어주세요.',
+                  UPGRADE_REQUIRED:'화면이 새로 바뀌었습니다. 새로고침 후 다시 시도해주세요.' };
       throw new Error(m[data?.error] || '프로필 등록 실패');
     }
     state.user = email;

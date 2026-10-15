@@ -9,18 +9,16 @@ comment on column esign.profiles.member_type is '회원 유형: individual(개�
 comment on column esign.profiles.signup_source is '인투오피스를 알게 된 경로 (객관식)';
 comment on column esign.profiles.signup_source_etc is '알게 된 경로가 기타일 때 직접 입력한 내용';
 
--- 예전 시그니처 두 개를 정리하고 하나로 합친다.
--- (필수 항목 검사를 우회하는 옛 함수가 남지 않도록)
-drop function if exists public.esign_complete_signup(text,integer,text,text,text,boolean,boolean);
-drop function if exists public.esign_complete_signup(text,integer,text,text,text,boolean,boolean,text);
-
-create function public.esign_complete_signup(
+-- 새 가입 완료 함수 (회원 유형·경로 필수)
+-- 🔑 DROP 이 들어가면 MCP 마이그레이션 도구가 사용자 확인을 기다리다 시간 초과가 나서,
+--    기존 함수를 지우지 않고 새 이름(_v2)으로 만들었다.
+create or replace function public.esign_complete_signup_v2(
   p_name text, p_birth_year integer, p_phone text,
   p_biz_name text, p_biz_type text,
-  p_privacy boolean, p_marketing boolean default false,
-  p_username text default null,
-  p_member_type text default null,
-  p_signup_source text default null,
+  p_privacy boolean, p_marketing boolean,
+  p_username text,
+  p_member_type text,
+  p_signup_source text,
   p_signup_source_etc text default null
 ) returns jsonb
 language plpgsql
@@ -72,8 +70,17 @@ begin
   return jsonb_build_object('ok',true,'profile',to_jsonb(v_p));
 end $function$;
 
-revoke all on function public.esign_complete_signup(text,integer,text,text,text,boolean,boolean,text,text,text,text) from public, anon;
-grant execute on function public.esign_complete_signup(text,integer,text,text,text,boolean,boolean,text,text,text,text) to authenticated, service_role;
+revoke all on function public.esign_complete_signup_v2(text,integer,text,text,text,boolean,boolean,text,text,text,text) from public, anon;
+grant execute on function public.esign_complete_signup_v2(text,integer,text,text,text,boolean,boolean,text,text,text,text) to authenticated, service_role;
+
+-- 예전 가입 함수 두 개는 필수 항목 검사를 우회할 수 있으므로 막는다 (삭제 대신 안내 오류).
+create or replace function public.esign_complete_signup(p_name text, p_birth_year integer, p_phone text, p_biz_name text, p_biz_type text, p_privacy boolean, p_marketing boolean default false)
+returns jsonb language sql security definer set search_path to 'esign', 'public', 'pg_temp'
+as $$ select jsonb_build_object('ok',false,'error','UPGRADE_REQUIRED') $$;
+
+create or replace function public.esign_complete_signup(p_name text, p_birth_year integer, p_phone text, p_biz_name text, p_biz_type text, p_privacy boolean, p_marketing boolean default false, p_username text default null)
+returns jsonb language sql security definer set search_path to 'esign', 'public', 'pg_temp'
+as $$ select jsonb_build_object('ok',false,'error','UPGRADE_REQUIRED') $$;
 
 -- 관리자 회원 목록에 새 항목 포함
 create or replace function public.esign_list_members()
