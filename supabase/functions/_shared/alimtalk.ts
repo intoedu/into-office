@@ -59,6 +59,20 @@ export function remainText(deadline: string | null | undefined): string {
   return `${Math.max(1, Math.floor(ms / 3_600_000))}시간`;
 }
 
+// 010-1234-5678 → 010-****-5678 (가운데를 가린다)
+export function maskPhone(p: string): string {
+  const d = digits(p);
+  if (d.length < 8) return "***";
+  return `${d.slice(0, 3)}-****-${d.slice(-4)}`;
+}
+
+// 서명 요청 템플릿의 #{서명자목록} — 함께 서명하는 사람 전원 (줄바꿈으로 구분)
+//   1. 홍길동 (010-****-1234)
+//   2. 김철수 (010-****-5678)
+function signerLines(targets: Array<{ name: string; phone: string }>): string {
+  return targets.map((t, i) => `${i + 1}. ${t.name} (${maskPhone(t.phone)})`).join("\n");
+}
+
 export type Row = {
   org_id: string | null;
   doc_id: string | null;
@@ -77,6 +91,8 @@ export async function collectDocRows(admin: SupabaseClient, kind: Kind, ids: str
     if (!info?.ok) { notFound.push(id); continue; }
 
     const doc = info.document;
+    // 서명 요청 시점에는 아직 아무도 서명하지 않았으므로 targets 가 곧 서명자 전원이다
+    const allSigners = kind === "request" ? signerLines(info.targets ?? []) : "";
     for (const t of info.targets ?? []) {
       if (digits(t.phone).length < 10) continue;
       const common = {
@@ -86,7 +102,8 @@ export async function collectDocRows(admin: SupabaseClient, kind: Kind, ids: str
         "#{서명토큰}": t.sign_token,                  // 버튼 URL 의 변수 부분
       };
       const vars: Record<string, string> =
-        kind === "request" ? { ...common, "#{요청자}": doc.requester_name, "#{기한}": fmtDate(doc.deadline) }
+        kind === "request" ? { ...common, "#{요청자}": doc.requester_name, "#{기한}": fmtDate(doc.deadline),
+                               "#{서명자목록}": allSigners }
         : kind === "remind" ? { ...common, "#{남은기간}": remainText(doc.deadline), "#{기한}": fmtDate(doc.deadline) }
         : { ...common, "#{완료일시}": fmtDate(doc.completed_at), "#{서명자목록}": doc.signer_names ?? t.name };
       rows.push({ org_id: doc.org_id, doc_id: doc.id, phone: t.phone, vars });
