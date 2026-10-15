@@ -271,7 +271,22 @@ input,select,textarea { font-family:inherit; }
 .doc-item { padding:16px 20px; border-bottom:1px solid var(--border); display:grid; grid-template-columns:2fr 1fr 1fr 120px; gap:12px; align-items:center; transition:background .15s; cursor:pointer; }
 .doc-item:last-child { border-bottom:none; }
 .doc-item:hover { background:var(--info-bg); }
-.doc-title { font-weight:500; font-size:14px; display:flex; align-items:center; gap:8px; }
+.doc-title { font-weight:500; font-size:14px; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.doc-label { display:inline-flex; align-items:center; gap:4px; padding:2px 9px; border-radius:20px; font-size:11.5px; font-weight:600;
+  background:#eef6ff; color:#1d4ed8; border:1px solid #dbeafe; white-space:nowrap; }
+.doc-label button { font-size:10px; color:#1d4ed8; opacity:.7; }
+.doc-label button:hover { opacity:1; }
+.doc-tools { display:flex; flex-direction:column; gap:10px; margin-bottom:14px; }
+.doc-tools input[type=search] { padding:10px 14px; border:1.5px solid var(--border); border-radius:8px; font-size:14px; max-width:420px; background:var(--card); }
+.label-filter { display:flex; flex-wrap:wrap; gap:6px; }
+.lf-chip { padding:6px 12px; border-radius:20px; font-size:12.5px; font-weight:600; border:1.5px solid var(--border); background:var(--card); color:var(--text-secondary); }
+.lf-chip span { color:var(--text-muted); font-weight:500; margin-left:2px; }
+.lf-chip.on { background:var(--navy); border-color:var(--navy); color:#fff; }
+.lf-chip.on span { color:rgba(255,255,255,.7); }
+.label-input { display:flex; flex-wrap:wrap; align-items:center; gap:6px; padding:8px 10px; border:1.5px solid var(--border); border-radius:8px; background:var(--card); cursor:text; min-height:44px; }
+.label-input .label-chips { display:contents; }
+.label-input input { flex:1; min-width:140px; border:none; outline:none; font-size:14px; padding:4px 2px; background:transparent; }
+.code-warn { background:#fff7ed; border:1.5px solid #fed7aa; color:#9a3412; border-radius:8px; padding:10px 12px; font-size:12.5px; line-height:1.75; margin-top:6px; }
 .doc-title svg { width:18px; height:18px; color:var(--cyan); flex-shrink:0; }
 .doc-signer { font-size:13px; color:var(--text-secondary); }
 .doc-date { font-size:13px; color:var(--text-muted); }
@@ -1039,6 +1054,10 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
         <div class="lp-faq-a">해지 후 30일 동안 모든 문서와 인증서를 내려받으실 수 있습니다. 그 기간이 지나면 문서는 삭제됩니다. 장기 보관이 필요하시면 별도로 문의해 주십시오.</div>
       </div>
       <div class="lp-faq-item">
+        <button class="lp-faq-q" onclick="lpFaq(this)">문서 접근 암호는 서명자에게 어떻게 전달하나요?<span class="mk">+</span></button>
+        <div class="lp-faq-a">접근 암호는 서명 요청 알림톡이나 문자에 담기지 않습니다. 링크와 암호가 한 메시지에 있으면 다른 사람이 메시지를 보더라도 문서를 열 수 있기 때문입니다. 암호를 설정하셨다면 서명자에게 전화나 별도 문자로 직접 알려주세요.</div>
+      </div>
+      <div class="lp-faq-item">
         <button class="lp-faq-q" onclick="lpFaq(this)">무료 체험이 끝나면 자동으로 결제되나요?<span class="mk">+</span></button>
         <div class="lp-faq-a">아닙니다. 카드를 등록받지 않으므로 자동 결제가 되지 않습니다. 30일이 지나거나 10건을 모두 사용하면 이용이 중지되며, 계속 쓰시려면 직접 요금제를 선택하시면 됩니다.</div>
       </div>
@@ -1517,6 +1536,12 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
       <span class="legal-badge">⚖️ 전자서명법 제3조 적용</span>
       <span style="font-size:12px;color:var(--text-muted);">모든 서명 문서는 감사추적인증서가 자동 생성됩니다</span>
     </div>
+    <div class="doc-tools">
+      <input type="search" id="docSearch" placeholder="🔍 문서명 · 서명자 검색"
+             oninput="state.docSearch=this.value.trim();renderDocList()">
+      <div class="label-filter" id="labelFilter"></div>
+    </div>
+    <datalist id="labelSuggest"></datalist>
     <div class="doc-list">
       <div class="doc-list-header">
         <span>문서명</span><span>서명자</span><span>요청일</span><span>상태</span><span style="text-align:right;">메뉴</span>
@@ -1559,6 +1584,16 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
             <input type="text" id="bulkTitle" placeholder="예: 2026년 재학생 개인정보 동의서">
             <p class="bulk-hint">각 문서는 「제목 - 서명자이름」 으로 저장됩니다.</p>
           </div>
+          <div class="form-group label-field" style="margin-bottom:12px;">
+            <label>🏷 라벨 <span class="sec-tag">선택</span></label>
+            <div class="label-input" id="lblBulk" onclick="this.querySelector('input').focus()">
+              <span class="label-chips"></span>
+              <input type="text" list="labelSuggest" maxlength="20" placeholder="입력 후 Enter (최대 5개)"
+                     onkeydown="labelKey(event,'lblBulk')" onblur="labelCommit('lblBulk')">
+            </div>
+            <p class="bulk-hint">이번에 보내는 문서 전체에 같은 라벨이 붙습니다.</p>
+          </div>
+          
           <div class="upload-sig-zone" id="bulkDropZone" onclick="document.getElementById('bulkPdfInput').click()" style="margin-bottom:12px;">
             <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17,8 12,3 7,8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
             <p style="font-size:13px;color:var(--text-secondary);margin-top:6px;" id="bulkPdfName">클릭하여 PDF 문서를 선택하세요</p>
@@ -1595,7 +1630,9 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
             <div class="form-group" style="margin-bottom:10px;">
               <label>문서 접근 암호</label>
               <input type="text" id="bulkAccessCode" placeholder="4자 이상 (비워두면 암호 없이 열람)" maxlength="20">
-              <p class="bulk-hint">암호를 걸면 서명자는 링크를 열 때 이 암호를 입력해야 합니다. 암호는 별도로 전달하세요.</p>
+              <p class="bulk-hint">암호를 걸면 서명자는 링크를 열 때 이 암호를 입력해야 합니다.</p>
+              <div class="code-warn">⚠️ <b>암호는 알림톡·문자에 담기지 않습니다.</b> 서명자에게 <b>전화나 별도 문자로 직접</b> 알려주세요.<br>
+            링크와 암호를 같은 메시지로 보내면 암호를 건 의미가 없어집니다.</div>
             </div>
             <label class="sec-check">
               <input type="checkbox" id="bulkPhoneVerify" disabled>
@@ -1855,12 +1892,25 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
         </div>
         <div class="page-nav" id="pageNav" style="display:none;"></div>
         <div class="pdf-editor" id="pdfEditor"></div>
-        <div class="sec-box" style="margin-top:16px;">
+        <div style="margin-top:16px;">
+          <div class="form-group label-field" style="margin-bottom:12px;">
+            <label>🏷 라벨 <span class="sec-tag">선택</span></label>
+            <div class="label-input" id="lblCreate" onclick="this.querySelector('input').focus()">
+              <span class="label-chips"></span>
+              <input type="text" list="labelSuggest" maxlength="20" placeholder="입력 후 Enter (최대 5개)"
+                     onkeydown="labelKey(event,'lblCreate')" onblur="labelCommit('lblCreate')">
+            </div>
+            <p class="bulk-hint">문서 목록에서 라벨별로 모아 볼 수 있습니다. 예) 2026 신학기, 학부모 동의서</p>
+          </div>
+          </div>
+        <div class="sec-box" style="margin-top:4px;">
           <div class="sec-title">🔐 보안 설정 <span class="sec-tag">선택</span></div>
           <div class="form-group" style="margin-bottom:10px;">
             <label>문서 접근 암호</label>
             <input type="text" id="docAccessCode" placeholder="4자 이상 (비워두면 암호 없이 열람)" maxlength="20">
-            <p class="bulk-hint">암호를 걸면 서명자는 링크를 열 때 이 암호를 입력해야 합니다. 링크와 다른 경로로 전달하세요.</p>
+            <p class="bulk-hint">암호를 걸면 서명자는 링크를 열 때 이 암호를 입력해야 합니다.</p>
+            <div class="code-warn">⚠️ <b>암호는 알림톡·문자에 담기지 않습니다.</b> 서명자에게 <b>전화나 별도 문자로 직접</b> 알려주세요.<br>
+            링크와 암호를 같은 메시지로 보내면 암호를 건 의미가 없어집니다.</div>
           </div>
           <label class="sec-check">
             <input type="checkbox" id="docPhoneVerify" disabled>
@@ -1995,17 +2045,19 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
     <div class="modal-body">
       <div class="share-preview">
         <div class="share-card">
-          <div class="share-card-title">전자서명 인투오피스</div>
-          <div class="share-card-heading">내 서명 필요</div>
+          <div class="share-card-title">인투오피스 전자서명</div>
+          <div class="share-card-heading">서명 요청이 도착했습니다</div>
           <div class="share-card-body">
-            서명하기로 한 계약서가 전송되었어요.<br>확인 후 서명해주세요.<br><br>
-            ▸ 문서명<br><span id="shareDocName">MOU 계약서</span><br>
-            ▸ 요청자<br><span id="shareRequester">인투유학</span><br>
-            ▸ 서명자<br><span id="shareSignerInfo">홍길동</span>
+            서명하실 문서가 도착했습니다.<br><br>
+            [문서 정보]<br>
+            - 문서: <span id="shareDocName">MOU 계약서</span><br>
+            - 보낸 곳: <span id="shareRequester">인투유학</span><br><br>
+            [함께 서명하는 분]<br><span id="shareSignerInfo">홍길동</span>
           </div>
-          <div class="share-card-btn">문서 확인하고 서명하기</div>
+          <div class="share-card-btn">서명하러 가기</div>
         </div>
       </div>
+      <div id="shareCodeNotice" class="code-warn" style="display:none;margin-bottom:14px;"></div>
       <div id="schedNotice" style="display:none;background:#faf5ff;border:1.5px solid #e9d5ff;border-radius:8px;padding:12px;margin-bottom:14px;font-size:12.5px;color:#6d28d9;line-height:1.7;"></div>
       <p style="font-size:13px;color:var(--text-secondary);margin-bottom:8px;">서명자별 링크 (각자 다른 링크가 발급됩니다)</p>
       <div id="signerLinks"></div>
@@ -2098,6 +2150,29 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
 </div>
 
 <!-- ===== MEMBER ACTION MODAL ===== -->
+<!-- ===== 문서 라벨 편집 ===== -->
+<div class="modal-overlay" id="labelModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>🏷 라벨 편집</h3>
+      <button class="modal-close" onclick="closeLabelEditor()">✕</button>
+    </div>
+    <div class="modal-body">
+      <p class="mem-sub" style="margin-bottom:10px;" id="labelModalDoc"></p>
+      <div class="label-input" id="lblEdit" onclick="this.querySelector('input').focus()">
+        <span class="label-chips"></span>
+        <input type="text" list="labelSuggest" maxlength="20" placeholder="입력 후 Enter (최대 5개)"
+               onkeydown="labelKey(event,'lblEdit')">
+      </div>
+      <p class="bulk-hint" style="margin-top:8px;">라벨은 내 계정에서만 보입니다. 모두 지우고 저장하면 라벨이 없어집니다.</p>
+    </div>
+    <div class="modal-footer" style="display:flex;gap:8px;justify-content:flex-end;padding:14px 20px;">
+      <button class="btn-secondary" onclick="closeLabelEditor()">취소</button>
+      <button class="btn-action" onclick="saveLabelEditor()">저장</button>
+    </div>
+  </div>
+</div>
+
 <!-- ===== 주소록에서 서명자 불러오기 ===== -->
 <div class="modal-overlay" id="contactPickModal">
   <div class="modal">
@@ -2740,6 +2815,7 @@ function openDocMenu(ev, id) {
     '<div class="rm-label">문서</div>' +
     it('audit','📋','상세 · 감사 기록', true) +
     it('preview','👁','서명 화면 미리보기', true) +
+    it('labels','🏷','라벨 편집', !!state.labelsReady) +
     '<div class="rm-sep"></div><div class="rm-label">발송</div>' +
     it('remind','🔔','서명 리마인드', canRemind) +
     it('send','🎉','완료 문서 전달', done) +
@@ -2756,6 +2832,7 @@ function rmAct(id, act) {
   ({
     audit:   () => showAuditTrail(id),
     preview: () => goSign(id),
+    labels:  () => openLabelEditor(id),
     remind:  () => openRemind(id),
     send:    () => openSendDone(id),
     signed:  () => downloadSignedDoc(id),
@@ -3153,7 +3230,7 @@ async function routeByProfile() {
 // ============================================================
 const SB_FN_ADMIN = SB_URL + '/functions/v1/esign-admin';
 const APP_URL = shareBase();
-const BUILD = '2026-10-15.6';   // 배포 확인용. 화면 하단과 콘솔에 표시된다.
+const BUILD = '2026-10-15.7';   // 배포 확인용. 화면 하단과 콘솔에 표시된다.
 
 
 // ============================================================
@@ -4315,6 +4392,7 @@ function bulkReset(show) {
   document.getElementById('bulkTitle').value = '';
   document.getElementById('bulkDeadline').value = '';
   document.getElementById('bulkAccessCode').value = '';
+  clearLabels('lblBulk');
   document.getElementById('bulkPdfName').textContent = '클릭하여 PDF 문서를 선택하세요';
   document.getElementById('bulkDateField').checked = false;
   document.getElementById('bulkPdfPane').innerHTML = '';
@@ -4609,6 +4687,8 @@ async function bulkSend() {
       return;
     }
     state.bulkResult = data;
+    const bulkLabels = getLabels('lblBulk');
+    if (bulkLabels.length) await setDocLabels((data.items || []).map(i => i.document_id), bulkLabels);
     showBulkResult(data, title, !!code);
     sendAlimtalk('request', (data.items || []).map(i => i.document_id), { verbose: true });
     bulkReset(false);
@@ -4638,7 +4718,7 @@ function showBulkResult(data, title, hasCode) {
     '<strong style="color:#047857;">' + data.count + '건의 문서가 생성되었습니다.</strong>' +
     '<p style="font-size:12.5px;color:var(--text-secondary);margin-top:6px;line-height:1.7;">' +
     esc(title) + ' · 서명자마다 개별 문서와 링크가 발급되었습니다.' +
-    (hasCode ? '<br>🔐 접근 암호가 설정되어 있습니다. 링크와 <strong>다른 경로</strong>로 암호를 전달하세요.' : '') +
+    (hasCode ? '<br>🔐 접근 암호가 설정되어 있습니다. 알림톡에는 암호가 담기지 않으니 <strong>전화나 별도 문자로 직접</strong> 서명자에게 알려주세요.' : '') +
     '<br>아래 링크를 각 서명자에게 전달해주세요. (알림톡 자동 발송은 연동 후 사용 가능합니다)</p></div>';
 
   const base = signLinkBase();
@@ -9300,6 +9380,7 @@ async function loadDocuments() {
   }));
   state.stats = data.stats;
   updateTrashBadge(data.trash_count || 0);
+  await loadDocLabels();
   renderDocList();
 }
 
@@ -9570,14 +9651,21 @@ function renderDocList() {
     </div>`;
   } else {
     const statusMap = { scheduled:['예약','status-scheduled'], waiting: ['서명 대기','status-waiting'], progress: ['진행 중','status-progress'], complete: ['완료','status-complete'], expired: ['만료','status-expired'], cancelled:['취소','status-expired'] };
-    body.innerHTML = state.documents.map(d => {
+    const q = (state.docSearch || '').toLowerCase();
+    const lf = state.labelFilter;
+    const shown = state.documents.filter(d =>
+      (!q || (d.title || '').toLowerCase().includes(q) || (d.signer || '').toLowerCase().includes(q)) &&
+      (!lf || (state.docLabels[d.id] || []).includes(lf)));
+    body.innerHTML = shown.length ? shown.map(d => {
       const [label, cls] = statusMap[d.status] || ['알 수 없음',''];
+      const lbls = state.docLabels[d.id] || [];
       const done = d.status === 'complete';
       const canRemind = ['waiting','progress'].includes(d.status);
       return `<div class="doc-item">
         <div class="doc-title" onclick="showAuditTrail('${d.id}')" style="cursor:pointer;">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>
-          ${esc(d.title)}
+          <span>${esc(d.title)}</span>
+          ${lbls.map(l => '<span class="doc-label">' + esc(l) + '</span>').join('')}
         </div>
         <div class="doc-signer">${esc(d.signer)}</div>
         <div class="doc-date">${d.date}${d.scheduled_at && d.status==='scheduled' ? '<div class="sched-badge">🕒 '+d.scheduled_at+'</div>' : ''}${d.reminder_count ? '<div class="post-meta">🔔 리마인드 '+d.reminder_count+'회</div>' : ''}</div>
@@ -9586,8 +9674,9 @@ function renderDocList() {
           <button class="btn-dots" onclick="openDocMenu(event,'${d.id}')">•••</button>
         </div>
       </div>`;
-    }).join('');
+    }).join('') : '<div class="empty-state"><p>조건에 맞는 문서가 없습니다.</p></div>';
   }
+  renderLabelFilter();
   // Stats
   const st = state.stats || {};
   const docs = state.documents;
@@ -9597,6 +9686,112 @@ function renderDocList() {
   document.getElementById('statWaiting').textContent = st.waiting ?? 0;
   document.getElementById('statComplete').textContent = st.complete ?? 0;
   document.getElementById('statExpired').textContent = st.expired ?? 0;
+}
+
+// ============================================================
+// 문서 라벨 (계정별 · 문서당 최대 5개)
+// ============================================================
+const LABEL_MAX = 5, LABEL_LEN = 20;
+state.docLabels = {};
+state.labelDrafts = {};
+
+async function loadDocLabels() {
+  try {
+    const { data, error } = await sb.rpc('esign_doc_labels_get');
+    state.labelsReady = !error && !!data?.ok;
+    state.docLabels = {};
+    if (state.labelsReady) (data.items || []).forEach(it => { state.docLabels[it.document_id] = it.labels || []; });
+  } catch { state.labelsReady = false; }
+  // DB 준비 전에는 라벨 입력칸을 숨긴다
+  document.querySelectorAll('.label-field').forEach(el => el.style.display = state.labelsReady ? '' : 'none');
+  const dl = document.getElementById('labelSuggest');
+  if (dl) dl.innerHTML = labelCounts().map(([l]) => '<option value="' + esc(l) + '">').join('');
+  if (state.labelFilter && !labelCounts().some(([l]) => l === state.labelFilter)) state.labelFilter = null;
+}
+
+// 지금 목록에 있는 문서 기준의 라벨별 개수
+function labelCounts() {
+  const m = {};
+  (state.documents || []).forEach(d => (state.docLabels[d.id] || []).forEach(l => { m[l] = (m[l] || 0) + 1; }));
+  return Object.entries(m).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+}
+
+function renderLabelFilter() {
+  const el = document.getElementById('labelFilter');
+  if (!el) return;
+  const counts = labelCounts();
+  if (!state.labelsReady || !counts.length) { el.innerHTML = ''; return; }
+  el.innerHTML = '<button class="lf-chip' + (state.labelFilter ? '' : ' on') + '" onclick="setLabelFilter(null)">전체</button>' +
+    counts.map(([l, n]) => '<button class="lf-chip' + (state.labelFilter === l ? ' on' : '') +
+      '" onclick="setLabelFilter(this.dataset.l)" data-l="' + esc(l) + '">🏷 ' + esc(l) + ' <span>' + n + '</span></button>').join('');
+}
+function setLabelFilter(l) { state.labelFilter = l || null; renderDocList(); }
+
+async function setDocLabels(ids, labels) {
+  const { data, error } = await sb.rpc('esign_doc_labels_set', { p_document_ids: ids, p_labels: labels });
+  if (error || !data?.ok) { showToast('라벨을 저장하지 못했습니다.'); return false; }
+  ids.forEach(id => { state.docLabels[id] = data.labels || labels; });
+  return true;
+}
+
+// ----- 라벨 입력칸 (칩) -----
+function normLabel(t) { return String(t || '').replace(/[,#]/g, ' ').trim().replace(/\s+/g, ' ').slice(0, LABEL_LEN); }
+function getLabels(id) { return [...(state.labelDrafts[id] || [])]; }
+function clearLabels(id) { state.labelDrafts[id] = []; renderLabelInput(id); }
+function setLabelsDraft(id, labels) { state.labelDrafts[id] = [...labels]; renderLabelInput(id); }
+function renderLabelInput(id) {
+  const box = document.getElementById(id);
+  if (!box) return;
+  const arr = state.labelDrafts[id] || [];
+  box.querySelector('.label-chips').innerHTML = arr.map((l, i) =>
+    '<span class="doc-label">' + esc(l) + '<button type="button" onclick="event.stopPropagation();removeLabel(\'' + id + '\',' + i + ')">✕</button></span>').join('');
+  const inp = box.querySelector('input');
+  if (inp) inp.disabled = arr.length >= LABEL_MAX;
+  if (inp) inp.placeholder = arr.length >= LABEL_MAX ? '최대 5개' : '입력 후 Enter (최대 5개)';
+}
+function addLabel(id, text) {
+  const l = normLabel(text);
+  if (!l) return;
+  const arr = state.labelDrafts[id] = state.labelDrafts[id] || [];
+  if (arr.includes(l)) return;
+  if (arr.length >= LABEL_MAX) { showToast('라벨은 문서당 5개까지입니다.'); return; }
+  arr.push(l);
+  renderLabelInput(id);
+}
+function removeLabel(id, i) { (state.labelDrafts[id] || []).splice(i, 1); renderLabelInput(id); }
+function labelKey(e, id) {
+  const inp = e.target;
+  if (e.key === 'Enter' || e.key === ',') {
+    e.preventDefault();
+    addLabel(id, inp.value); inp.value = '';
+  } else if (e.key === 'Backspace' && !inp.value && (state.labelDrafts[id] || []).length) {
+    removeLabel(id, state.labelDrafts[id].length - 1);
+  }
+}
+function labelCommit(id) {
+  const inp = document.querySelector('#' + id + ' input');
+  if (inp && inp.value.trim()) { addLabel(id, inp.value); inp.value = ''; }
+}
+
+// ----- 문서 메뉴 → 라벨 편집 -----
+function openLabelEditor(docId) {
+  const d = (state.documents || []).find(x => x.id === docId);
+  if (!d) return;
+  state.labelEditDoc = docId;
+  document.getElementById('labelModalDoc').textContent = d.title;
+  setLabelsDraft('lblEdit', state.docLabels[docId] || []);
+  document.getElementById('labelModal').classList.add('active');
+  setTimeout(() => document.querySelector('#lblEdit input')?.focus(), 50);
+}
+function closeLabelEditor() { document.getElementById('labelModal').classList.remove('active'); }
+async function saveLabelEditor() {
+  labelCommit('lblEdit');
+  const ok = await setDocLabels([state.labelEditDoc], getLabels('lblEdit'));
+  if (!ok) return;
+  closeLabelEditor();
+  showToast('라벨을 저장했습니다.', true);
+  await loadDocLabels();
+  renderDocList();
 }
 
 // ===== CREATE DOCUMENT =====
@@ -9610,6 +9805,8 @@ function resetCreate() {
   const st = document.getElementById('schedToggle');
   if (st) { st.checked = false; document.getElementById('schedBody').classList.remove('on'); }
   initSigners();
+  clearLabels('lblCreate');
+  const ac = document.getElementById('docAccessCode'); if (ac) ac.value = '';
   document.getElementById('filePreview').style.display = 'none';
   document.getElementById('btnToStep2').disabled = true;
   document.getElementById('uploadZone').style.display = '';
@@ -10108,6 +10305,8 @@ async function createDocument() {
     }
 
     state.lastCreated = data;
+    const createLabels = getLabels('lblCreate');
+    if (createLabels.length) await setDocLabels([data.document_id], createLabels);
     sendAlimtalk('request', [data.document_id]);
     saveSignersToContacts(signers);
     // 4) 공유 모달
@@ -10115,8 +10314,16 @@ async function createDocument() {
     const first = data.signers[0];
     document.getElementById('shareDocName').textContent = title;
     document.getElementById('shareRequester').textContent = '인투유학';
-    document.getElementById('shareSignerInfo').textContent =
-      data.signers.map(s => s.name + ' (' + s.phone + ')').join(', ');
+    // 알림톡과 같은 형식: · 이름 님 (끝자리 1234)
+    document.getElementById('shareSignerInfo').innerHTML =
+      data.signers.map(s => '· ' + esc(s.name) + ' 님 (끝자리 ' + esc(String(s.phone || '').replace(/[^0-9]/g, '').slice(-4)) + ')').join('<br>');
+    const cn = document.getElementById('shareCodeNotice');
+    if (cn) {
+      const ac = (accessCode && accessCode.length >= 4) ? accessCode : '';
+      cn.style.display = ac ? 'block' : 'none';
+      cn.innerHTML = ac ? '🔐 접근 암호 <b>' + esc(ac) + '</b> — 알림톡에는 담기지 않습니다.<br>' +
+        esc(data.signers.map(s => s.name).join(', ')) + ' 님께 <b>전화나 별도 문자로 직접</b> 알려주세요.' : '';
+    }
     renderShareLinks(base, data.signers);
     document.getElementById('shareUrl').value = base + '?s=' + first.sign_token;
     const sn = document.getElementById('schedNotice');
