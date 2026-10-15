@@ -3,7 +3,7 @@
 // 인증: sign_token 자체가 인증 수단 (로그인 불필요)
 
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-import { createClient } from "jsr:@supabase/supabase-js@2";
+import { createClient } from "npm:@supabase/supabase-js@2.47.10";
 import { collectDocRows, sendRows } from "../_shared/alimtalk.ts";
 
 const CORS = {

@@ -7,7 +7,7 @@
 //
 // SOLAPI_* 키나 템플릿 코드가 없으면 실제 발송 없이 status='skipped' 로 기록만 남긴다.
 // ============================================================
-import type { SupabaseClient } from "jsr:@supabase/supabase-js@2";
+import type { SupabaseClient } from "npm:@supabase/supabase-js@2.47.10";
 
 const SOLAPI_URL = "https://api.solapi.com/messages/v4/send-many/detail";
 

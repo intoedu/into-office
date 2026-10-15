@@ -13,7 +13,7 @@
 // 대상 조회·발송 기록은 public 래퍼(esign_notify_targets / esign_member_notify_info /
 // esign_alimtalk_log)로 한다.
 // ============================================================
-import { createClient } from "jsr:@supabase/supabase-js@2";
+import { createClient } from "npm:@supabase/supabase-js@2.47.10";
 import { collectDocRows, fmtDate, isKind, sendRows, type Row } from "../_shared/alimtalk.ts";
 
 const MAX_DOCS = 500;
