@@ -2174,6 +2174,7 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
           <div class="share-card-btn">서명하러 가기</div>
         </div>
       </div>
+      <div id="shareAlimStatus" style="display:none;border-radius:8px;padding:11px 13px;margin-bottom:14px;font-size:13px;line-height:1.7;"></div>
       <div id="shareCodeNotice" class="code-warn" style="display:none;margin-bottom:14px;"></div>
       <div id="schedNotice" style="display:none;background:#faf5ff;border:1.5px solid #e9d5ff;border-radius:8px;padding:12px;margin-bottom:14px;font-size:12.5px;color:#6d28d9;line-height:1.7;"></div>
       <p style="font-size:13px;color:var(--text-secondary);margin-bottom:8px;">서명자별 링크 (각자 다른 링크가 발급됩니다)</p>
@@ -3419,7 +3420,7 @@ async function routeByProfile() {
 // ============================================================
 const SB_FN_ADMIN = SB_URL + '/functions/v1/esign-admin';
 const APP_URL = shareBase();
-const BUILD = '2026-10-15.10';   // 배포 확인용. 화면 하단과 콘솔에 표시된다.
+const BUILD = '2026-10-19.1';   // 배포 확인용. 화면 하단과 콘솔에 표시된다.
 
 
 // ============================================================
@@ -9804,6 +9805,32 @@ async function sendAlimtalk(kind, documentIds, opts = {}) {
   }
 }
 
+// 서명 요청 창에 알림톡 발송 결과를 보여 준다 — 안 갔으면 링크 · 카카오톡 공유로 직접 보내도록 안내
+async function showAlimStatus(promise, count) {
+  const el = document.getElementById('shareAlimStatus');
+  if (!el) return;
+  const paint = (bg, bd, fg, html) => {
+    el.style.display = ''; el.style.background = bg; el.style.border = '1.5px solid ' + bd; el.style.color = fg; el.innerHTML = html;
+  };
+  paint('var(--bg)', 'var(--border)', 'var(--text-secondary)', '💬 카카오 알림톡을 보내는 중입니다…');
+  const r = await promise;
+  // 솔라피는 일부 실패도 HTTP 200 으로 돌려주고 실패 건을 failedMessageList 에 담는다
+  const failed = r?.result?.failedMessageList || [];
+  const why = r?.error || r?.result?.errorMessage || failed[0]?.statusMessage || failed[0]?.statusCode || '';
+  if (r?.ok && r.sent > 0 && failed.length) {
+    paint('#fffbeb', '#fde68a', '#92400e', '⚠️ 알림톡 ' + (r.sent - failed.length) + '건 접수, <b>' + failed.length + '건 실패</b>했습니다. 실패한 서명자에게는 아래 링크를 직접 보내 주세요.' +
+      (why ? '<br><span style="font-size:12px;">사유: ' + esc(String(why)) + '</span>' : ''));
+  } else if (r?.ok && r.sent > 0) {
+    paint('#ecfdf5', '#a7f3d0', '#047857', '✅ <b>카카오 알림톡 ' + r.sent + '건을 보냈습니다.</b> 서명자에게 따로 보내지 않으셔도 됩니다.' +
+      (r.sent < count ? '<br><span style="font-size:12px;">휴대폰 번호가 없는 서명자에게는 아래 링크를 직접 보내 주세요.</span>' : ''));
+  } else if (r?.ok && r.skipped > 0) {
+    paint('#fffbeb', '#fde68a', '#92400e', '⚠️ 알림톡 설정이 아직 없어 보내지 않았습니다. 아래 링크를 직접 보내 주세요.');
+  } else {
+    paint('#fef2f2', '#fecaca', '#b91c1c', '⚠️ 알림톡을 보내지 못했습니다. 아래 링크를 직접 보내 주세요.' +
+      (why ? '<br><span style="font-size:12px;">사유: ' + esc(String(why)) + '</span>' : ''));
+  }
+}
+
 // 가입 승인 안내 — 실패해도 승인 처리에는 영향을 주지 않는다
 async function sendApproveAlimtalk(userId) {
   try {
@@ -10837,13 +10864,14 @@ async function createDocument() {
     state.lastCreated = data;
     const createLabels = getLabels('lblCreate');
     if (createLabels.length) await setDocLabels([data.document_id], createLabels);
-    sendAlimtalk('request', [data.document_id]);
+    showAlimStatus(sendAlimtalk('request', [data.document_id]), data.signers.length);
     saveSignersToContacts(signers);
     // 4) 공유 모달
     const base = shareBase();
     const first = data.signers[0];
     document.getElementById('shareDocName').textContent = title;
-    document.getElementById('shareRequester').textContent = '인투유학';
+    document.getElementById('shareRequester').textContent =
+      state.org?.org?.name || state.profile?.biz_name || state.profile?.name || '-';
     // 알림톡과 같은 형식: · 이름 님 (끝자리 1234)
     document.getElementById('shareSignerInfo').innerHTML =
       data.signers.map(s => '· ' + esc(s.name) + ' 님 (끝자리 ' + esc(String(s.phone || '').replace(/[^0-9]/g, '').slice(-4)) + ')').join('<br>');
