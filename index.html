@@ -10,7 +10,7 @@
 <!-- 서명 · 도장 생성용 한글 손글씨 / 명조 서체 -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Nanum+Pen+Script&family=Nanum+Brush+Script&family=Gaegu:wght@700&family=Dokdo&family=Hi+Melody&family=Gamja+Flower&family=Poor+Story&family=Single+Day&family=Nanum+Myeongjo:wght@800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Nanum+Pen+Script&family=Nanum+Brush+Script&family=Mrs+Saint+Delafield&family=Gaegu:wght@700&family=Dokdo&family=Hi+Melody&family=Gamja+Flower&family=Poor+Story&family=Single+Day&family=Nanum+Myeongjo:wght@800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.9.155/pdf.min.mjs" type="module"></script>
 <script src="https://cdn.jsdelivr.net/npm/signature_pad@5.0.4/dist/signature_pad.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
@@ -837,7 +837,8 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
 .typed-font-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
 .typed-font { position:relative; border:1.5px solid var(--border); border-radius:10px; background:#fafbfc; cursor:pointer;
   height:96px; display:flex; align-items:center; justify-content:center; padding:8px 10px 20px; color:#0e2d4d; overflow:hidden; transition:all .15s; }
-.typed-font .tf-name { font-size:40px; line-height:1.1; white-space:nowrap; max-width:100%; overflow:hidden; text-overflow:clip; }
+.typed-font .tf-img { width:100%; height:64px; object-fit:contain; }
+.typed-font .tf-label b { font-size:9.5px; color:#fff; background:var(--cyan); border-radius:4px; padding:1px 4px; margin-left:3px; }
 .typed-font .tf-label { position:absolute; left:10px; bottom:6px; font-size:11px; color:var(--text-muted); font-family:'Pretendard Variable', Pretendard, sans-serif; }
 .typed-font.sel { border-color:var(--cyan); background:rgba(4,183,221,.06); box-shadow:0 0 0 3px rgba(4,183,221,.15); }
 .typed-font.sel::after { content:'✓'; position:absolute; right:10px; top:6px; font-size:13px; font-weight:800; color:var(--cyan); font-family:sans-serif; }
@@ -2133,11 +2134,15 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
       </div>
       <!-- Tab 1: Type name -->
       <div class="sig-tab-content" id="sigTabType">
-        <p style="font-size:13px;color:var(--text-secondary);margin-bottom:10px;">이름을 적으면 <b>필기체 4가지</b>로 만들어 드립니다. 마음에 드는 서명을 골라 주세요.</p>
+        <p style="font-size:13px;color:var(--text-secondary);margin-bottom:10px;">이름을 적으면 <b>필기체 · 사인</b> 여러 가지로 만들어 드립니다. 마음에 드는 서명을 골라 주세요.</p>
         <div class="form-group" style="margin-bottom:12px;">
-          <input type="text" id="typedSigName" placeholder="서명자 이름" maxlength="20" oninput="updateTypedPreview()">
+          <input type="text" id="typedSigName" placeholder="서명자 이름" maxlength="20" oninput="state.typedEnEdited=false;updateTypedPreview()">
         </div>
         <div class="typed-font-grid" id="typedFontGrid"></div>
+        <div class="form-group" id="typedEnWrap" style="display:none;margin:12px 0 0;">
+          <label style="font-size:12.5px;">영문 표기 <span style="color:var(--text-muted);font-weight:400;">(자동 변환 — 여권 표기처럼 고칠 수 있어요)</span></label>
+          <input type="text" id="typedSigEn" maxlength="30" oninput="state.typedEnEdited=true;updateTypedPreview()">
+        </div>
       </div>
       <!-- Tab 2: Upload image -->
       <div class="sig-tab-content" id="sigTabUpload">
@@ -3426,7 +3431,7 @@ async function routeByProfile() {
 // ============================================================
 const SB_FN_ADMIN = SB_URL + '/functions/v1/esign-admin';
 const APP_URL = shareBase();
-const BUILD = '2026-10-19.2';   // 배포 확인용. 화면 하단과 콘솔에 표시된다.
+const BUILD = '2026-10-19.3';   // 배포 확인용. 화면 하단과 콘솔에 표시된다.
 
 
 // ============================================================
@@ -8452,7 +8457,7 @@ async function composeSignedPdf(doc, signers, fields) {
     if (s.sig_method === 'typed') {
       const t = parseTypedSig(s.sig_data, s.name);
       await loadTypedFont(t);
-      du = typedSigToPng(t.name, bw, bh, t.font);
+      du = typedSigToPng(t.name, bw, bh, t.font, t.text);
     } else if (s.sig_data && s.sig_data.startsWith('data:image')) {
       du = s.sig_data;
     }
@@ -8493,38 +8498,152 @@ function safeName(t) {
 }
 
 // ===== 서명 합성 문서 다운로드 =====
-// 이름 자동입력 서명 — 'TYPED:이름' (예전 · 정자체) 또는 'TYPED:이름||font=서체' (필기체)
+// 이름 자동입력 서명
+//   'TYPED:이름'                              예전 · 정자체
+//   'TYPED:이름||font=서체'                    필기체 (key 는 서체 이름)
+//   'TYPED:이름||font=sign-ko'                 한글 사인 (기울이고 겹쳐 쓰고 밑줄 꼬리)
+//   'TYPED:이름||font=sign-en||text=영문 이름'  영문 사인
 const TYPED_FONTS = [
-  { family: 'Nanum Pen Script',   label: '펜글씨' },
-  { family: 'Nanum Brush Script', label: '붓글씨' },
-  { family: 'Gaegu',              label: '또박또박', weight: 700 },
-  { family: 'Dokdo',              label: '굵은 손글씨' }
+  { key: 'Nanum Pen Script',   family: 'Nanum Pen Script',   label: '펜글씨' },
+  { key: 'Nanum Brush Script', family: 'Nanum Brush Script', label: '붓글씨' },
+  { key: 'Gaegu',              family: 'Gaegu',              label: '또박또박', weight: 700 },
+  { key: 'Dokdo',              family: 'Dokdo',              label: '굵은 손글씨' },
+  { key: 'sign-ko', family: 'Nanum Brush Script', label: '한글 사인', sign: true,
+    skew: -0.42, squeeze: 0.78, overlap: -0.16, jitter: 0.07 },
+  { key: 'sign-en', family: 'Mrs Saint Delafield', label: '영문 사인', sign: true, latin: true,
+    skew: -0.12, squeeze: 0.92, overlap: -0.04, jitter: 0.03 }
 ];
+const typedStyle = k => TYPED_FONTS.find(x => x.key === k) || null;
+
 function parseTypedSig(data, fallback) {
-  const raw = String(data || '').replace(/^TYPED:/, '');
-  const i = raw.indexOf('||font=');
-  const name = (i >= 0 ? raw.slice(0, i) : raw) || fallback || '';
-  const font = i >= 0 ? raw.slice(i + 7) : null;
-  return { name, font: TYPED_FONTS.some(f => f.family === font) ? font : null };
+  const parts = String(data || '').replace(/^TYPED:/, '').split('||');
+  const opt = {};
+  parts.slice(1).forEach(p => { const i = p.indexOf('='); if (i > 0) opt[p.slice(0, i)] = p.slice(i + 1); });
+  const st = typedStyle(opt.font);
+  return { name: parts[0] || fallback || '', font: st ? st.key : null, text: opt.text || null };
 }
+// 실제로 그릴 글자 (영문 사인은 영문 표기)
+const typedText = t => (typedStyle(t?.font)?.latin ? (t.text || romanizeName(t.name)) : t?.name) || '';
 async function loadTypedFont(t) {
-  if (!t?.font || !t.name) return;
-  const f = TYPED_FONTS.find(x => x.family === t.font);
-  try { await document.fonts.load((f?.weight || 400) + ' 48px "' + t.font + '"', t.name); } catch (e) {}
+  const st = typedStyle(t?.font);
+  const txt = typedText(t);
+  if (!st || !txt) return;
+  try { await document.fonts.load((st.weight || 400) + ' 48px "' + st.family + '"', txt); } catch (e) {}
+}
+
+// 한글 이름 → 영문 (국어의 로마자 표기법 기본 규칙 + 흔한 성씨 관용 표기). 예) 홍길동 → Gildong Hong
+const RR_I = ['g','kk','n','d','tt','r','m','b','pp','s','ss','','j','jj','ch','k','t','p','h'];
+const RR_V = ['a','ae','ya','yae','eo','e','yeo','ye','o','wa','wae','oe','yo','u','wo','we','wi','yu','eu','ui','i'];
+const RR_F = ['','k','k','k','n','n','n','t','l','k','m','l','l','l','p','l','m','p','p','t','t','ng','t','t','k','t','p','t'];
+const RR_SURNAME = {
+  '김':'Kim','이':'Lee','박':'Park','최':'Choi','정':'Jung','강':'Kang','조':'Cho','윤':'Yoon','장':'Jang','임':'Lim',
+  '한':'Han','오':'Oh','서':'Seo','신':'Shin','권':'Kwon','황':'Hwang','안':'Ahn','송':'Song','류':'Ryu','유':'Yoo',
+  '홍':'Hong','전':'Jeon','고':'Ko','문':'Moon','양':'Yang','손':'Son','배':'Bae','백':'Baek','허':'Heo','노':'Noh',
+  '남':'Nam','심':'Shim','하':'Ha','곽':'Kwak','성':'Sung','차':'Cha','주':'Joo','우':'Woo','구':'Koo','나':'Na',
+  '민':'Min','진':'Jin','지':'Ji','엄':'Uhm','채':'Chae','원':'Won','천':'Chun','방':'Bang','공':'Kong','현':'Hyun',
+  '함':'Ham','변':'Byun','염':'Yeom','여':'Yeo','추':'Choo','도':'Do','소':'So','석':'Seok','선':'Sun','설':'Seol',
+  '마':'Ma','길':'Gil','연':'Yeon','위':'Wi','표':'Pyo','명':'Myung','기':'Ki','반':'Ban','왕':'Wang','금':'Keum',
+  '옥':'Ok','육':'Yook','인':'In','맹':'Maeng','제':'Je','모':'Mo','탁':'Tak','국':'Kook','어':'Eo','은':'Eun',
+  '편':'Pyeon','용':'Yong','남궁':'Namgung','황보':'Hwangbo','제갈':'Jegal','선우':'Sunwoo','독고':'Dokgo','사공':'Sagong'
+};
+function rrSyllables(str) {
+  let out = '';
+  for (const ch of str) {
+    const c = ch.charCodeAt(0) - 0xAC00;
+    if (c < 0 || c > 11171) { out += ch; continue; }
+    out += RR_I[Math.floor(c / 588)] + RR_V[Math.floor((c % 588) / 28)] + RR_F[c % 28];
+  }
+  return out;
+}
+const cap = w => w ? w.charAt(0).toUpperCase() + w.slice(1) : '';
+function romanizeName(name) {
+  const n = String(name || '').replace(/\s+/g, '');
+  if (!/^[가-힣]{2,5}$/.test(n)) return String(name || '').trim();   // 한글 이름이 아니면 그대로
+  const sur = (n.length >= 4 && RR_SURNAME[n.slice(0, 2)]) ? n.slice(0, 2) : n.slice(0, 1);
+  const given = n.slice(sur.length);
+  return cap(rrSyllables(given)) + ' ' + (RR_SURNAME[sur] || cap(rrSyllables(sur)));
+}
+
+// 같은 이름은 늘 같은 모양이 되도록 이름으로 만든 난수
+function seededRand(str) {
+  let h = 2166136261;
+  for (const ch of String(str)) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619); }
+  return () => { h ^= h << 13; h ^= h >>> 17; h ^= h << 5; return ((h >>> 0) % 10000) / 10000; };
+}
+
+// 사인 스타일: 기울이고 · 좁히고 · 글자를 겹쳐 쓰고 · 밑줄 꼬리를 붙인다
+function drawSignStyle(ctx, W, H, text, st) {
+  const rnd = seededRand(text + st.key);
+  const chars = [...text];
+  const fontAt = sz => (st.weight || 400) + ' ' + sz + 'px "' + st.family + '", cursive';
+  let size = H * (st.latin ? 0.8 : 0.95);
+  const widthAt = sz => {
+    ctx.font = fontAt(sz);
+    return chars.reduce((a, ch) => a + ctx.measureText(ch).width, 0) + st.overlap * sz * Math.max(0, chars.length - 1);
+  };
+  // 폭과 높이 둘 다 서명란 안에 들어와야 한다 (영문 사인 서체는 머리글자가 유난히 높다)
+  const heightAt = sz => {
+    ctx.font = fontAt(sz * 1.15);
+    const m = ctx.measureText(text);
+    return (m.actualBoundingBoxAscent || sz * 0.8) + (m.actualBoundingBoxDescent || sz * 0.2);
+  };
+  while ((widthAt(size) * st.squeeze > W * 0.78 || heightAt(size) > H * 0.8) && size > 8) size -= 2;
+  const total = widthAt(size) * st.squeeze;
+
+  ctx.save();
+  // 글자 덩어리의 위아래 가운데에 맞춘다
+  ctx.font = fontAt(size * 1.15);
+  const mm = ctx.measureText(text);
+  const mid = ((mm.actualBoundingBoxAscent || 0) - (mm.actualBoundingBoxDescent || 0)) / 2;
+  ctx.translate(W / 2, H * 0.45 + mid * 0.5);
+  ctx.transform(st.squeeze, 0, st.skew, 1, 0, 0);
+  ctx.font = fontAt(size);
+  ctx.textBaseline = 'middle';
+  ctx.textAlign = 'left';
+  let x = -total / st.squeeze / 2;
+  chars.forEach((ch, i) => {
+    const dy = (rnd() - 0.5) * 2 * st.jitter * size + (i === 0 ? -0.06 * size : 0);
+    const rot = (rnd() - 0.5) * 0.18;
+    ctx.save(); ctx.translate(x, dy); ctx.rotate(rot);
+    // 첫 글자는 조금 크게 — 사인처럼 머리글자를 키운다
+    if (i === 0) ctx.font = fontAt(size * 1.15);
+    ctx.fillText(ch, 0, 0);
+    ctx.restore();
+    if (i === 0) ctx.font = fontAt(size);
+    x += ctx.measureText(ch).width + st.overlap * size;
+  });
+  ctx.restore();
+
+  // 밑줄 꼬리: 이름 아래를 가로지르고 끝에서 살짝 말려 올라간다
+  const left = W / 2 - total / 2, right = W / 2 + total / 2;
+  const y0 = H * (0.7 + rnd() * 0.06);
+  ctx.save();
+  ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  ctx.lineWidth = Math.max(1.5, size * (st.latin ? 0.03 : 0.05));
+  ctx.beginPath();
+  ctx.moveTo(left - W * 0.03, y0 + H * 0.04);
+  ctx.bezierCurveTo(left + total * 0.3, y0 - H * 0.06, right - total * 0.2, y0 + H * 0.1, right + W * 0.06, y0 - H * 0.12);
+  ctx.bezierCurveTo(right + W * 0.09, y0 - H * 0.2, right + W * 0.01, y0 - H * 0.22, right - W * 0.01, y0 - H * 0.08);
+  ctx.stroke();
+  ctx.restore();
 }
 
 // 이름 자동입력 서명을 캔버스로 그려 PNG 변환 (한글 폰트 문제 회피)
-function typedSigToPng(name, w, h, family) {
+function typedSigToPng(name, w, h, key, text) {
   const scale = 3;
   const c = document.createElement('canvas');
   c.width = Math.max(60, w) * scale;
   c.height = Math.max(24, h) * scale;
   const ctx = c.getContext('2d');
   ctx.clearRect(0, 0, c.width, c.height);
-  const tf = family && TYPED_FONTS.find(x => x.family === family);
+  ctx.fillStyle = ctx.strokeStyle = '#0e2d4d';
+  const tf = key && typedStyle(key);
+  if (tf?.sign) {
+    drawSignStyle(ctx, c.width, c.height, typedText({ name, font: key, text }), tf);
+    return c.toDataURL('image/png');
+  }
   // 필기체는 같은 크기에서 글자가 작아 보여 조금 더 크게 시작한다
   let size = c.height * (tf ? 0.8 : 0.55);
-  ctx.fillStyle = '#0e2d4d';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   const font = tf
@@ -10207,7 +10326,7 @@ function renderSignedFields(fields, signers, editorId) {
       src = typedSigToPng(sg.signed_at ? new Date(sg.signed_at).toLocaleDateString('ko-KR') : '', w, h);
     } else if (sg.sig_method === 'typed') {
       typed = parseTypedSig(sg.sig_data, sg.name);
-      src = typedSigToPng(typed.name, w, h, typed.font);
+      src = typedSigToPng(typed.name, w, h, typed.font, typed.text);
     } else if (sg.sig_data && sg.sig_data.startsWith('data:image')) {
       src = sg.sig_data;
     }
@@ -10220,7 +10339,7 @@ function renderSignedFields(fields, signers, editorId) {
       'width:' + w + 'px;height:' + h + 'px;';
     pg.appendChild(im);
     // 필기체가 아직 내려받아지지 않았으면 받은 뒤 다시 그린다
-    if (typed?.font) loadTypedFont(typed).then(() => { im.src = typedSigToPng(typed.name, w, h, typed.font); });
+    if (typed?.font) loadTypedFont(typed).then(() => { im.src = typedSigToPng(typed.name, w, h, typed.font, typed.text); });
   });
 }
 
@@ -10495,16 +10614,33 @@ function updateTypedPreview() {
   const name = (document.getElementById('typedSigName')?.value || '').replace(/\|/g, '').trim();
   const grid = document.getElementById('typedFontGrid');
   if (!grid) return;
-  if (!TYPED_FONTS.some(f => f.family === state.typedFont)) state.typedFont = TYPED_FONTS[0].family;
+  if (!typedStyle(state.typedFont)) state.typedFont = TYPED_FONTS[0].key;
+  // 영문 사인을 고르면 영문 표기 칸을 보여 준다 (자동 변환값을 서명자가 고칠 수 있다)
+  const enWrap = document.getElementById('typedEnWrap');
+  const enInput = document.getElementById('typedSigEn');
+  if (enWrap) enWrap.style.display = state.typedFont === 'sign-en' ? '' : 'none';
+  if (enInput && !state.typedEnEdited) enInput.value = romanizeName(name || '홍길동');
+  const en = (enInput?.value || '').replace(/\|/g, '').trim();
+
   grid.innerHTML = TYPED_FONTS.map(f =>
-    '<div class="typed-font' + (f.family === state.typedFont ? ' sel' : '') + '" onclick="pickTypedFont(\'' + f.family + '\')">' +
-      '<span class="tf-name" style="font-family:\'' + f.family + '\', cursive;font-weight:' + (f.weight || 400) + ';">' +
-        esc(name || '홍길동') + '</span>' +
-      '<span class="tf-label">' + f.label + '</span></div>').join('');
-  // 한글 필기체는 쓰인 글자만 내려받으므로, 이름이 바뀌면 그 글자를 불러온다
-  if (name) TYPED_FONTS.forEach(f => loadTypedFont({ name, font: f.family }));
+    '<div class="typed-font' + (f.key === state.typedFont ? ' sel' : '') + (f.sign ? ' sign' : '') +
+      '" onclick="pickTypedFont(\'' + f.key + '\')">' +
+      '<img class="tf-img" data-key="' + f.key + '" alt="' + f.label + '">' +
+      '<span class="tf-label">' + f.label + (f.sign ? ' <b>NEW</b>' : '') + '</span></div>').join('');
+  const nm = name || '홍길동';
+  const paint = () => grid.querySelectorAll('.tf-img').forEach(im => {
+    const k = im.dataset.key;
+    im.src = typedSigToPng(nm, 150, 56, k, k === 'sign-en' ? en : null);
+  });
+  paint();
+  // 한글 필기체는 쓰인 글자만 내려받으므로, 받은 뒤 다시 그린다
+  clearTimeout(state.typedPaintT);
+  state.typedPaintT = setTimeout(async () => {
+    await Promise.all(TYPED_FONTS.map(f => loadTypedFont({ name: nm, font: f.key, text: en })));
+    if (document.getElementById('typedFontGrid') === grid) paint();
+  }, 120);
 }
-function pickTypedFont(family) { state.typedFont = family; updateTypedPreview(); }
+function pickTypedFont(key) { state.typedFont = key; updateTypedPreview(); }
 function handleSigImageUpload(e) {
   const file = e.target.files[0];
   if (!file) return;
@@ -11050,6 +11186,10 @@ async function submitSignature() {
     const nm = (document.getElementById('typedSigName')?.value || '').replace(/\|/g, '').trim();
     if (!nm) { showToast('서명할 이름을 입력해주세요.'); return; }
     sigData = 'TYPED:' + nm + (state.typedFont ? '||font=' + state.typedFont : '');
+    if (state.typedFont === 'sign-en') {
+      const en = (document.getElementById('typedSigEn')?.value || '').replace(/\|/g, '').trim() || romanizeName(nm);
+      sigData += '||text=' + en;
+    }
   } else {
     if (!state.sigUploadedImage) { showToast('도장/사인 이미지를 업로드해주세요.'); return; }
     sigData = state.sigUploadedImage;
