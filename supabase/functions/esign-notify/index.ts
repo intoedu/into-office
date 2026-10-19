@@ -5,6 +5,7 @@
 //   POST { kind, document_id }          단건   (request · remind · done)
 //   POST { kind, document_ids: [...] }  대량   (한 번의 API 호출로 묶어 보낸다)
 //   POST { kind: 'approve', user_id }   가입 승인 안내 (관리자만)
+//   POST { kind: 'remind_one', document_id, sign_tokens: [...] }  고른 미서명자에게만 리마인드
 //
 // 발송·변수 규칙은 ../_shared/alimtalk.ts 에 있다.
 // SOLAPI_* 키가 없는 동안에는 실제 발송 없이 status='skipped' 로 기록만 남긴다.
@@ -38,10 +39,12 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
   if (req.method !== "POST") return json({ ok: false, error: "METHOD_NOT_ALLOWED" }, 405);
 
-  let body: { kind?: string; document_id?: string; document_ids?: string[]; user_id?: string };
+  let body: { kind?: string; document_id?: string; document_ids?: string[]; user_id?: string; sign_tokens?: string[] };
   try { body = await req.json(); } catch { return json({ ok: false, error: "BAD_JSON" }, 400); }
 
-  const kind = body.kind ?? "request";
+  // remind_one: 한 문서의 미서명자 중 고른 사람(sign_tokens)에게만 리마인드 템플릿으로 보낸다
+  const one = body.kind === "remind_one";
+  const kind = one ? "remind" : (body.kind ?? "request");
   if (!isKind(kind)) return json({ ok: false, error: "BAD_KIND" }, 400);
 
   const authz = req.headers.get("Authorization") ?? "";
@@ -80,7 +83,13 @@ Deno.serve(async (req) => {
     }
   }
 
-  const { rows, notFound } = await collectDocRows(admin, kind, ids);
+  let { rows, notFound } = await collectDocRows(admin, kind, ids);
+  if (one) {
+    const tokens = new Set((body.sign_tokens ?? []).slice(0, 5));
+    if (ids.length !== 1 || !tokens.size) return json({ ok: false, error: "SIGNER_REQUIRED" }, 400);
+    // 미서명자 목록(collectDocRows 의 remind 대상) 안에 있는 사람만 — 이미 서명한 사람에게는 가지 않는다
+    rows = rows.filter((r) => tokens.has(r.vars["#{서명토큰}"]));
+  }
   if (!rows.length) {
     return json({ ok: true, sent: 0, documents: ids.length, not_found: notFound, note: "발송 대상이 없습니다" });
   }

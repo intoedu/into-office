@@ -841,6 +841,9 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
 .rc-row:last-child { border-bottom:none; }
 .rc-row .nm { font-size:15px; font-weight:700; }
 .rc-row .ph { font-size:17px; font-weight:800; letter-spacing:.5px; font-variant-numeric:tabular-nums; color:var(--navy); }
+.remind-copy summary { font-size:13px; color:var(--text-secondary); cursor:pointer; padding:6px 0; }
+.btn-alim { background:#fee500; color:#191919; font-weight:700; font-size:12.5px; border-radius:8px; padding:8px 12px; white-space:nowrap; }
+.btn-alim:disabled { background:var(--bg); color:var(--text-muted); cursor:default; }
 .typed-font-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
 .typed-font { position:relative; border:1.5px solid var(--border); border-radius:10px; background:#fafbfc; cursor:pointer;
   height:96px; display:flex; align-items:center; justify-content:center; padding:8px 10px 20px; color:#0e2d4d; overflow:hidden; transition:all .15s; }
@@ -2260,27 +2263,32 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
       <button class="modal-close" onclick="closeRemind()">✕</button>
     </div>
     <div class="modal-body" style="max-height:68vh;overflow-y:auto;">
+      <p style="font-size:12.5px;color:var(--text-secondary);margin-bottom:8px;">이렇게 발송됩니다 (카카오 승인 알림톡 · 문구 고정)</p>
       <div class="msg-preview">
-        <div class="mt">전자서명 인투오피스</div>
-        <div class="mh">서명 요청 안내</div>
+        <div class="mt">인투오피스 전자서명</div>
+        <div class="mh">서명을 기다리고 있습니다</div>
         <div class="mb" id="remindPreview"></div>
-        <div class="mbtn">문서 확인하고 서명하기</div>
+        <div class="mbtn">서명하러 가기</div>
       </div>
-      <div class="form-group">
-        <label>리마인드 메시지 (수정 가능)</label>
-        <textarea class="ta" id="remindMsg" oninput="updateRemindPreview()"></textarea>
-      </div>
-      <div style="background:var(--warning-bg);border-radius:8px;padding:12px;margin-bottom:14px;">
+      <p style="font-size:13px;color:var(--text-secondary);margin:4px 0 8px;">미서명자 · 한 분씩 보내기</p>
+      <div id="remindLinks"></div>
+      <div style="background:var(--warning-bg);border-radius:8px;padding:12px;margin:14px 0;">
         <p style="font-size:12px;color:#b45309;line-height:1.7;">
-          아직 서명하지 않은 분에게만 표시됩니다. 발송 기록은 감사 추적에 남습니다.
+          아직 서명하지 않은 분에게만 보냅니다. 보낸 기록은 감사 추적에 남습니다.<br>
+          보내기 전에 <b>이름과 전화번호</b>가 맞는지 확인해 주세요.
         </p>
       </div>
-      <p style="font-size:13px;color:var(--text-secondary);margin-bottom:8px;">미서명자 · 개별 전달</p>
-      <div id="remindLinks"></div>
+      <details class="remind-copy">
+        <summary>✍️ 직접 쓴 메시지로 보내고 싶다면 (복사해서 문자 · 카톡으로)</summary>
+        <div class="form-group" style="margin-top:10px;">
+          <textarea class="ta" id="remindMsg" oninput="updateRemindPreview()"></textarea>
+          <div class="fld-msg hint">각 서명자 줄의 「복사」를 누르면 이 메시지와 서명 링크가 함께 복사됩니다.</div>
+        </div>
+      </details>
     </div>
     <div class="modal-footer">
       <button class="btn-secondary" onclick="closeRemind()">닫기</button>
-      <button class="btn-action navy" onclick="confirmRemind()">발송 기록 저장</button>
+      <button class="btn-action navy" id="remindAllBtn" onclick="confirmRemind()">💬 미서명자 모두에게 알림톡</button>
     </div>
   </div>
 </div>
@@ -3027,25 +3035,75 @@ function openRemind(docId) {
   updateRemindPreview();
 
   const base = shareBase();
+  state.remindPending = pending;
   document.getElementById('remindLinks').innerHTML = pending.map((s, i) =>
     '<div class="signer-link-row">' +
       '<span class="signer-num" style="background:' + SIGNER_COLORS[s.order_index || i] + '">' +
         ((s.order_index || i) + 1) + '</span>' +
       '<div class="signer-link-info"><div class="sl-name">' + esc(s.name) + '</div>' +
-      '<div class="sl-phone">' + esc(s.phone) + ' · ' +
-        (s.status === 'viewed' ? '열람함' : '미열람') + '</div></div>' +
-      '<button class="btn-copy" onclick="copyRemind(\'' + base + '?s=' + s.sign_token + '\',\'' + esc(s.name) + '\')">복사</button>' +
-      '<button class="btn-kakao-sm" onclick="shareRemind(\'' + base + '?s=' + s.sign_token + '\',\'' + esc(s.name) + '\')">카톡</button>' +
+      '<div class="sl-phone" style="font-weight:700;color:var(--navy);">' + esc(fmtPhone(s.phone)) +
+        ' <span style="font-weight:400;color:var(--text-muted);">· ' + (s.status === 'viewed' ? '열람함' : '미열람') + '</span></div></div>' +
+      '<button class="btn-copy" onclick="copyRemind(\'' + base + '?s=' + s.sign_token + '\',\'' + esc(s.name).replace(/'/g, '') + '\')">복사</button>' +
+      '<button class="btn-alim" data-idx="' + i + '" onclick="sendRemindOne(' + i + ', this)">💬 알림톡</button>' +
     '</div>').join('');
+  document.getElementById('remindAllBtn').textContent = '💬 미서명자 모두에게 알림톡 (' + pending.length + '명)';
 
   document.getElementById('remindModal').classList.add('active');
 }
 
+// 미리보기 = 실제로 나가는 리마인드 알림톡 (docs/알림톡-템플릿-초안.md 의 승인 문구)
 function updateRemindPreview() {
   const d = state.documents.find(x => x.id === state.remindDocId);
+  const dl = d?.deadline && d.deadline !== '미지정' ? d.deadline : null;
+  let remain = '기한 없음';
+  if (d?.deadline_at || dl) {
+    const ms = new Date(d.deadline_at || String(dl).replace(' ', 'T')).getTime() - Date.now();
+    remain = isNaN(ms) ? '-' : ms <= 0 ? '기한 경과' : ms >= 86400000 ? Math.floor(ms / 86400000) + '일' : Math.max(1, Math.floor(ms / 3600000)) + '시간';
+  }
   document.getElementById('remindPreview').textContent =
-    document.getElementById('remindMsg').value + '\n\n▸ 문서명\n' + (d?.title || '') +
-    (d?.deadline && d.deadline !== '미지정' ? '\n▸ 서명 기한\n' + d.deadline : '');
+    '(서명자 이름)님, 아직 서명하지 않은 문서가 있어 다시 알려드립니다.\n\n' +
+    '[문서 정보]\n- 문서: ' + (d?.title || '') + '\n- 남은 기간: ' + remain + '\n- 기한: ' + (dl || '미지정') + '까지\n\n' +
+    '기한이 지나면 링크가 만료되어 요청자가 다시 보내야 합니다.\n' +
+    '아래 「서명하러 가기」를 누르면 바로 이어서 서명할 수 있습니다.\n\n' +
+    '※ 이미 서명하셨다면 이 안내는 넘기셔도 됩니다.';
+}
+
+// 한 사람에게만 리마인드 알림톡 — 기록(esign_send_reminder) 후 알림톡(remind_one)
+async function sendRemindOne(i, btn) {
+  const s = state.remindPending?.[i];
+  if (!s) return;
+  if (!confirm(s.name + ' 님 (' + fmtPhone(s.phone) + ')\n\n이 번호로 리마인드 알림톡을 보낼까요?')) return;
+  btn.disabled = true; btn.textContent = '보내는 중…';
+  try {
+    const { data: sess } = await sb.auth.getSession();
+    const res = await fetch(SB_FN_NOTIFY, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (sess?.session?.access_token || '') },
+      body: JSON.stringify({ kind: 'remind_one', document_id: state.remindDocId, sign_tokens: [s.sign_token] })
+    });
+    const r = await res.json().catch(() => ({}));
+    const failed = r?.result?.failedMessageList || [];
+    if (r.error === 'BAD_KIND') throw new Error('서버 업데이트 전이라 한 분씩 보내기를 아직 쓸 수 없습니다. 아래 「모두에게」를 이용해 주세요.');
+    if (!r.ok || !r.sent || failed.length) {
+      throw new Error(r.skipped ? '알림톡 설정이 없어 보내지 못했습니다.'
+        : (failed[0]?.statusMessage || r.result?.errorMessage || r.error || '알림톡 발송 실패'));
+    }
+    // 알림톡이 실제로 나간 뒤에 감사 기록 — 서명자 id 가 있을 때만 그 한 사람으로 남긴다 (없으면 전원으로 기록되므로 건너뛴다.
+    // 알림톡 발송 자체는 esign.alimtalk_logs 에 따로 남는다)
+    if (s.id) {
+      const { data: rec } = await sb.rpc('esign_send_reminder', {
+        p_document_id: state.remindDocId,
+        p_message: document.getElementById('remindMsg').value,
+        p_signer_ids: [s.id]
+      });
+      if (!rec?.ok) console.warn('remind record failed');
+    }
+    btn.textContent = '✓ 보냄';
+    showToast(s.name + ' 님께 리마인드 알림톡을 보냈습니다.', true);
+  } catch (e) {
+    btn.disabled = false; btn.textContent = '💬 알림톡';
+    showToast(e.message);
+  }
 }
 
 function closeRemind() { document.getElementById('remindModal').classList.remove('active'); }
@@ -3082,6 +3140,8 @@ function shareRemind(url, name) {
 }
 
 async function confirmRemind() {
+  const list = (state.remindPending || []).map(s => '· ' + s.name + '  ' + fmtPhone(s.phone)).join('\n');
+  if (!confirm('미서명자 모두에게 리마인드 알림톡을 보낼까요?\n\n' + list)) return;
   const { data } = await sb.rpc('esign_send_reminder', {
     p_document_id: state.remindDocId,
     p_message: document.getElementById('remindMsg').value,
@@ -3089,7 +3149,7 @@ async function confirmRemind() {
   });
   if (!data?.ok) { showToast('기록 저장 실패'); return; }
   closeRemind();
-  showToast('리마인드 ' + data.count + '건이 기록되었습니다.', true);
+  showToast('리마인드 ' + data.count + '건을 기록하고 알림톡을 보내는 중입니다.', true);
   sendAlimtalk('remind', [state.remindDocId], { verbose: true });
   loadDocuments();
 }
@@ -3438,7 +3498,7 @@ async function routeByProfile() {
 // ============================================================
 const SB_FN_ADMIN = SB_URL + '/functions/v1/esign-admin';
 const APP_URL = shareBase();
-const BUILD = '2026-10-19.4';   // 배포 확인용. 화면 하단과 콘솔에 표시된다.
+const BUILD = '2026-10-19.5';   // 배포 확인용. 화면 하단과 콘솔에 표시된다.
 
 
 // ============================================================
