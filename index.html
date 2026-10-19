@@ -834,7 +834,13 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
 .sig-tab.active { background:var(--cyan); color:#fff; }
 .sig-tab-content { display:none; }
 .sig-tab-content.active { display:block; }
-.typed-sig-preview { font-family:'Brush Script MT','Segoe Script',cursive; font-size:36px; text-align:center; padding:24px; border:1.5px solid var(--border); border-radius:8px; background:#fafbfc; color:var(--navy); min-height:80px; }
+.typed-font-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.typed-font { position:relative; border:1.5px solid var(--border); border-radius:10px; background:#fafbfc; cursor:pointer;
+  height:96px; display:flex; align-items:center; justify-content:center; padding:8px 10px 20px; color:#0e2d4d; overflow:hidden; transition:all .15s; }
+.typed-font .tf-name { font-size:40px; line-height:1.1; white-space:nowrap; max-width:100%; overflow:hidden; text-overflow:clip; }
+.typed-font .tf-label { position:absolute; left:10px; bottom:6px; font-size:11px; color:var(--text-muted); font-family:'Pretendard Variable', Pretendard, sans-serif; }
+.typed-font.sel { border-color:var(--cyan); background:rgba(4,183,221,.06); box-shadow:0 0 0 3px rgba(4,183,221,.15); }
+.typed-font.sel::after { content:'✓'; position:absolute; right:10px; top:6px; font-size:13px; font-weight:800; color:var(--cyan); font-family:sans-serif; }
 .upload-sig-zone { border:2px dashed var(--border); border-radius:8px; padding:24px; text-align:center; cursor:pointer; transition:all .2s; }
 .upload-sig-zone:hover { border-color:var(--cyan); background:rgba(4,183,221,0.04); }
 .upload-sig-zone img { max-width:100%; max-height:120px; margin-top:8px; }
@@ -2127,11 +2133,11 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
       </div>
       <!-- Tab 1: Type name -->
       <div class="sig-tab-content" id="sigTabType">
-        <p style="font-size:13px;color:var(--text-secondary);margin-bottom:10px;">서명자의 이름이 서명란에 자동으로 입력됩니다.</p>
+        <p style="font-size:13px;color:var(--text-secondary);margin-bottom:10px;">이름을 적으면 <b>필기체 4가지</b>로 만들어 드립니다. 마음에 드는 서명을 골라 주세요.</p>
         <div class="form-group" style="margin-bottom:12px;">
-          <input type="text" id="typedSigName" placeholder="서명자 이름" oninput="updateTypedPreview()">
+          <input type="text" id="typedSigName" placeholder="서명자 이름" maxlength="20" oninput="updateTypedPreview()">
         </div>
-        <div class="typed-sig-preview" id="typedSigPreview">서명 미리보기</div>
+        <div class="typed-font-grid" id="typedFontGrid"></div>
       </div>
       <!-- Tab 2: Upload image -->
       <div class="sig-tab-content" id="sigTabUpload">
@@ -3420,7 +3426,7 @@ async function routeByProfile() {
 // ============================================================
 const SB_FN_ADMIN = SB_URL + '/functions/v1/esign-admin';
 const APP_URL = shareBase();
-const BUILD = '2026-10-19.1';   // 배포 확인용. 화면 하단과 콘솔에 표시된다.
+const BUILD = '2026-10-19.2';   // 배포 확인용. 화면 하단과 콘솔에 표시된다.
 
 
 // ============================================================
@@ -8444,7 +8450,9 @@ async function composeSignedPdf(doc, signers, fields) {
 
     let du = null;
     if (s.sig_method === 'typed') {
-      du = typedSigToPng((s.sig_data || '').replace(/^TYPED:/, '') || s.name, bw, bh);
+      const t = parseTypedSig(s.sig_data, s.name);
+      await loadTypedFont(t);
+      du = typedSigToPng(t.name, bw, bh, t.font);
     } else if (s.sig_data && s.sig_data.startsWith('data:image')) {
       du = s.sig_data;
     }
@@ -8485,19 +8493,43 @@ function safeName(t) {
 }
 
 // ===== 서명 합성 문서 다운로드 =====
+// 이름 자동입력 서명 — 'TYPED:이름' (예전 · 정자체) 또는 'TYPED:이름||font=서체' (필기체)
+const TYPED_FONTS = [
+  { family: 'Nanum Pen Script',   label: '펜글씨' },
+  { family: 'Nanum Brush Script', label: '붓글씨' },
+  { family: 'Gaegu',              label: '또박또박', weight: 700 },
+  { family: 'Dokdo',              label: '굵은 손글씨' }
+];
+function parseTypedSig(data, fallback) {
+  const raw = String(data || '').replace(/^TYPED:/, '');
+  const i = raw.indexOf('||font=');
+  const name = (i >= 0 ? raw.slice(0, i) : raw) || fallback || '';
+  const font = i >= 0 ? raw.slice(i + 7) : null;
+  return { name, font: TYPED_FONTS.some(f => f.family === font) ? font : null };
+}
+async function loadTypedFont(t) {
+  if (!t?.font || !t.name) return;
+  const f = TYPED_FONTS.find(x => x.family === t.font);
+  try { await document.fonts.load((f?.weight || 400) + ' 48px "' + t.font + '"', t.name); } catch (e) {}
+}
+
 // 이름 자동입력 서명을 캔버스로 그려 PNG 변환 (한글 폰트 문제 회피)
-function typedSigToPng(name, w, h) {
+function typedSigToPng(name, w, h, family) {
   const scale = 3;
   const c = document.createElement('canvas');
   c.width = Math.max(60, w) * scale;
   c.height = Math.max(24, h) * scale;
   const ctx = c.getContext('2d');
   ctx.clearRect(0, 0, c.width, c.height);
-  let size = c.height * 0.55;
+  const tf = family && TYPED_FONTS.find(x => x.family === family);
+  // 필기체는 같은 크기에서 글자가 작아 보여 조금 더 크게 시작한다
+  let size = c.height * (tf ? 0.8 : 0.55);
   ctx.fillStyle = '#0e2d4d';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  const font = s => `${s}px "Pretendard Variable", Pretendard, "Malgun Gothic", sans-serif`;
+  const font = tf
+    ? s => `${tf.weight || 400} ${s}px "${tf.family}", "Pretendard Variable", Pretendard, cursive`
+    : s => `${s}px "Pretendard Variable", Pretendard, "Malgun Gothic", sans-serif`;
   ctx.font = font(size);
   while (ctx.measureText(name).width > c.width * 0.9 && size > 8) {
     size -= 2; ctx.font = font(size);
@@ -10170,11 +10202,12 @@ function renderSignedFields(fields, signers, editorId) {
     const pg = document.querySelector('#' + editorId + ' .pdf-page[data-page="' + (f.page || 1) + '"]');
     if (!pg) return;
     const w = f.w * pg.offsetWidth, h = f.h * pg.offsetHeight;
-    let src = null;
+    let src = null, typed = null;
     if (f.field_type === 'date') {
       src = typedSigToPng(sg.signed_at ? new Date(sg.signed_at).toLocaleDateString('ko-KR') : '', w, h);
     } else if (sg.sig_method === 'typed') {
-      src = typedSigToPng((sg.sig_data || '').replace(/^TYPED:/, '') || sg.name, w, h);
+      typed = parseTypedSig(sg.sig_data, sg.name);
+      src = typedSigToPng(typed.name, w, h, typed.font);
     } else if (sg.sig_data && sg.sig_data.startsWith('data:image')) {
       src = sg.sig_data;
     }
@@ -10186,6 +10219,8 @@ function renderSignedFields(fields, signers, editorId) {
       'left:' + (f.x * pg.offsetWidth) + 'px;top:' + (f.y * pg.offsetHeight) + 'px;' +
       'width:' + w + 'px;height:' + h + 'px;';
     pg.appendChild(im);
+    // 필기체가 아직 내려받아지지 않았으면 받은 뒤 다시 그린다
+    if (typed?.font) loadTypedFont(typed).then(() => { im.src = typedSigToPng(typed.name, w, h, typed.font); });
   });
 }
 
@@ -10457,10 +10492,19 @@ function initSigPadSize() {
   if (state.signaturePad) state.signaturePad.clear();
 }
 function updateTypedPreview() {
-  const name = document.getElementById('typedSigName')?.value || '';
-  const preview = document.getElementById('typedSigPreview');
-  if (preview) preview.textContent = name || '서명 미리보기';
+  const name = (document.getElementById('typedSigName')?.value || '').replace(/\|/g, '').trim();
+  const grid = document.getElementById('typedFontGrid');
+  if (!grid) return;
+  if (!TYPED_FONTS.some(f => f.family === state.typedFont)) state.typedFont = TYPED_FONTS[0].family;
+  grid.innerHTML = TYPED_FONTS.map(f =>
+    '<div class="typed-font' + (f.family === state.typedFont ? ' sel' : '') + '" onclick="pickTypedFont(\'' + f.family + '\')">' +
+      '<span class="tf-name" style="font-family:\'' + f.family + '\', cursive;font-weight:' + (f.weight || 400) + ';">' +
+        esc(name || '홍길동') + '</span>' +
+      '<span class="tf-label">' + f.label + '</span></div>').join('');
+  // 한글 필기체는 쓰인 글자만 내려받으므로, 이름이 바뀌면 그 글자를 불러온다
+  if (name) TYPED_FONTS.forEach(f => loadTypedFont({ name, font: f.family }));
 }
+function pickTypedFont(family) { state.typedFont = family; updateTypedPreview(); }
 function handleSigImageUpload(e) {
   const file = e.target.files[0];
   if (!file) return;
@@ -11003,9 +11047,9 @@ async function submitSignature() {
     }
     sigData = state.signaturePad.toDataURL('image/png');
   } else if (method === 1) {
-    const nm = document.getElementById('typedSigName')?.value?.trim();
+    const nm = (document.getElementById('typedSigName')?.value || '').replace(/\|/g, '').trim();
     if (!nm) { showToast('서명할 이름을 입력해주세요.'); return; }
-    sigData = 'TYPED:' + nm;
+    sigData = 'TYPED:' + nm + (state.typedFont ? '||font=' + state.typedFont : '');
   } else {
     if (!state.sigUploadedImage) { showToast('도장/사인 이미지를 업로드해주세요.'); return; }
     sigData = state.sigUploadedImage;
@@ -11016,18 +11060,24 @@ async function submitSignature() {
   btn.disabled = true; btn.textContent = '처리 중...';
 
   try {
-    const res = await fetch(SB_FN, {
+    const post = sd => fetch(SB_FN, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         action: 'sign',
         token: state.signToken,
         method: methodKey,
-        sig_data: sigData,
+        sig_data: sd,
         consent: true
       })
-    });
-    const out = await res.json();
+    }).then(r => r.json());
+    let out = await post(sigData);
+    // 필기체 정보가 붙은 형식을 서버가 받지 못하면 이름만으로 한 번 더 보낸다 (서명은 반드시 끝나도록)
+    if (!out.ok && methodKey === 'typed' && sigData.includes('||font=') &&
+        !['ALREADY_SIGNED', 'CONSENT_REQUIRED', 'INVALID_TOKEN'].includes(out.error)) {
+      console.warn('typed font rejected, retry plain', out.error);
+      out = await post(sigData.split('||font=')[0]);
+    }
 
     if (!out.ok) {
       const msgs = {
