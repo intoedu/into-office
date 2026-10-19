@@ -844,6 +844,24 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
 .remind-copy summary { font-size:13px; color:var(--text-secondary); cursor:pointer; padding:6px 0; }
 .btn-alim { background:#fee500; color:#191919; font-weight:700; font-size:12.5px; border-radius:8px; padding:8px 12px; white-space:nowrap; }
 .btn-alim:disabled { background:var(--bg); color:var(--text-muted); cursor:default; }
+.io-ad-bar { position:fixed; left:0; right:0; bottom:0; z-index:50; background:#fff; border-top:1px solid #e5e9f0;
+  box-shadow:0 -4px 18px rgba(14,45,77,.08); display:flex; align-items:center; gap:10px; padding:10px 12px 10px 14px; }
+.io-ad-bar .ic { width:30px; height:30px; border-radius:8px; background:#0e2d4d; color:#fff; display:flex; align-items:center; justify-content:center; font-size:15px; flex-shrink:0; }
+.io-ad-bar .tx { flex:1; font-size:12.5px; line-height:1.45; color:#334155; }
+.io-ad-bar .tx b { color:#0e2d4d; }
+.io-ad-bar .go { flex-shrink:0; background:#04b7dd; color:#fff; font-size:12.5px; font-weight:700; border-radius:8px; padding:8px 11px; white-space:nowrap; text-decoration:none; }
+.io-ad-bar .x { flex-shrink:0; color:#94a3b8; font-size:15px; padding:4px 6px; background:none; }
+@media (min-width:760px) { .io-ad-bar { left:50%; right:auto; transform:translateX(-50%); width:min(720px, 100%); border:1px solid #e5e9f0; border-bottom:none; border-radius:12px 12px 0 0; } }
+.io-ad-card { margin-top:18px; border-radius:16px; padding:22px 20px; text-align:left; color:#fff; position:relative; overflow:hidden;
+  background:linear-gradient(135deg,#0e2d4d 0%,#13406b 60%,#0a7ea0 100%); }
+.io-ad-card:after { content:''; position:absolute; right:-40px; top:-40px; width:140px; height:140px; border-radius:50%; background:rgba(4,183,221,.25); pointer-events:none; }
+.io-ad-card .lb { font-size:11.5px; font-weight:700; letter-spacing:.5px; color:#7fe3f7; margin-bottom:8px; }
+.io-ad-card .tt { font-size:20px; font-weight:800; line-height:1.35; margin-bottom:8px; }
+.io-ad-card .sb { font-size:13px; line-height:1.65; color:rgba(255,255,255,.85); margin-bottom:14px; }
+.io-ad-card .ch { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:16px; }
+.io-ad-card .ch span { font-size:11.5px; background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.2); border-radius:999px; padding:4px 9px; }
+.io-ad-card .bt { position:relative; z-index:1; display:block; text-align:center; background:#fff; color:#0e2d4d; font-weight:800; font-size:15px; border-radius:10px; padding:13px; text-decoration:none; }
+.io-ad-card .ft { font-size:11px; color:rgba(255,255,255,.6); margin-top:10px; text-align:center; }
 .typed-font-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
 .typed-font { position:relative; border:1.5px solid var(--border); border-radius:10px; background:#fafbfc; cursor:pointer;
   height:96px; display:flex; align-items:center; justify-content:center; padding:8px 10px 20px; color:#0e2d4d; overflow:hidden; transition:all .15s; }
@@ -1556,6 +1574,7 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
         <label class="choice"><input type="radio" name="suSource" value="인스타그램 · 유튜브" onchange="onSourceChange()"><span>인스타그램 · 유튜브</span></label>
         <label class="choice"><input type="radio" name="suSource" value="카카오톡 채널" onchange="onSourceChange()"><span>카카오톡 채널</span></label>
         <label class="choice"><input type="radio" name="suSource" value="인투마케팅 안내" onchange="onSourceChange()"><span>인투마케팅 안내</span></label>
+        <label class="choice"><input type="radio" name="suSource" value="전자서명을 받아 보고" onchange="onSourceChange()"><span>전자서명을 받아 보고</span></label>
         <label class="choice"><input type="radio" name="suSource" value="기타" onchange="onSourceChange()"><span>기타</span></label>
       </div>
       <input type="text" id="suSourceEtc" maxlength="100" placeholder="알게 된 경로를 적어주세요" style="display:none;margin-top:8px;">
@@ -3173,6 +3192,10 @@ function goSignup() {
   });
   document.getElementById('suBizType').value = '';
   document.querySelectorAll('input[name="suMemberType"], input[name="suSource"]').forEach(r => r.checked = false);
+  // 서명 화면 안내를 보고 들어온 사람은 가입 경로를 미리 골라 둔다 (바꿀 수 있다)
+  let fromSign = false;
+  try { fromSign = localStorage.getItem('io_from') === 'sign'; } catch (e) {}
+  if (fromSign) { const r = document.querySelector('input[name="suSource"][value="전자서명을 받아 보고"]'); if (r) r.checked = true; }
   const etc = document.getElementById('suSourceEtc'); if (etc) { etc.value = ''; etc.style.display = 'none'; }
   ['agAll','agPrivacy','agMarketing'].forEach(i => document.getElementById(i).checked = false);
   state.userOk = false; state.emailOk = false;
@@ -3361,6 +3384,7 @@ async function submitSignup() {
       throw new Error(m[data?.error] || '프로필 등록 실패');
     }
     state.user = email;
+    try { localStorage.removeItem('io_from'); } catch (e) {}
     const inv = document.getElementById('suInvite')?.value.trim();
     if (inv) storeInvite(inv);
     showToast('가입이 완료되었습니다.', true);
@@ -3498,7 +3522,7 @@ async function routeByProfile() {
 // ============================================================
 const SB_FN_ADMIN = SB_URL + '/functions/v1/esign-admin';
 const APP_URL = shareBase();
-const BUILD = '2026-10-19.5';   // 배포 확인용. 화면 하단과 콘솔에 표시된다.
+const BUILD = '2026-10-19.6';   // 배포 확인용. 화면 하단과 콘솔에 표시된다.
 
 
 // ============================================================
@@ -10075,6 +10099,7 @@ async function sendApproveAlimtalk(userId) {
 function showPage(id) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById(id).classList.add('active');
+  if (id !== 'signPage') hidePromoBar();
   // 서명 화면이 아니면 주소에서 토큰 제거
   if (id !== 'signPage' && location.search.includes('s=')) {
     history.replaceState(null, '', location.origin + location.pathname);
@@ -10222,6 +10247,7 @@ async function openSignByToken(token) {
 
   document.getElementById('signDocTitle').textContent = d.title;
   document.getElementById('signRequester').textContent = d.requester_name;
+  loadSignPromo(token);
   document.getElementById('signDeadline').textContent = fmtLocal(d.deadline);
 
   // 서명 진행 현황
@@ -11406,6 +11432,52 @@ function showSignComplete(result) {
         '</p></div>' +
       '<p class="ip-notice">본 기록은 「전자서명법」 제3조에 따른 법적 증거로 보관됩니다.</p>' +
     '</div>';
+  hidePromoBar();
+  if (state.signPromo) c.insertAdjacentHTML('beforeend', promoCardHtml());
+}
+
+// ── 서명 화면 인투오피스 안내 (광고) ─────────────────────────
+// 무료 체험 · 조직 없는 문서에서만 보인다 (esign_sign_promo). 유료 고객 문서 · 확인 실패 시에는 보이지 않는다.
+const PROMO_URL = () => APP_URL + '?from=sign';
+async function loadSignPromo(token) {
+  state.signPromo = false;
+  hidePromoBar();
+  try {
+    const { data, error } = await sb.rpc('esign_sign_promo', { p_token: token });
+    state.signPromo = !error && !!data?.ok && !!data.show;
+  } catch (e) { state.signPromo = false; }
+  if (!state.signPromo) return;
+  let closed = false;
+  try { closed = sessionStorage.getItem('io_promo_closed') === '1'; } catch (e) {}
+  if (closed || !document.getElementById('signPage').classList.contains('active')) return;
+  const bar = document.createElement('div');
+  bar.className = 'io-ad-bar'; bar.id = 'ioAdBar';
+  bar.innerHTML = '<div class="ic">✍️</div>' +
+    '<div class="tx"><b>이 서명 요청도 인투오피스로 왔어요.</b><br>계약서 · 동의서, 우리도 카톡으로 보내 볼까요?</div>' +
+    // 서명 중에는 새 창으로 열어 서명 화면을 잃지 않게 한다
+    '<a class="go" href="' + PROMO_URL() + '" target="_blank" rel="noopener">무료 체험</a>' +
+    '<button class="x" aria-label="닫기" onclick="closePromoBar()">✕</button>';
+  document.body.appendChild(bar);
+  document.getElementById('signPage').style.paddingBottom = '72px';
+}
+function hidePromoBar() {
+  document.getElementById('ioAdBar')?.remove();
+  const sp = document.getElementById('signPage');
+  if (sp) sp.style.paddingBottom = '';
+}
+function closePromoBar() {
+  try { sessionStorage.setItem('io_promo_closed', '1'); } catch (e) {}
+  hidePromoBar();
+}
+function promoCardHtml() {
+  return '<div class="io-ad-card">' +
+    '<div class="lb">INTO OFFICE · 인투오피스 전자서명</div>' +
+    '<div class="tt">방금처럼, 1분이면<br>서명 끝.</div>' +
+    '<div class="sb">이번엔 보내는 쪽이 되어 보세요.<br>계약서 · 동의서를 카카오톡으로 보내고 서명까지 한 번에 받습니다.</div>' +
+    '<div class="ch"><span>✓ 30일 · 10건 무료</span><span>✓ 카드 등록 없음</span><span>✓ 양식 35종</span></div>' +
+    '<a class="bt" href="' + PROMO_URL() + '">무료로 시작하기 →</a>' +
+    '<div class="ft">개인은 월 3,900원부터 · 조직 · 팀 요금제도 있어요</div>' +
+  '</div>';
 }
 
 // ===== SHARE =====
@@ -11489,6 +11561,12 @@ async function handleRoute() {
 
   const qToken = qs.get('s');
   if (qToken) { await openSignByToken(qToken); return; }
+
+  // 서명 화면 안내에서 들어온 방문 (?from=sign) — 가입 경로를 미리 골라 두기 위해 기억한다
+  if (qs.get('from') === 'sign') {
+    try { localStorage.setItem('io_from', 'sign'); } catch (e) {}
+    history.replaceState(null, '', location.pathname);
+  }
 
   // 팀 초대 링크 (?invite=코드) — 저장해 두고 주소를 정리한다
   const qInvite = qs.get('invite');
