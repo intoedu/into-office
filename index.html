@@ -834,6 +834,13 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
 .sig-tab.active { background:var(--cyan); color:#fff; }
 .sig-tab-content { display:none; }
 .sig-tab-content.active { display:block; }
+.phone-bad { border-color:var(--danger) !important; background:#fff7f7 !important; }
+.phone-ok { border-color:#10b981 !important; }
+.rc-list { border:1px solid var(--border); border-radius:10px; overflow:hidden; margin:12px 0 4px; }
+.rc-row { display:grid; grid-template-columns:28px 1fr auto; gap:10px; align-items:center; padding:12px 14px; border-bottom:1px solid var(--border); }
+.rc-row:last-child { border-bottom:none; }
+.rc-row .nm { font-size:15px; font-weight:700; }
+.rc-row .ph { font-size:17px; font-weight:800; letter-spacing:.5px; font-variant-numeric:tabular-nums; color:var(--navy); }
 .typed-font-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
 .typed-font { position:relative; border:1.5px solid var(--border); border-radius:10px; background:#fafbfc; cursor:pointer;
   height:96px; display:flex; align-items:center; justify-content:center; padding:8px 10px 20px; color:#0e2d4d; overflow:hidden; transition:all .15s; }
@@ -1237,7 +1244,7 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
       <div id="inviteForm">
         <div class="form-group"><label>이름</label><input type="text" id="invName" placeholder="홍길동"></div>
         <div class="form-group"><label>이메일</label><input type="email" id="invEmail" placeholder="name@example.com"></div>
-        <div class="form-group"><label>연락처</label><input type="tel" id="invPhone" placeholder="010-1234-5678"></div>
+        <div class="form-group"><label>연락처</label><input type="tel" id="invPhone" inputmode="numeric" maxlength="13" placeholder="010-1234-5678" oninput="phoneInput(this)"></div>
         <div class="form-group">
           <label>권한</label>
           <select id="invRole" class="signer-select" style="width:100%;padding:11px 12px;font-size:14px;">
@@ -1522,7 +1529,7 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
       <div class="form-group"><label>이름 *</label><input type="text" id="suName" placeholder="홍길동"></div>
       <div class="form-group"><label>출생년도 *</label><input type="number" id="suBirth" placeholder="1990" min="1930" max="2020"></div>
     </div>
-    <div class="form-group"><label>연락처 *</label><input type="tel" id="suPhone" placeholder="010-1234-5678"></div>
+    <div class="form-group"><label>연락처 *</label><input type="tel" id="suPhone" inputmode="numeric" maxlength="13" placeholder="010-1234-5678" oninput="phoneInput(this)"></div>
     <div class="su-row">
       <div class="form-group"><label>사업명 (선택)</label><input type="text" id="suBizName" placeholder="OO학원"></div>
       <div class="form-group">
@@ -1886,7 +1893,7 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
       </p>
       <div class="contact-add">
         <input type="text" id="ctName" placeholder="이름 *" maxlength="50">
-        <input type="tel" id="ctPhone" placeholder="연락처 *" maxlength="20">
+        <input type="tel" id="ctPhone" placeholder="연락처 *  010-0000-0000" inputmode="numeric" maxlength="13" oninput="phoneInput(this)">
         <input type="text" id="ctMemo" placeholder="메모 (예: 3학년 학부모)" maxlength="100"
                onkeydown="if(event.key==='Enter')addContact()">
         <button class="btn-action" onclick="addContact()">＋ 저장</button>
@@ -3431,7 +3438,7 @@ async function routeByProfile() {
 // ============================================================
 const SB_FN_ADMIN = SB_URL + '/functions/v1/esign-admin';
 const APP_URL = shareBase();
-const BUILD = '2026-10-19.3';   // 배포 확인용. 화면 하단과 콘솔에 표시된다.
+const BUILD = '2026-10-19.4';   // 배포 확인용. 화면 하단과 콘솔에 표시된다.
 
 
 // ============================================================
@@ -4146,8 +4153,8 @@ async function addContact() {
   const phone = document.getElementById('ctPhone').value.trim();
   const memo = document.getElementById('ctMemo').value.trim();
   if (!name) { showToast('이름을 입력해주세요.'); return; }
-  if (phone.replace(/[^0-9]/g, '').length < 9) { showToast('연락처를 정확히 입력해주세요.'); return; }
-  const { data } = await sb.rpc('esign_saved_signers_add', { p_items: [{ name, phone, memo }] });
+  if (!phoneOk(phone)) { showToast('휴대전화 번호를 정확히 입력해주세요. (010-1234-5678)'); return; }
+  const { data } = await sb.rpc('esign_saved_signers_add', { p_items: [{ name, phone: fmtPhone(phone), memo }] });
   if (data?.error === 'LIMIT_REACHED') { showToast('주소록은 최대 500명까지 저장할 수 있습니다.'); return; }
   if (!data?.ok) { showToast('저장하지 못했습니다.'); return; }
   if (!data.added) { showToast('이미 같은 이름과 번호로 저장되어 있습니다.'); return; }
@@ -4678,13 +4685,15 @@ function bulkRenderTable() {
       '<tr>' +
         '<td>' + (i + 1) + '</td>' +
         '<td class="' + (r.name.trim() ? '' : 'bad') + '"><input value="' + esc(r.name) + '" placeholder="이름" oninput="bulkEditRow(' + i + ',\'name\',this.value)"></td>' +
-        '<td class="' + (bulkPhoneOk(r.phone) ? '' : 'bad') + '"><input value="' + esc(r.phone) + '" placeholder="010-0000-0000" oninput="bulkEditRow(' + i + ',\'phone\',this.value)"></td>' +
+        '<td class="' + (bulkPhoneOk(r.phone) ? '' : 'bad') + '"><input value="' + esc(r.phone) + '" inputmode="numeric" maxlength="13" placeholder="010-0000-0000" ' +
+          'oninput="bulkEditRow(' + i + ',\'phone\',phoneInput(this));this.parentElement.classList.toggle(\'bad\',!phoneOk(this.value))"></td>' +
         '<td><button class="btn-del" onclick="bulkDelRow(' + i + ')">삭제</button></td>' +
       '</tr>').join('') + '</tbody>';
   bulkUpdateInfo();
 }
 
-function bulkPhoneOk(p) { return /^0\d{1,2}-?\d{3,4}-?\d{4}$/.test(String(p || '').replace(/\s/g, '')); }
+// 알림톡은 휴대전화로만 가므로 휴대전화 번호만 통과시킨다
+function bulkPhoneOk(p) { return phoneOk(p); }
 
 function bulkUpdateInfo() {
   const el = document.getElementById('bulkRowInfo');
@@ -4752,7 +4761,8 @@ function bulkFromMatrix(rows) {
   }
   return body.map(r => ({
     name: String(r[nameIdx] ?? '').trim(),
-    phone: String(r[phoneIdx] ?? '').trim()
+    // 엑셀이 앞자리 0 을 지운 경우(1012345678)를 되살리고 010-1234-5678 형식으로 맞춘다
+    phone: fmtPhone(String(r[phoneIdx] ?? '').trim().replace(/^(1[016789])/, '0$1'))
   })).filter(r => r.name || r.phone);
 }
 
@@ -9972,7 +9982,9 @@ async function showAlimStatus(promise, count) {
     paint('#fffbeb', '#fde68a', '#92400e', '⚠️ 알림톡 ' + (r.sent - failed.length) + '건 접수, <b>' + failed.length + '건 실패</b>했습니다. 실패한 서명자에게는 아래 링크를 직접 보내 주세요.' +
       (why ? '<br><span style="font-size:12px;">사유: ' + esc(String(why)) + '</span>' : ''));
   } else if (r?.ok && r.sent > 0) {
-    paint('#ecfdf5', '#a7f3d0', '#047857', '✅ <b>카카오 알림톡 ' + r.sent + '건을 보냈습니다.</b> 서명자에게 따로 보내지 않으셔도 됩니다.' +
+    paint('#ecfdf5', '#a7f3d0', '#047857', '✅ <b>카카오 알림톡 ' + r.sent + '건을 보냈습니다.</b><br>' +
+      '아래 <b>서명자 이름과 전화번호가 맞는지</b> 한 번 더 확인해 주세요.<br>' +
+      '<span style="font-size:12px;">번호가 틀렸다면 문서 메뉴(•••)에서 삭제한 뒤 올바른 번호로 다시 보내 주세요.</span>' +
       (r.sent < count ? '<br><span style="font-size:12px;">휴대폰 번호가 없는 서명자에게는 아래 링크를 직접 보내 주세요.</span>' : ''));
   } else if (r?.ok && r.skipped > 0) {
     paint('#fffbeb', '#fde68a', '#92400e', '⚠️ 알림톡 설정이 아직 없어 보내지 않았습니다. 아래 링크를 직접 보내 주세요.');
@@ -10541,12 +10553,48 @@ function goStep(n) {
     // Validate signers
     const incomplete = state.signers.some(s => !s.name.trim() || !s.phone.trim());
     if (incomplete) { showToast('모든 서명자의 이름과 연락처를 입력해주세요.'); goStep(2); return; }
+    const badIdx = state.signers.findIndex(s => !phoneOk(s.phone));
+    if (badIdx >= 0) {
+      showToast((badIdx + 1) + '번 서명자의 휴대전화 번호를 확인해 주세요. (010-1234-5678 형식, 11자리)');
+      goStep(2); return;
+    }
+    const nums = state.signers.map(s => s.phone.replace(/\D/g, ''));
+    const dup = nums.findIndex((n, i) => nums.indexOf(n) !== i);
+    if (dup >= 0 && !confirm('서명자 ' + (nums.indexOf(nums[dup]) + 1) + '번과 ' + (dup + 1) + '번의 휴대전화 번호가 같습니다.\n' +
+        '한 사람이 두 번 서명하는 것이 맞나요?\n\n[확인] 그대로 진행  ·  [취소] 번호 고치기')) { goStep(2); return; }
     populateFieldSignerSelect();
     renderPdf().then(() => {
       state.fields.forEach(f => renderField(f));
     });
   }
 }
+
+// ===== 휴대전화 번호 =====
+// 숫자만 받고 최대 11자리까지만 들어가게 한다. 입력하는 동안 010-1234-5678 형식으로 자동 하이픈.
+function fmtPhone(v) {
+  const d = String(v || '').replace(/\D/g, '').slice(0, 11);
+  if (d.length <= 3) return d;
+  if (d.length <= 7) return d.slice(0, 3) + '-' + d.slice(3);
+  if (d.length === 10 && !d.startsWith('010')) return d.slice(0, 3) + '-' + d.slice(3, 6) + '-' + d.slice(6);
+  return d.slice(0, 3) + '-' + d.slice(3, 7) + '-' + d.slice(7);
+}
+// 알림톡을 받을 수 있는 휴대전화인지 (010 은 11자리, 011·016·017·018·019 는 10~11자리)
+function phoneOk(v) {
+  const d = String(v || '').replace(/\D/g, '');
+  return d.startsWith('010') ? d.length === 11 : /^01[16789]\d{7,8}$/.test(d);
+}
+function phoneInput(el) {
+  const atEnd = el.selectionStart === el.value.length;
+  const f = fmtPhone(el.value);
+  if (el.value !== f) {
+    el.value = f;
+    if (atEnd) el.setSelectionRange(f.length, f.length);
+  }
+  el.classList.toggle('phone-bad', f.length >= 12 && !phoneOk(f));
+  el.classList.toggle('phone-ok', phoneOk(f));
+  return f;
+}
+const PHONE_ATTRS = 'type="tel" inputmode="numeric" autocomplete="tel" maxlength="13" placeholder="010-0000-0000"';
 
 // ===== FILE UPLOAD =====
 const SIGNER_COLORS = ['#04b7dd','#7c3aed','#ef4444','#f59e0b','#10b981'];
@@ -10562,8 +10610,9 @@ function renderSignerList() {
   if (!list) return;
   list.innerHTML = state.signers.map((s,i) => 
     '<div class="signer-entry"><span class="signer-num" style="background:'+SIGNER_COLORS[i]+'">'+(i+1)+'</span>' +
-    '<input type="text" placeholder="이름 *" value="'+esc(s.name||'')+'" onchange="state.signers['+i+'].name=this.value">' +
-    '<input type="tel" placeholder="연락처 *" value="'+esc(s.phone||'')+'" onchange="state.signers['+i+'].phone=this.value">' +
+    '<input type="text" placeholder="이름 *" maxlength="20" value="'+esc(s.name||'')+'" oninput="state.signers['+i+'].name=this.value">' +
+    '<input ' + PHONE_ATTRS.replace('010-0000-0000', '휴대전화 *  010-0000-0000') + ' class="' + (s.phone ? (phoneOk(s.phone) ? 'phone-ok' : 'phone-bad') : '') +
+      '" value="'+esc(fmtPhone(s.phone||''))+'" oninput="state.signers['+i+'].phone=phoneInput(this)">' +
     (state.signers.length > 2 ? '<button class="btn-remove-signer" onclick="removeSigner('+i+')">✕</button>' : '<span></span>') +
     '</div>'
   ).join('');
@@ -10967,6 +11016,9 @@ async function createDocument() {
     showToast('최소 2명의 서명자 정보를 입력해주세요.');
     return;
   }
+  if (signers.some(s => !phoneOk(s.phone))) { showToast('휴대전화 번호를 확인해 주세요.'); goStep(2); return; }
+  // 보내기 전에 이름 · 번호를 한 번 더 확인 — 번호가 틀리면 다른 사람에게 알림톡이 간다
+  if (!await confirmRecipients(signers)) return;
   const name = signers.map(s => s.name).join(', ');
   const phone = signers[0].phone;
   // 예약 시각
@@ -11082,6 +11134,39 @@ async function createDocument() {
   }
 }
 
+// 보내기 직전 수신자 확인 창. 맞으면 true
+function confirmRecipients(signers) {
+  return new Promise(resolve => {
+    let ov = document.getElementById('rcModal');
+    if (!ov) {
+      ov = document.createElement('div');
+      ov.id = 'rcModal'; ov.className = 'modal-overlay';
+      document.body.appendChild(ov);
+    }
+    ov.innerHTML =
+      '<div class="modal"><div class="modal-header"><h3>받는 사람을 확인해 주세요</h3></div>' +
+      '<div class="modal-body">' +
+        '<p style="font-size:13.5px;color:var(--text-secondary);line-height:1.7;">아래 번호로 <b>카카오 알림톡</b>이 바로 발송됩니다.<br>' +
+        '번호가 한 자리라도 틀리면 <b style="color:var(--danger);">다른 사람에게 문서가 전달</b>될 수 있습니다.</p>' +
+        '<div class="rc-list">' + signers.map((s, i) =>
+          '<div class="rc-row"><span class="signer-num" style="background:' + SIGNER_COLORS[i] + '">' + (i + 1) + '</span>' +
+          '<span class="nm">' + esc(s.name.trim()) + '</span><span class="ph">' + esc(fmtPhone(s.phone)) + '</span></div>').join('') +
+        '</div>' +
+        '<label style="display:flex;gap:8px;align-items:center;margin-top:14px;font-size:13.5px;cursor:pointer;">' +
+          '<input type="checkbox" id="rcCheck" style="width:18px;height:18px;"> 이름과 전화번호를 모두 확인했습니다</label>' +
+      '</div>' +
+      '<div class="modal-footer">' +
+        '<button class="btn-secondary" id="rcBack">번호 고치기</button>' +
+        '<button class="btn-primary" id="rcGo" style="width:auto;padding:11px 20px;" disabled>확인했습니다, 보내기</button>' +
+      '</div></div>';
+    ov.classList.add('active');
+    const done = ok => { ov.classList.remove('active'); resolve(ok); if (!ok) goStep(2); };
+    ov.querySelector('#rcCheck').onchange = e => { ov.querySelector('#rcGo').disabled = !e.target.checked; };
+    ov.querySelector('#rcBack').onclick = () => done(false);
+    ov.querySelector('#rcGo').onclick = () => done(true);
+  });
+}
+
 // 서명자별 링크 목록 렌더링
 function renderShareLinks(base, signers) {
   const wrap = document.getElementById('signerLinks');
@@ -11089,10 +11174,10 @@ function renderShareLinks(base, signers) {
   wrap.innerHTML = signers.map((s,i) =>
     '<div class="signer-link-row">' +
       '<span class="signer-num" style="background:'+SIGNER_COLORS[i]+'">'+(i+1)+'</span>' +
-      '<div class="signer-link-info"><div class="sl-name">'+s.name+'</div>' +
-      '<div class="sl-phone">'+s.phone+'</div></div>' +
+      '<div class="signer-link-info"><div class="sl-name">'+esc(s.name)+'</div>' +
+      '<div class="sl-phone" style="font-weight:700;color:var(--navy);">'+esc(fmtPhone(s.phone))+'</div></div>' +
       '<button class="btn-copy" onclick="copyLink(\''+base+'#sign/'+s.sign_token+'\')">복사</button>' +
-      '<button class="btn-kakao-sm" onclick="shareKakaoFor(\''+base+'#sign/'+s.sign_token+'\',\''+s.name+'\')">카톡</button>' +
+      '<button class="btn-kakao-sm" onclick="shareKakaoFor(\''+base+'#sign/'+s.sign_token+'\',\''+esc(s.name).replace(/'/g, '')+'\')">카톡</button>' +
     '</div>'
   ).join('');
 }
