@@ -353,6 +353,64 @@ input,select,textarea { font-family:inherit; }
 .sig-field .resize-handle { position:absolute; bottom:-4px; right:-4px; width:12px; height:12px; background:var(--cyan); border-radius:50%; cursor:nwse-resize; }
 .sig-field .remove-field { position:absolute; top:-8px; right:-8px; width:18px; height:18px; background:var(--danger); color:#fff; border-radius:50%; font-size:10px; display:flex; align-items:center; justify-content:center; cursor:pointer; opacity:0; transition:opacity .2s; }
 .sig-field:hover .remove-field { opacity:1; }
+/* 서명만 요청 / 서명 + 정보 기입 요청 */
+.req-mode { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:4px 0 14px; }
+.rm-opt { text-align:left; padding:12px 14px; border:1.5px solid var(--border); border-radius:10px; background:var(--card); cursor:pointer; transition:all .2s; font:inherit; }
+.rm-opt b { display:block; font-size:14px; color:var(--navy); margin-bottom:3px; }
+.rm-opt span { font-size:12px; color:var(--text-muted); line-height:1.5; }
+.rm-opt:hover { border-color:var(--cyan); }
+.rm-opt.active { border-color:var(--cyan); background:rgba(4,183,221,.07); box-shadow:0 0 0 3px rgba(4,183,221,.12); }
+.input-palette { border:1.5px dashed #b6e6f2; border-radius:10px; padding:12px; margin:-6px 0 16px; background:#f6fcfe; }
+.ip-title { font-size:13px; font-weight:700; color:var(--navy); margin-bottom:8px; }
+.ip-title span { font-weight:400; color:var(--text-muted); font-size:12px; margin-left:4px; }
+.ip-chips { display:flex; flex-wrap:wrap; gap:6px; }
+.ip-chip { display:inline-flex; align-items:center; gap:5px; padding:7px 11px; border:1.5px solid var(--border); border-radius:999px; background:var(--card); font-size:12.5px; cursor:pointer; font-family:inherit; color:var(--text); }
+.ip-chip:hover { border-color:var(--cyan); color:var(--cyan); }
+.ip-chip small { color:var(--text-muted); font-size:11px; }
+.ip-chip.custom { border-style:dashed; }
+.ip-chip .x { margin-left:2px; color:var(--text-muted); font-size:11px; padding:0 3px; border-radius:50%; }
+.ip-chip .x:hover { background:var(--danger); color:#fff; }
+.ip-chip.add { border-color:var(--cyan); color:var(--cyan); font-weight:600; }
+.sig-field.input-field { border-style:dotted; font-weight:500; justify-content:flex-start; padding:0 8px; overflow:hidden; white-space:nowrap; }
+.sig-field .edit-field { position:absolute; top:-8px; right:14px; width:18px; height:18px; background:var(--navy); color:#fff; border-radius:50%; font-size:10px; display:flex; align-items:center; justify-content:center; cursor:pointer; opacity:0; transition:opacity .2s; }
+.sig-field:hover .edit-field { opacity:1; }
+@media (hover: none) { .sig-field .edit-field, .sig-field .remove-field { opacity:1; } }
+#ifModal .form-group { margin-bottom:14px; }
+#ifModal .form-group > label { display:block; font-size:13px; font-weight:600; margin-bottom:6px; }
+#ifModal input[type=text], #ifModal input[type=number] { width:100%; padding:10px 12px; border:1.5px solid var(--border); border-radius:8px; font-size:14px; outline:none; font-family:inherit; }
+#ifModal input:focus { border-color:var(--cyan); }
+.if-modes { display:grid; gap:8px; }
+.if-mode { display:flex; gap:10px; align-items:flex-start; padding:10px 12px; border:1.5px solid var(--border); border-radius:8px; cursor:pointer; }
+.if-mode:has(input:checked) { border-color:var(--cyan); background:rgba(4,183,221,.06); }
+.if-mode input { margin-top:3px; }
+.if-mode b { display:block; font-size:13.5px; }
+.if-mode span { font-size:12px; color:var(--text-muted); }
+.if-check { display:flex; gap:8px; align-items:center; font-size:13px; margin-top:8px; cursor:pointer; }
+.di-list { display:grid; gap:12px; }
+.di-signer { border:1px solid var(--border); border-radius:10px; padding:12px 14px; }
+.di-signer h5 { font-size:13.5px; margin-bottom:8px; display:flex; align-items:center; gap:8px; }
+.di-row { display:grid; grid-template-columns:120px 1fr; gap:10px; font-size:13px; padding:5px 0; border-top:1px dashed var(--border); }
+.di-row:first-of-type { border-top:none; }
+.di-row .k { color:var(--text-muted); }
+.di-row .v { font-weight:600; word-break:break-all; }
+.di-row .v.empty { color:var(--text-muted); font-weight:400; }
+/* 서명자 화면 — 작성할 항목 */
+.sign-inputs { background:var(--card); border:1.5px solid #b6e6f2; border-radius:var(--radius-lg); padding:18px 18px 8px; margin-bottom:16px; }
+.sign-inputs h4 { font-size:15px; margin-bottom:4px; color:var(--navy); }
+.sign-inputs .si-desc { font-size:12.5px; color:var(--text-secondary); line-height:1.6; margin-bottom:12px; }
+.si-row { margin-bottom:14px; }
+.si-row > label { display:block; font-size:13.5px; font-weight:700; margin-bottom:4px; }
+.si-row > label em { color:var(--danger); font-style:normal; }
+.si-row > label small { font-weight:400; color:var(--text-muted); }
+.si-purpose { font-size:12px; color:var(--text-secondary); margin-bottom:6px; }
+.si-row input, .si-row textarea { width:100%; padding:11px 12px; border:1.5px solid var(--border); border-radius:8px; font-size:15px; outline:none; font-family:inherit; background:#fff; }
+.si-row input:focus, .si-row textarea:focus { border-color:var(--cyan); }
+.si-row.bad input, .si-row.bad textarea { border-color:var(--danger); }
+.si-hint { font-size:11.5px; color:var(--text-muted); margin-top:4px; }
+.si-hint.flash { color:var(--danger); }
+.si-err { font-size:12px; color:var(--danger); margin-top:3px; min-height:0; }
+.sig-field.in-field { border-style:dotted; justify-content:flex-start; padding:0 6px; overflow:hidden; white-space:nowrap; cursor:pointer !important; font-weight:600; }
+.sig-field.in-field.filled { background:rgba(255,255,255,.85); color:#0e2d4d; }
 
 /* Step 3: Signer info */
 .signer-form { display:flex; flex-direction:column; gap:16px; }
@@ -798,6 +856,13 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
 .signer-num { width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; font-size:12px; font-weight:700; flex-shrink:0; }
 .signer-entry input { padding:9px 12px; border:1.5px solid var(--border); border-radius:6px; font-size:13px; outline:none; }
 .signer-entry input:focus { border-color:var(--cyan); }
+.signer-entry { grid-template-columns:28px 1fr 1fr 112px 32px; }
+.signer-entry select.signer-lang { padding:9px 6px; border:1.5px solid var(--border); border-radius:6px; font-size:12.5px; background:var(--card); min-width:0; }
+@media (max-width:640px) {
+  .signer-entry { grid-template-columns:28px 1fr 1fr 32px; }
+  .signer-entry .signer-lang { grid-column:2 / 4; grid-row:2; }
+  .req-mode { grid-template-columns:1fr; }
+}
 .btn-remove-signer { width:28px; height:28px; display:flex; align-items:center; justify-content:center; border-radius:6px; color:var(--text-muted); font-size:14px; }
 .btn-remove-signer:hover { background:var(--danger-bg); color:var(--danger); }
 .btn-add-signer { display:flex; align-items:center; gap:6px; padding:8px 14px; border:1.5px dashed var(--border); border-radius:8px; font-size:13px; color:var(--text-secondary); width:100%; justify-content:center; transition:all .2s; margin-top:4px; }
@@ -2060,7 +2125,7 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
         </div>
         <div id="signerList"></div>
         <button class="btn-add-signer" id="btnAddSigner" onclick="addSigner()">+ 서명자 추가</button>
-        <p class="fld-msg hint" style="margin:8px 2px 0;">🌐 외국인 서명자는 휴대폰 언어에 맞춰 서명 화면이 <b>영어 · 중국어 · 일본어 · 베트남어</b>로 자동 표시되고, 서명자가 직접 바꿀 수도 있습니다. (알림톡 안내 문구는 한국어로 갑니다)</p>
+        <p class="fld-msg hint" style="margin:8px 2px 0;">🌐 외국인 서명자는 오른쪽에서 <b>언어</b>를 고르세요. 서명 화면이 그 언어로 열리고, 외국어 알림톡이 준비된 언어는 알림톡도 그 언어로 갑니다 (준비 전에는 한국어로 발송). 고르지 않아도 서명 화면은 휴대폰 언어에 맞춰 자동 표시됩니다.</p>
         <label class="save-signers">
           <input type="checkbox" id="saveSignersToggle">
           이번에 입력한 서명자를 주소록에 저장 <span>(이미 저장된 분은 건너뜁니다)</span>
@@ -2100,6 +2165,14 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
       <!-- Step 3: Place fields -->
       <div id="createStep3" class="create-card" style="display:none">
         <h3>서명란을 배치하세요</h3>
+        <div class="req-mode" id="reqMode">
+          <button type="button" class="rm-opt active" data-mode="sign" onclick="setReqMode('sign')">
+            <b>✍️ 서명만 요청</b><span>서명란 · 날짜란만 배치합니다</span>
+          </button>
+          <button type="button" class="rm-opt" data-mode="fill" onclick="setReqMode('fill')">
+            <b>📝 서명 + 정보 기입 요청</b><span>연락처 · 주소 · 날짜 등도 서명자에게 함께 받습니다</span>
+          </button>
+        </div>
         <p style="font-size:13px;color:var(--text-muted);margin-bottom:10px;">서명자를 선택한 후 서명란을 추가하세요. 서명자별로 색상이 구분됩니다.</p>
         <div class="field-toolbar">
           <select id="fieldSignerSelect" class="btn-tool" style="padding:8px 12px;font-size:13px;"></select>
@@ -2111,6 +2184,10 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
             날짜란
           </button>
+        </div>
+        <div class="input-palette" id="inputPalette" style="display:none;">
+          <div class="ip-title">기입 항목<span>위에서 고른 서명자에게 받을 정보를 눌러 문서에 배치하세요 · ✎ 로 이름 · 필수 여부를 고칠 수 있습니다</span></div>
+          <div class="ip-chips" id="ipChips"></div>
         </div>
         <div class="page-nav" id="pageNav" style="display:none;"></div>
         <div class="pdf-editor" id="pdfEditor"></div>
@@ -2188,6 +2265,7 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
       <div class="sign-pdf-area">
         <div class="pdf-editor" id="signPdfEditor"></div>
       </div>
+      <div class="sign-inputs" id="signInputsBox" style="display:none;"></div>
       <div class="consent-box" id="consentBox">
         <h4 data-sl="consent_title">⚖️ 전자서명 동의</h4>
         <p data-sl="consent_p1">「전자서명법」 제3조 및 「전자문서 및 전자거래 기본법」 제4조에 의거하여, 본 전자서명은 서명, 서명날인 또는 기명날인과 동일한 법적 효력을 가집니다.</p>
@@ -2972,7 +3050,8 @@ async function downloadSignedForSigner() {
     }
 
     // 화면에 띄운 합성본이 있으면 그대로 쓴다 (화면과 파일이 같도록)
-    const bytes = state.signedPdf?.bytes || await composeSignedPdf(doc, data.signers, data.fields);
+    if (!state.signedPdf?.bytes) await loadSignInputs(state.signToken);   // 그 사이 완료됐으면 전원 기입 값
+    const bytes = state.signedPdf?.bytes || await composeSignedPdf(doc, data.signers, data.fields, state.signInputs);
     saveBlob(bytes, safeName(doc.title) + '_서명완료.pdf');
     showToast(st('dl_ok'), true);
   } catch (e) {
@@ -3059,6 +3138,7 @@ function openDocMenu(ev, id) {
     '<div class="rm-label">문서</div>' +
     it('audit','📋','상세 · 감사 기록', true) +
     it('preview','👁','서명 화면 미리보기', true) +
+    it('inputs','📝','기입 내용 보기', true) +
     it('labels','🏷','라벨 편집', !!state.labelsReady) +
     '<div class="rm-sep"></div><div class="rm-label">발송</div>' +
     it('remind','🔔','서명 리마인드', canRemind) +
@@ -3076,6 +3156,7 @@ function rmAct(id, act) {
   ({
     audit:   () => showAuditTrail(id),
     preview: () => goSign(id),
+    inputs:  () => openDocInputs(id),
     labels:  () => openLabelEditor(id),
     remind:  () => openRemind(id),
     send:    () => openSendDone(id),
@@ -3603,7 +3684,7 @@ async function routeByProfile() {
 // ============================================================
 const SB_FN_ADMIN = SB_URL + '/functions/v1/esign-admin';
 const APP_URL = shareBase();
-const BUILD = '2026-10-25.1';   // 배포 확인용. 화면 하단과 콘솔에 표시된다.
+const BUILD = '2026-10-25.2';   // 배포 확인용. 화면 하단과 콘솔에 표시된다.
 
 
 // ============================================================
@@ -8595,7 +8676,7 @@ function shareDoneKakao(url, name) {
 // ============================================================
 // 서명 합성 PDF 생성 (공통) — 저장 없이 즉석 생성
 // ============================================================
-async function composeSignedPdf(doc, signers, fields) {
+async function composeSignedPdf(doc, signers, fields, inputs) {
   const buf = await fetch(await fileUrl(doc.file_path)).then(r => {
     if (!r.ok) throw new Error('원본 문서를 불러올 수 없습니다.');
     return r.arrayBuffer();
@@ -8644,6 +8725,18 @@ async function composeSignedPdf(doc, signers, fields) {
     page.drawImage(img, {
       x: bx + (bw - dw) / 2, y: by + (bh - dh) / 2, width: dw, height: dh
     });
+  }
+
+  // 기입 항목 값 (서명을 마친 서명자 것만)
+  for (const f of (inputs || [])) {
+    const s = sm[f.signer_id];
+    if (!s || s.status !== 'signed' || !f.value) continue;
+    const page = pages[(f.page || 1) - 1];
+    if (!page) continue;
+    const { width: pw, height: ph } = page.getSize();
+    const bw = Number(f.w) * pw, bh = Number(f.h) * ph;
+    const png = await pdfDoc.embedPng(fieldTextToPng(inputDisplay(f, f.value), bw, bh));
+    page.drawImage(png, { x: Number(f.x) * pw, y: ph - Number(f.y) * ph - bh, width: bw, height: bh });
   }
 
   // 검증 스탬프
@@ -8831,6 +8924,25 @@ function typedSigToPng(name, w, h, key, text) {
   return c.toDataURL('image/png');
 }
 
+// 기입 항목 값 — 서식처럼 왼쪽 정렬, 칸에 맞춰 글자 크기를 줄인다
+function fieldTextToPng(text, w, h) {
+  const scale = 3;
+  const c = document.createElement('canvas');
+  c.width = Math.max(40, w) * scale;
+  c.height = Math.max(16, h) * scale;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#0e2d4d';
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'middle';
+  let size = c.height * 0.62;
+  const font = s => `${s}px "Pretendard Variable", Pretendard, "Malgun Gothic", sans-serif`;
+  ctx.font = font(size);
+  const pad = Math.min(c.width * 0.04, 6 * scale);
+  while (ctx.measureText(text).width > c.width - pad * 2 && size > 8) { size -= 2; ctx.font = font(size); }
+  ctx.fillText(text, pad, c.height / 2);
+  return c.toDataURL('image/png');
+}
+
 async function downloadSignedDoc(docId) {
   showToast('서명 문서를 생성하는 중...');
   try {
@@ -8847,7 +8959,12 @@ async function downloadSignedDoc(docId) {
       return;
     }
 
-    const bytes = await composeSignedPdf(doc, data.signers, data.fields);
+    let inputs = [];
+    try {
+      const { data: di } = await sb.rpc('esign_doc_inputs', { p_document_id: docId });
+      if (di?.ok) inputs = di.fields || [];
+    } catch (e) { /* 기입 항목 기능이 없는 서버 — 서명만 합성 */ }
+    const bytes = await composeSignedPdf(doc, data.signers, data.fields, inputs);
     saveBlob(bytes, safeName(doc.title) + '_서명완료.pdf');
     sb.rpc('esign_log_download', { p_document_id: docId, p_kind: 'signed_pdf' }).then(() => {});
     showToast('서명 문서가 다운로드되었습니다.', true);
@@ -10324,7 +10441,33 @@ const SL = {
     done_legal: '본 기록은 「전자서명법」 제3조에 따른 법적 증거로 보관됩니다.',
     dl_making: '문서를 만드는 중...', dl_not_completed: '아직 모든 서명이 완료되지 않았습니다.', dl_info_fail: '문서 정보를 불러올 수 없습니다.',
     dl_ok: '완료 문서를 내려받았습니다.', dl_ok_orig: '문서를 내려받았습니다.', dl_err: '문서 생성 중 오류가 발생했습니다.',
-    popup_blocked: '팝업이 차단되었습니다. 「완료 문서 다운로드」를 이용해주세요.', orig_missing: '원본 문서를 찾을 수 없습니다.'
+    popup_blocked: '팝업이 차단되었습니다. 「완료 문서 다운로드」를 이용해주세요.', orig_missing: '원본 문서를 찾을 수 없습니다.',
+    in_title: '작성할 항목',
+    in_desc: '요청자가 서명과 함께 받으려는 정보입니다. 입력한 내용은 완료 문서에 함께 들어갑니다.',
+    in_optional: '(선택)',
+    in_hint_phone: '숫자만 입력하세요. 하이픈(-)은 자동으로 들어갑니다.',
+    in_hint_digits: '숫자만 입력할 수 있습니다.',
+    in_hint_letters: '글자만 입력할 수 있습니다 (숫자 제외).',
+    in_hint_mixed: '글자와 숫자를 함께 입력할 수 있습니다.',
+    in_hint_email: '예) name@example.com',
+    in_hint_date: '날짜를 선택하세요.',
+    in_k_phone: '연락처',
+    in_k_address: '주소',
+    in_k_date: '날짜',
+    in_k_email: '이메일',
+    in_k_name: '이름',
+    in_k_number: '숫자',
+    in_k_text: '자유 입력',
+    in_err_required: '이 항목을 입력해 주세요.',
+    in_err_digits: '숫자만 입력해 주세요.',
+    in_err_letters: '숫자는 넣을 수 없습니다.',
+    in_err_phone: '전화번호를 확인해 주세요.',
+    in_err_email: '이메일 형식을 확인해 주세요.',
+    in_err_date: '날짜를 확인해 주세요.',
+    in_err_long: '글자 수가 너무 많습니다.',
+    in_err_invalid: '입력한 내용을 확인해 주세요.',
+    in_fix: '작성할 항목을 먼저 확인해 주세요.',
+    in_save_fail: '입력 내용을 저장하지 못했습니다: '
   },
   en: {
     hdr: 'E-Signature', loading: 'Loading the document...',
@@ -10368,7 +10511,33 @@ const SL = {
     done_legal: 'This record is kept as legal evidence under Article 3 of the Korean Digital Signature Act.',
     dl_making: 'Preparing the document...', dl_not_completed: 'Not everyone has signed yet.', dl_info_fail: 'Could not load the document information.',
     dl_ok: 'The completed document has been downloaded.', dl_ok_orig: 'The document has been downloaded.', dl_err: 'An error occurred while creating the document.',
-    popup_blocked: 'The pop-up was blocked. Please use 「Download completed document」.', orig_missing: 'The original document could not be found.'
+    popup_blocked: 'The pop-up was blocked. Please use 「Download completed document」.', orig_missing: 'The original document could not be found.',
+    in_title: 'Information to fill in',
+    in_desc: 'The requester asks you to provide the following along with your signature. Your entries will appear on the completed document.',
+    in_optional: '(optional)',
+    in_hint_phone: 'Numbers only. Hyphens are added automatically.',
+    in_hint_digits: 'Numbers only.',
+    in_hint_letters: 'Letters only (no numbers).',
+    in_hint_mixed: 'Letters and numbers allowed.',
+    in_hint_email: 'e.g. name@example.com',
+    in_hint_date: 'Select a date.',
+    in_k_phone: 'Phone number',
+    in_k_address: 'Address',
+    in_k_date: 'Date',
+    in_k_email: 'Email',
+    in_k_name: 'Name',
+    in_k_number: 'Number',
+    in_k_text: 'Text',
+    in_err_required: 'Please fill in this field.',
+    in_err_digits: 'Please enter numbers only.',
+    in_err_letters: 'Numbers are not allowed.',
+    in_err_phone: 'Please check the phone number.',
+    in_err_email: 'Please check the email format.',
+    in_err_date: 'Please check the date.',
+    in_err_long: 'This entry is too long.',
+    in_err_invalid: 'Please check your entry.',
+    in_fix: 'Please complete the information to fill in first.',
+    in_save_fail: 'Could not save your entries: '
   },
   zh: {
     hdr: '电子签名', loading: '正在加载文件...',
@@ -10411,7 +10580,33 @@ const SL = {
     done_legal: '本记录将依据韩国《电子签名法》第3条作为法律证据保存。',
     dl_making: '正在生成文件...', dl_not_completed: '尚未全部签名完成。', dl_info_fail: '无法加载文件信息。',
     dl_ok: '已下载完成的文件。', dl_ok_orig: '已下载文件。', dl_err: '生成文件时出错。',
-    popup_blocked: '弹出窗口被拦截。请使用「下载已完成文件」。', orig_missing: '找不到原始文件。'
+    popup_blocked: '弹出窗口被拦截。请使用「下载已完成文件」。', orig_missing: '找不到原始文件。',
+    in_title: '需要填写的信息',
+    in_desc: '请求方希望您在签名时一并填写以下信息。填写内容将显示在完成的文件中。',
+    in_optional: '（选填）',
+    in_hint_phone: '仅限数字，连字符（-）将自动添加。',
+    in_hint_digits: '仅可输入数字。',
+    in_hint_letters: '仅可输入文字（不含数字）。',
+    in_hint_mixed: '可输入文字和数字。',
+    in_hint_email: '例：name@example.com',
+    in_hint_date: '请选择日期。',
+    in_k_phone: '联系电话',
+    in_k_address: '地址',
+    in_k_date: '日期',
+    in_k_email: '电子邮箱',
+    in_k_name: '姓名',
+    in_k_number: '数字',
+    in_k_text: '填写内容',
+    in_err_required: '请填写此项。',
+    in_err_digits: '请仅输入数字。',
+    in_err_letters: '不能输入数字。',
+    in_err_phone: '请检查电话号码。',
+    in_err_email: '请检查邮箱格式。',
+    in_err_date: '请检查日期。',
+    in_err_long: '内容过长。',
+    in_err_invalid: '请检查填写内容。',
+    in_fix: '请先完成需要填写的信息。',
+    in_save_fail: '无法保存填写内容：'
   },
   ja: {
     hdr: '電子署名', loading: '文書を読み込んでいます...',
@@ -10454,7 +10649,33 @@ const SL = {
     done_legal: '本記録は韓国「電子署名法」第3条に基づく法的証拠として保管されます。',
     dl_making: '文書を作成しています...', dl_not_completed: 'まだすべての署名が完了していません。', dl_info_fail: '文書情報を読み込めませんでした。',
     dl_ok: '完了文書をダウンロードしました。', dl_ok_orig: '文書をダウンロードしました。', dl_err: '文書の作成中にエラーが発生しました。',
-    popup_blocked: 'ポップアップがブロックされました。「完了文書をダウンロード」をご利用ください。', orig_missing: '元の文書が見つかりません。'
+    popup_blocked: 'ポップアップがブロックされました。「完了文書をダウンロード」をご利用ください。', orig_missing: '元の文書が見つかりません。',
+    in_title: '記入項目',
+    in_desc: '依頼者が署名とあわせて記入をお願いしている項目です。入力内容は完了文書に記載されます。',
+    in_optional: '（任意）',
+    in_hint_phone: '数字のみ入力してください。ハイフン（-）は自動で入ります。',
+    in_hint_digits: '数字のみ入力できます。',
+    in_hint_letters: '文字のみ入力できます（数字不可）。',
+    in_hint_mixed: '文字と数字を入力できます。',
+    in_hint_email: '例）name@example.com',
+    in_hint_date: '日付を選択してください。',
+    in_k_phone: '電話番号',
+    in_k_address: '住所',
+    in_k_date: '日付',
+    in_k_email: 'メールアドレス',
+    in_k_name: '氏名',
+    in_k_number: '数字',
+    in_k_text: '自由記入',
+    in_err_required: 'この項目を入力してください。',
+    in_err_digits: '数字のみ入力してください。',
+    in_err_letters: '数字は入力できません。',
+    in_err_phone: '電話番号をご確認ください。',
+    in_err_email: 'メールアドレスの形式をご確認ください。',
+    in_err_date: '日付をご確認ください。',
+    in_err_long: '文字数が多すぎます。',
+    in_err_invalid: '入力内容をご確認ください。',
+    in_fix: '先に記入項目をご確認ください。',
+    in_save_fail: '入力内容を保存できませんでした：'
   },
   vi: {
     hdr: 'Chữ ký điện tử', loading: 'Đang tải tài liệu...',
@@ -10497,7 +10718,33 @@ const SL = {
     done_legal: 'Hồ sơ này được lưu giữ làm bằng chứng pháp lý theo Điều 3 Luật Chữ ký điện tử Hàn Quốc.',
     dl_making: 'Đang tạo tài liệu...', dl_not_completed: 'Chưa phải tất cả người ký đã ký.', dl_info_fail: 'Không thể tải thông tin tài liệu.',
     dl_ok: 'Đã tải tài liệu hoàn tất.', dl_ok_orig: 'Đã tải tài liệu.', dl_err: 'Đã xảy ra lỗi khi tạo tài liệu.',
-    popup_blocked: 'Cửa sổ bật lên bị chặn. Vui lòng dùng 「Tải tài liệu đã hoàn tất」.', orig_missing: 'Không tìm thấy tài liệu gốc.'
+    popup_blocked: 'Cửa sổ bật lên bị chặn. Vui lòng dùng 「Tải tài liệu đã hoàn tất」.', orig_missing: 'Không tìm thấy tài liệu gốc.',
+    in_title: 'Thông tin cần điền',
+    in_desc: 'Người yêu cầu đề nghị bạn điền các thông tin sau cùng với chữ ký. Nội dung bạn nhập sẽ xuất hiện trên tài liệu hoàn tất.',
+    in_optional: '(không bắt buộc)',
+    in_hint_phone: 'Chỉ nhập số. Dấu gạch nối (-) được thêm tự động.',
+    in_hint_digits: 'Chỉ được nhập số.',
+    in_hint_letters: 'Chỉ được nhập chữ (không có số).',
+    in_hint_mixed: 'Có thể nhập chữ và số.',
+    in_hint_email: 'Ví dụ: name@example.com',
+    in_hint_date: 'Vui lòng chọn ngày.',
+    in_k_phone: 'Số điện thoại',
+    in_k_address: 'Địa chỉ',
+    in_k_date: 'Ngày',
+    in_k_email: 'Email',
+    in_k_name: 'Họ tên',
+    in_k_number: 'Số',
+    in_k_text: 'Nội dung',
+    in_err_required: 'Vui lòng điền mục này.',
+    in_err_digits: 'Vui lòng chỉ nhập số.',
+    in_err_letters: 'Không được nhập số.',
+    in_err_phone: 'Vui lòng kiểm tra số điện thoại.',
+    in_err_email: 'Vui lòng kiểm tra định dạng email.',
+    in_err_date: 'Vui lòng kiểm tra ngày.',
+    in_err_long: 'Nội dung quá dài.',
+    in_err_invalid: 'Vui lòng kiểm tra nội dung đã nhập.',
+    in_fix: 'Vui lòng hoàn tất thông tin cần điền trước.',
+    in_save_fail: 'Không thể lưu nội dung: '
   }
 };
 
@@ -10551,6 +10798,13 @@ function setSignLang(lang) {
   const d = state.signData?.document;
   if (d) document.getElementById('signDeadline').textContent = fmtSignDate(d.deadline);
   document.querySelectorAll('#signPdfEditor .sign-field-label[data-sl-field]').forEach(el => { el.textContent = st(el.dataset.slField); });
+  if (myInputs().length) {
+    renderSignInputsBox();
+    myInputs().forEach(f => {
+      const ov = document.getElementById('sio_' + f.id);
+      if (ov && !signInputVal(f)) ov.textContent = inputLabel(f);
+    });
+  }
   if (document.getElementById('typedFontGrid')) updateTypedPreview();
   if (lang !== 'ko') hidePromoBar();
 }
@@ -10603,6 +10857,14 @@ async function openSignByToken(token) {
 
   state.signData = data;
   const d = data.document, s = data.signer;
+  // 기입 항목 · 요청자가 정한 서명자 언어 (서명자가 직접 고른 언어가 있으면 그쪽이 우선)
+  state.signInputVals = {};
+  const inp = await loadSignInputs(token);
+  if (inp?.lang && SL[inp.lang] && inp.lang !== state.signLang && !signLangChosen()) {
+    state.signLang = inp.lang;
+    applySignLang();
+  }
+  renderSignInputsBox();
 
   document.getElementById('signDocTitle').textContent = d.title;
   document.getElementById('signRequester').textContent = d.requester_name;
@@ -10663,7 +10925,7 @@ async function openSignByToken(token) {
       let shown = false;
       try {
         state.signedPdf = {
-          bytes: await composeSignedPdf(completed.document, completed.signers, completed.fields),
+          bytes: await composeSignedPdf(completed.document, completed.signers, completed.fields, state.signInputs),
           title: completed.document.title
         };
         shown = (await renderPdfFromUrl({ data: state.signedPdf.bytes.slice() }, 'signPdfEditor')) > 0;
@@ -10673,18 +10935,25 @@ async function openSignByToken(token) {
       if (!shown) {   // 합성에 실패하면 원본 + 서명 이미지 덧그리기로 대신한다
         await renderPdfFromUrl(await fileUrl(d.file_path), 'signPdfEditor');
         renderSignedFields(completed.fields, completed.signers, 'signPdfEditor');
+        renderSignedInputs(state.signInputs, completed.signers, 'signPdfEditor');
       }
     } else if (d.file_type === 'pdf') {
       await renderPdfFromUrl(await fileUrl(d.file_path), 'signPdfEditor');
       renderSignFields(data.fields, 'signPdfEditor', s.status === 'signed');
+      renderSignInputOverlays('signPdfEditor');
     } else if (['jpg','jpeg','png'].includes(d.file_type)) {
       const docUrl = await fileUrl(d.file_path);
       editor.innerHTML = '<div class="pdf-page" data-page="1">' +
         '<img src="'+docUrl+'" style="max-width:'+(editor.clientWidth-48)+'px;">' + '</div>';
       const im = editor.querySelector('img');
       await new Promise(r => { im.onload = r; im.onerror = r; });
-      if (completed) renderSignedFields(completed.fields, completed.signers, 'signPdfEditor');
-      else renderSignFields(data.fields, 'signPdfEditor', s.status === 'signed');
+      if (completed) {
+        renderSignedFields(completed.fields, completed.signers, 'signPdfEditor');
+        renderSignedInputs(state.signInputs, completed.signers, 'signPdfEditor');
+      } else {
+        renderSignFields(data.fields, 'signPdfEditor', s.status === 'signed');
+        renderSignInputOverlays('signPdfEditor');
+      }
     } else {
       editor.innerHTML = '<div class="sign-loading">' + st('no_preview') + '<br>' +
         '<a href="'+pub.publicUrl+'" target="_blank" style="color:var(--cyan);">' + st('doc_download') + '</a></div>';
@@ -10760,6 +11029,241 @@ function renderSignFields(fields, editorId, signedByMe) {
     el.textContent = st(el.dataset.slField);
     pg.appendChild(el);
   });
+}
+
+// ===== 서명자 기입 항목 =====
+// 서명 전에는 내 항목만, 문서가 완료되면 전원 항목(완료본 합성용)이 온다. 기능이 없는 서버면 빈 목록.
+async function loadSignInputs(token) {
+  state.signInputs = [];
+  try {
+    const { data, error } = await sb.rpc('esign_sign_inputs', { p_token: token });
+    if (error || !data?.ok) return null;
+    state.signInputs = data.fields || [];
+    return data;
+  } catch (e) { return null; }
+}
+// 서명자가 언어를 직접 고른 적이 있는지 (주소의 ?lang= 또는 언어 선택)
+function signLangChosen() {
+  if (new URLSearchParams(location.search).get('lang')) return true;
+  try { return !!localStorage.getItem('io_sign_lang'); } catch (e) { return false; }
+}
+const myInputs = () => (state.signInputs || []).filter(f => f.mine);
+const signInputVal = f => String(state.signInputVals?.[f.id] ?? f.value ?? '');
+// 기본 기입 방법 이름은 서명자 언어로, 요청자가 바꾼 이름 · 직접 만든 항목은 그대로
+function inputLabel(f) {
+  const k = INPUT_KINDS[f.kind];
+  return (k && f.label === k.label) ? st('in_k_' + f.kind) : f.label;
+}
+// 문서 · 완료본에 찍히는 값 (휴대전화는 하이픈)
+function inputDisplay(f, v) {
+  v = String(v ?? '');
+  return f.mode === 'phone' ? fmtPhone(v) : v;
+}
+function signInputError(f, v) {
+  v = String(v || '').trim();
+  if (!v) return f.required ? 'in_err_required' : null;
+  if (f.mode === 'phone') return /^0[0-9]{8,10}$/.test(v.replace(/\D/g, '')) ? null : 'in_err_phone';
+  if (v.length > (f.max_len || 100)) return 'in_err_long';
+  switch (f.mode) {
+    case 'digits':  return /^[0-9]+$/.test(v) ? null : 'in_err_digits';
+    case 'letters': return /[0-9]/.test(v) ? 'in_err_letters' : null;
+    case 'email':   return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v) ? null : 'in_err_email';
+    case 'date': {
+      let ok = false;
+      try { ok = /^\d{4}-\d{2}-\d{2}$/.test(v) && new Date(v + 'T00:00:00Z').toISOString().slice(0, 10) === v; } catch (e) {}
+      return ok ? null : 'in_err_date';
+    }
+  }
+  return null;
+}
+
+function renderSignInputsBox() {
+  const box = document.getElementById('signInputsBox');
+  if (!box) return;
+  const mine = myInputs();
+  if (!mine.length || state.signData?.signer?.status === 'signed') {
+    box.style.display = 'none'; box.innerHTML = ''; return;
+  }
+  const attr = f => 'id="si_' + f.id + '" data-fid="' + f.id + '" oninput="onSignInput(this)" autocomplete="off"';
+  const ctl = f => {
+    const v = signInputVal(f);
+    const val = ' value="' + esc(inputDisplay(f, v)) + '"';
+    switch (f.mode) {
+      case 'phone':  return '<input type="tel" inputmode="numeric" maxlength="13" placeholder="010-0000-0000" ' + attr(f) + val + '>';
+      case 'digits': return '<input type="text" inputmode="numeric" maxlength="' + f.max_len + '" ' + attr(f) + val + '>';
+      case 'email':  return '<input type="email" inputmode="email" maxlength="' + f.max_len + '" placeholder="name@example.com" ' + attr(f) + val + '>';
+      case 'date':   return '<input type="date" onchange="onSignInput(this)" ' + attr(f) + val + '>';
+      default:
+        return (f.kind === 'address' || f.max_len > 80)
+          ? '<textarea rows="2" maxlength="' + f.max_len + '" ' + attr(f) + '>' + esc(v) + '</textarea>'
+          : '<input type="text" maxlength="' + f.max_len + '" ' + attr(f) + val + '>';
+    }
+  };
+  box.style.display = '';
+  box.innerHTML =
+    '<h4>📝 ' + st('in_title') + '</h4><p class="si-desc">' + st('in_desc') + '</p>' +
+    mine.map(f =>
+      '<div class="si-row" id="sirow_' + f.id + '">' +
+        '<label for="si_' + f.id + '">' + esc(inputLabel(f)) +
+          (f.required ? ' <em>*</em>' : ' <small>' + st('in_optional') + '</small>') + '</label>' +
+        (f.purpose ? '<div class="si-purpose">' + esc(f.purpose) + '</div>' : '') +
+        ctl(f) +
+        '<div class="si-hint" id="sihint_' + f.id + '">' + st('in_hint_' + f.mode) + '</div>' +
+        '<div class="si-err" id="sierr_' + f.id + '"></div>' +
+      '</div>').join('');
+}
+
+// 입력 중: 숫자만 · 글자만 항목은 맞지 않는 글자를 바로 걸러 낸다
+function onSignInput(el) {
+  const f = myInputs().find(x => x.id === el.dataset.fid);
+  if (!f) return;
+  let v = el.value;
+  const strip = re => {
+    const c = v.replace(re, '');
+    if (c !== v) {
+      el.value = c; v = c;
+      const h = document.getElementById('sihint_' + f.id);
+      if (h) { h.classList.add('flash'); setTimeout(() => h.classList.remove('flash'), 1200); }
+    }
+  };
+  if (f.mode === 'digits') strip(/[^0-9]/g);
+  else if (f.mode === 'letters') strip(/[0-9０-９]/g);
+  else if (f.mode === 'phone') v = phoneInput(el);
+  state.signInputVals[f.id] = v;
+  showSignInputErr(f, null);
+  const ov = document.getElementById('sio_' + f.id);
+  if (ov) { ov.textContent = v ? inputDisplay(f, v) : inputLabel(f); ov.classList.toggle('filled', !!v); }
+}
+function showSignInputErr(f, key) {
+  const row = document.getElementById('sirow_' + f.id);
+  const box = document.getElementById('sierr_' + f.id);
+  if (row) row.classList.toggle('bad', !!key);
+  if (box) box.textContent = key ? st(key) : '';
+}
+// 서명 전에 모두 맞는지. 틀린 첫 항목으로 이동한다
+function checkSignInputs() {
+  let first = null;
+  myInputs().forEach(f => {
+    const err = signInputError(f, signInputVal(f));
+    showSignInputErr(f, err);
+    if (err && !first) first = f;
+  });
+  if (!first) return true;
+  const el = document.getElementById('si_' + first.id);
+  if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); el.focus({ preventScroll: true }); }
+  showToast(st('in_fix'));
+  return false;
+}
+// 서명 직전에 값을 서버에 낸다. 서버도 같은 규칙으로 다시 검사한다
+async function submitSignInputs() {
+  const mine = myInputs();
+  if (!mine.length) return true;
+  if (!checkSignInputs()) { closeSigModal(); return false; }
+  const vals = {};
+  mine.forEach(f => {
+    let v = signInputVal(f).trim();
+    if (f.mode === 'phone') v = v.replace(/\D/g, '');
+    vals[f.id] = v;
+  });
+  const { data, error } = await sb.rpc('esign_submit_inputs', { p_token: state.signToken, p_values: vals });
+  if (error || !data?.ok) {
+    if (data?.error === 'INPUTS_INVALID') {
+      (data.fields || []).forEach(x => {
+        const f = mine.find(m => m.id === x.id);
+        if (f) showSignInputErr(f, x.error === 'REQUIRED' ? 'in_err_required' : 'in_err_invalid');
+      });
+      closeSigModal();
+      showToast(st('in_fix'));
+    } else {
+      showToast(st('in_save_fail') + (data?.error || error?.message || ''));
+    }
+    return false;
+  }
+  mine.forEach(f => { f.value = vals[f.id]; });
+  return true;
+}
+
+// 문서 위 내 기입 칸 — 입력한 값이 바로 보이고, 누르면 입력 칸으로 이동
+function renderSignInputOverlays(editorId) {
+  const signed = state.signData?.signer?.status === 'signed';
+  myInputs().forEach(f => {
+    const pg = document.querySelector('#' + editorId + ' .pdf-page[data-page="' + (f.page || 1) + '"]');
+    if (!pg) return;
+    const v = signInputVal(f);
+    const el = document.createElement('div');
+    el.className = 'sig-field in-field' + (v ? ' filled' : '') + (signed ? ' sig-done' : '');
+    el.id = 'sio_' + f.id;
+    el.style.cssText = 'left:' + (f.x * pg.offsetWidth) + 'px;top:' + (f.y * pg.offsetHeight) + 'px;' +
+      'width:' + (f.w * pg.offsetWidth) + 'px;height:' + (f.h * pg.offsetHeight) + 'px;';
+    el.textContent = v ? inputDisplay(f, v) : inputLabel(f);
+    if (!signed) el.onclick = () => {
+      const i = document.getElementById('si_' + f.id);
+      if (i) { i.scrollIntoView({ behavior: 'smooth', block: 'center' }); i.focus({ preventScroll: true }); }
+    };
+    pg.appendChild(el);
+  });
+}
+// 완료 문서(이미지 문서 · 합성 실패 시)에 기입 값을 그린다
+function renderSignedInputs(inputs, signers, editorId) {
+  const sm = {};
+  (signers || []).forEach(x => { sm[x.id] = x; });
+  (inputs || []).forEach(f => {
+    if (!f.value || sm[f.signer_id]?.status !== 'signed') return;
+    const pg = document.querySelector('#' + editorId + ' .pdf-page[data-page="' + (f.page || 1) + '"]');
+    if (!pg) return;
+    const w = f.w * pg.offsetWidth, h = f.h * pg.offsetHeight;
+    const im = document.createElement('img');
+    im.src = fieldTextToPng(inputDisplay(f, f.value), w, h);
+    im.alt = f.label;
+    im.style.cssText = 'position:absolute;object-fit:contain;pointer-events:none;' +
+      'left:' + (f.x * pg.offsetWidth) + 'px;top:' + (f.y * pg.offsetHeight) + 'px;width:' + w + 'px;height:' + h + 'px;';
+    pg.appendChild(im);
+  });
+}
+
+// 요청자: 서명자들이 적은 기입 내용
+async function openDocInputs(docId) {
+  const d = state.documents.find(x => x.id === docId);
+  let fields = null, err = null;
+  try {
+    const { data, error } = await sb.rpc('esign_doc_inputs', { p_document_id: docId });
+    if (error || !data?.ok) err = data?.error || error?.message || '오류';
+    else fields = data.fields || [];
+  } catch (e) { err = e.message; }
+  let ov = document.getElementById('diModal');
+  if (!ov) {
+    ov = document.createElement('div');
+    ov.id = 'diModal'; ov.className = 'modal-overlay';
+    ov.onclick = e => { if (e.target === ov) ov.classList.remove('active'); };
+    document.body.appendChild(ov);
+  }
+  const groups = {};
+  (fields || []).forEach(f => { (groups[f.signer_id] = groups[f.signer_id] || { name: f.signer_name, rows: [] }).rows.push(f); });
+  const body = err
+    ? '<p class="bulk-hint">기입 내용을 불러오지 못했습니다. (' + esc(err) + ')</p>'
+    : !fields.length
+      ? '<p class="bulk-hint">이 문서에는 기입 항목이 없습니다. 「서명 + 정보 기입 요청」으로 만든 문서만 기입 내용이 있습니다.</p>'
+      : '<div class="di-list">' + Object.values(groups).map(g =>
+          '<div class="di-signer"><h5>👤 ' + esc(g.name) + '</h5>' + g.rows.map(f =>
+            '<div class="di-row"><span class="k">' + esc(f.label) + (f.required ? '' : ' (선택)') + '</span>' +
+            '<span class="v' + (f.value ? '' : ' empty') + '">' + (f.value ? esc(inputDisplay(f, f.value)) : '아직 입력 전') + '</span></div>').join('') +
+          '</div>').join('') + '</div>';
+  state.docInputsText = (fields || []).filter(f => f.value)
+    .map(f => f.signer_name + '\t' + f.label + '\t' + inputDisplay(f, f.value)).join('\n');
+  ov.innerHTML =
+    '<div class="modal"><div class="modal-header"><h3>📝 기입 내용</h3></div>' +
+    '<div class="modal-body"><p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">' + esc(d?.title || '') + '</p>' + body + '</div>' +
+    '<div class="modal-footer">' +
+      (state.docInputsText ? '<button class="btn-secondary" onclick="copyDocInputs()">표로 복사</button>' : '') +
+      '<button class="btn-primary" style="width:auto;padding:11px 20px;" onclick="document.getElementById(\'diModal\').classList.remove(\'active\')">닫기</button>' +
+    '</div></div>';
+  ov.classList.add('active');
+}
+function copyDocInputs() {
+  const t = '서명자\t항목\t내용\n' + (state.docInputsText || '');
+  (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject())
+    .then(() => showToast('복사했습니다. 엑셀에 붙여 넣으면 표로 들어갑니다.', true))
+    .catch(() => showToast('복사하지 못했습니다.'));
 }
 
 // 완료 문서 데이터 (서명 이미지 포함). 실패하면 null.
@@ -10971,6 +11475,7 @@ function resetCreate() {
   state.fields = [];
   state.fieldIdCounter = 0;
   state.currentSigMethod = 0;
+  setReqMode('sign');
   state.sigUploadedImage = null;
   const st = document.getElementById('schedToggle');
   if (st) { st.checked = false; document.getElementById('schedBody').classList.remove('on'); }
@@ -11060,6 +11565,10 @@ function renderSignerList() {
     '<input type="text" placeholder="이름 *" maxlength="20" value="'+esc(s.name||'')+'" oninput="state.signers['+i+'].name=this.value">' +
     '<input ' + PHONE_ATTRS.replace('010-0000-0000', '휴대전화 *  010-0000-0000') + ' class="' + (s.phone ? (phoneOk(s.phone) ? 'phone-ok' : 'phone-bad') : '') +
       '" value="'+esc(fmtPhone(s.phone||''))+'" oninput="state.signers['+i+'].phone=phoneInput(this)">' +
+    // 서명자 언어 — 서명 화면 기본 언어 · 외국어 알림톡 (템플릿이 준비된 언어만, 아니면 한국어로 발송)
+    '<select class="signer-lang" title="알림톡 · 서명 화면 언어" onchange="state.signers['+i+'].lang=this.value">' +
+      Object.keys(SIGN_LANGS).map(k => '<option value="'+k+'"'+((s.lang||'ko')===k?' selected':'')+'>'+(k==='ko'?'한국어':SIGN_LANGS[k])+'</option>').join('') +
+    '</select>' +
     (state.signers.length > 2 ? '<button class="btn-remove-signer" onclick="removeSigner('+i+')">✕</button>' : '<span></span>') +
     '</div>'
   ).join('');
@@ -11335,7 +11844,159 @@ function getVisiblePage(editorId) {
 function addSignatureField() { addField('signature', 150, 50, '서명'); }
 function addDateField()      { addField('date', 120, 30, '날짜'); }
 
-function addField(type, w, h, labelSuffix) {
+// ===== 기입 항목 (서명 + 정보 기입 요청) =====
+// mode: digits 숫자만 · letters 글자만(숫자 불가) · mixed 글자+숫자 · phone · email · date
+// 서버(esign.input_value_ok)와 같은 규칙으로 검사한다.
+const INPUT_KINDS = {
+  phone:   { icon: '📞', label: '연락처',    mode: 'phone',   hint: '숫자만',     w: 150, max: 13 },
+  address: { icon: '🏠', label: '주소',      mode: 'mixed',   hint: '글자+숫자',  w: 280, max: 120 },
+  date:    { icon: '📅', label: '날짜',      mode: 'date',    hint: '달력에서 선택', w: 120, max: 10 },
+  email:   { icon: '✉️', label: '이메일',    mode: 'email',   hint: '이메일 형식', w: 200, max: 100 },
+  name:    { icon: '👤', label: '이름',      mode: 'letters', hint: '글자만',     w: 120, max: 30 },
+  number:  { icon: '🔢', label: '숫자',      mode: 'digits',  hint: '숫자만',     w: 120, max: 30 },
+  text:    { icon: '✏️', label: '자유 입력', mode: 'mixed',   hint: '글자+숫자',  w: 220, max: 100 }
+};
+const INPUT_MODES = { digits: '숫자만', letters: '글자만', mixed: '글자+숫자', phone: '휴대전화', email: '이메일', date: '날짜' };
+const IF_MODE_DESC = {
+  digits: '0~9 숫자만 들어갑니다. 예) 학번, 계좌번호, 인원 수',
+  letters: '숫자 없이 글자만 들어갑니다. 예) 영문 이름, 소속, 직책',
+  mixed: '글자와 숫자를 함께 쓸 수 있습니다. 예) 차량번호, 동 · 호수'
+};
+const CUSTOM_INPUT_KEY = 'io_custom_inputs';
+function customInputs() {
+  try { const a = JSON.parse(localStorage.getItem(CUSTOM_INPUT_KEY) || '[]'); return Array.isArray(a) ? a.slice(0, 30) : []; }
+  catch (e) { return []; }
+}
+function saveCustomInputs(list) {
+  try { localStorage.setItem(CUSTOM_INPUT_KEY, JSON.stringify(list.slice(0, 30))); } catch (e) {}
+}
+
+function setReqMode(mode) {
+  const inputs = state.fields.filter(f => f.type === 'input');
+  if (mode === 'sign' && inputs.length &&
+      !confirm('배치한 기입 항목 ' + inputs.length + '개를 지우고 「서명만 요청」으로 바꿀까요?')) return;
+  if (mode === 'sign') inputs.forEach(f => removeField(f.id));
+  state.reqMode = mode;
+  document.querySelectorAll('#reqMode .rm-opt').forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
+  const pal = document.getElementById('inputPalette');
+  if (pal) pal.style.display = mode === 'fill' ? '' : 'none';
+  if (mode === 'fill') renderInputPalette();
+}
+
+function renderInputPalette() {
+  const box = document.getElementById('ipChips');
+  if (!box) return;
+  box.innerHTML =
+    Object.entries(INPUT_KINDS).map(([k, d]) =>
+      '<button type="button" class="ip-chip" onclick="addInputField(\'' + k + '\')">' + d.icon + ' ' + d.label +
+      ' <small>' + d.hint + '</small></button>').join('') +
+    customInputs().map((c, i) =>
+      '<span class="ip-chip custom" role="button" tabindex="0" onclick="addCustomInputField(' + i + ')" title="' + esc(c.purpose || '') + '">🧩 ' +
+      esc(c.label) + ' <small>' + (INPUT_MODES[c.mode] || '') + '</small>' +
+      '<span class="x" onclick="event.stopPropagation();deleteCustomInput(' + i + ')" title="목록에서 지우기">✕</span></span>').join('') +
+    '<button type="button" class="ip-chip add" onclick="openInputDef()">＋ 기입 방법 추가</button>';
+}
+
+function addInputField(kind, custom) {
+  const d = INPUT_KINDS[kind];
+  const spec = custom
+    ? { kind: 'custom', label: custom.label, purpose: custom.purpose || '', mode: custom.mode || 'mixed',
+        required: custom.required !== false, maxLen: custom.max || 50 }
+    : { kind, label: d.label, purpose: '', mode: d.mode, required: true, maxLen: d.max };
+  const w = custom ? Math.min(260, Math.max(120, spec.maxLen * 6)) : d.w;
+  addField('input', w, 28, '', spec);
+}
+function addCustomInputField(i) {
+  const c = customInputs()[i];
+  if (c) addInputField('custom', c);
+}
+function deleteCustomInput(i) {
+  const list = customInputs();
+  if (!list[i] || !confirm('「' + list[i].label + '」 기입 방법을 목록에서 지울까요?\n(이미 문서에 배치한 항목은 그대로 남습니다)')) return;
+  list.splice(i, 1);
+  saveCustomInputs(list);
+  renderInputPalette();
+}
+
+// 배치한 기입 항목에 보이는 글자
+function inputFieldLabel(f) {
+  const nm = state.signers[f.signerIdx || 0]?.name || SIGNER_LABELS[f.signerIdx || 0];
+  const icon = f.kind === 'custom' ? '🧩' : (INPUT_KINDS[f.kind]?.icon || '');
+  return esc(nm) + ' · ' + icon + ' ' + esc(f.label) + (f.required ? '' : ' (선택)');
+}
+
+// 기입 방법 추가 (fieldId 없음) · 배치한 항목 고치기 (fieldId)
+function openInputDef(fieldId) {
+  const f = fieldId ? state.fields.find(x => x.id === fieldId) : null;
+  const isCustom = !f || f.kind === 'custom';
+  const mode = f ? f.mode : 'mixed';
+  let ov = document.getElementById('ifModal');
+  if (!ov) {
+    ov = document.createElement('div');
+    ov.id = 'ifModal'; ov.className = 'modal-overlay';
+    document.body.appendChild(ov);
+  }
+  ov.innerHTML =
+    '<div class="modal"><div class="modal-header"><h3>' + (f ? '기입 항목 고치기' : '기입 방법 추가') + '</h3></div>' +
+    '<div class="modal-body">' +
+      (f ? '' : '<p class="bulk-hint" style="margin:0 0 12px;">서명자에게 받을 정보를 직접 정합니다. 한 번 만들면 다음 문서에서도 바로 쓸 수 있습니다.</p>') +
+      '<div class="form-group"><label>이름 *</label>' +
+        '<input type="text" id="ifLabel" maxlength="30" placeholder="예) 차량번호, 학번, 비상 연락처" value="' + esc(f ? f.label : '') + '"></div>' +
+      '<div class="form-group"><label>용도 <span class="sec-tag">선택</span></label>' +
+        '<input type="text" id="ifPurpose" maxlength="80" placeholder="예) 주차 등록에 사용합니다 — 서명자 화면에 안내로 보입니다" value="' + esc(f ? (f.purpose || '') : '') + '"></div>' +
+      (isCustom
+        ? '<div class="form-group"><label>입력 방식 *</label><div class="if-modes">' +
+            ['digits', 'letters', 'mixed'].map(m =>
+              '<label class="if-mode"><input type="radio" name="ifMode" value="' + m + '"' + (m === mode ? ' checked' : '') + '>' +
+              '<div><b>' + INPUT_MODES[m] + '</b><span>' + IF_MODE_DESC[m] + '</span></div></label>').join('') +
+          '</div></div>' +
+          '<div class="form-group"><label>최대 글자 수</label>' +
+            '<input type="number" id="ifMax" min="1" max="300" value="' + (f ? f.maxLen : 50) + '"></div>'
+        : '<p class="bulk-hint">입력 방식: <b>' + INPUT_MODES[mode] + '</b> (기본 기입 방법은 입력 방식이 정해져 있습니다)</p>') +
+      '<label class="if-check"><input type="checkbox" id="ifRequired"' + ((f ? f.required : true) ? ' checked' : '') + '> 반드시 입력해야 서명할 수 있게 (필수)</label>' +
+      (f ? '' : '<label class="if-check"><input type="checkbox" id="ifSave" checked> 기입 방법 목록에 저장해 다음 문서에도 쓰기</label>') +
+    '</div>' +
+    '<div class="modal-footer">' +
+      '<button class="btn-secondary" onclick="closeInputDef()">취소</button>' +
+      '<button class="btn-primary" style="width:auto;padding:11px 20px;" onclick="saveInputDef(\'' + (fieldId || '') + '\')">' +
+        (f ? '저장' : '추가하고 문서에 배치') + '</button>' +
+    '</div></div>';
+  ov.classList.add('active');
+  setTimeout(() => document.getElementById('ifLabel')?.focus(), 50);
+}
+function closeInputDef() { document.getElementById('ifModal')?.classList.remove('active'); }
+function saveInputDef(fieldId) {
+  const label = document.getElementById('ifLabel').value.trim();
+  if (!label) { showToast('이름을 입력해 주세요.'); return; }
+  const purpose = document.getElementById('ifPurpose').value.trim();
+  const required = document.getElementById('ifRequired').checked;
+  const modeEl = document.querySelector('#ifModal input[name=ifMode]:checked');
+  const maxEl = document.getElementById('ifMax');
+  const max = maxEl ? Math.max(1, Math.min(300, parseInt(maxEl.value, 10) || 50)) : null;
+  if (fieldId) {
+    const f = state.fields.find(x => x.id === fieldId);
+    if (f) {
+      Object.assign(f, { label, purpose, required });
+      if (modeEl) f.mode = modeEl.value;
+      if (max) f.maxLen = max;
+      document.getElementById(f.id)?.remove();
+      renderField(f);
+    }
+    closeInputDef();
+    return;
+  }
+  const spec = { label, purpose, mode: modeEl ? modeEl.value : 'mixed', required, max: max || 50 };
+  if (document.getElementById('ifSave')?.checked) {
+    const list = customInputs().filter(c => c.label !== label);
+    list.push(spec);
+    saveCustomInputs(list);
+    renderInputPalette();
+  }
+  closeInputDef();
+  addInputField('custom', spec);
+}
+
+function addField(type, w, h, labelSuffix, extra) {
   const pg = getVisiblePage('pdfEditor');
   if (!pg) { showToast('문서 미리보기가 없어 배치할 수 없습니다.'); return; }
 
@@ -11352,7 +12013,8 @@ function addField(type, w, h, labelSuffix) {
     id: 'field_' + (++state.fieldIdCounter),
     type, page, x, y, w, h,
     label: signerName + ' ' + labelSuffix,
-    signerIdx
+    signerIdx,
+    ...(extra || {})
   };
   state.fields.push(f);
   renderField(f, pg);
@@ -11364,11 +12026,14 @@ function renderField(f, pageEl) {
     if (!pageEl) return;
   }
   const el = document.createElement('div');
-  el.className = 'sig-field';
+  const isInput = f.type === 'input';
+  el.className = 'sig-field' + (isInput ? ' input-field' : '');
   el.id = f.id;
   el.setAttribute('data-signer', f.signerIdx || 0);
   el.style.cssText = `left:${f.x}px;top:${f.y}px;width:${f.w}px;height:${f.h}px;`;
-  el.innerHTML = `${f.label}<div class="resize-handle"></div><div class="remove-field" onclick="removeField('${f.id}')">✕</div>`;
+  el.innerHTML = (isInput ? inputFieldLabel(f) : f.label) + '<div class="resize-handle"></div>' +
+    (isInput ? `<div class="edit-field" onclick="openInputDef('${f.id}')" title="이름 · 필수 여부 고치기">✎</div>` : '') +
+    `<div class="remove-field" onclick="removeField('${f.id}')">✕</div>`;
   el.addEventListener('mousedown', startDrag);
   el.addEventListener('touchstart', startDrag, { passive: false });
   el.querySelector('.resize-handle').addEventListener('mousedown', startResize);
@@ -11377,7 +12042,7 @@ function renderField(f, pageEl) {
 }
 
 function startDrag(e) {
-  if (e.target.classList.contains('resize-handle') || e.target.classList.contains('remove-field')) return;
+  if (['resize-handle', 'remove-field', 'edit-field'].some(c => e.target.classList.contains(c))) return;
   e.preventDefault();
   const el = e.currentTarget;
   const rect = el.getBoundingClientRect();
@@ -11464,6 +12129,19 @@ async function createDocument() {
     return;
   }
   if (signers.some(s => !phoneOk(s.phone))) { showToast('휴대전화 번호를 확인해 주세요.'); goStep(2); return; }
+  // 서명 + 정보 기입 요청 — 기입 항목이 있어야 하고, 서버가 기능을 지원해야 한다
+  const inputFields = state.reqMode === 'fill' ? state.fields.filter(f => f.type === 'input') : [];
+  if (state.reqMode === 'fill' && !inputFields.length) {
+    showToast('기입 항목을 문서에 하나 이상 배치하거나, 「서명만 요청」을 골라 주세요.');
+    return;
+  }
+  if (inputFields.length) {
+    const { data: rd, error: re } = await sb.rpc('esign_inputs_ready');
+    if (re || !rd?.ok) {
+      showToast('기입 항목 기능의 서버 준비가 아직 끝나지 않았습니다. 「서명만 요청」으로 보내 주세요.');
+      return;
+    }
+  }
   // 보내기 전에 이름 · 번호를 한 번 더 확인 — 번호가 틀리면 다른 사람에게 알림톡이 간다
   if (!await confirmRecipients(signers)) return;
   const name = signers.map(s => s.name).join(', ');
@@ -11491,20 +12169,12 @@ async function createDocument() {
       if (upErr) throw new Error('파일 업로드 실패: ' + upErr.message);
     }
 
-    // 2) 서명란 좌표를 0~1 비율로 변환
-    const fieldsPayload = state.fields.map(f => {
-      const pg = document.querySelector('#pdfEditor .pdf-page[data-page="' + f.page + '"]');
-      const pw = pg?.offsetWidth || 1, ph = pg?.offsetHeight || 1;
-      return {
-        signer_index: f.signerIdx || 0,
-        field_type: f.type,
-        page: f.page || 1,
-        x: Math.max(0, Math.min(1, f.x / pw)),
-        y: Math.max(0, Math.min(1, f.y / ph)),
-        w: Math.max(0, Math.min(1, f.w / pw)),
-        h: Math.max(0, Math.min(1, f.h / ph))
-      };
-    });
+    // 2) 서명란 좌표를 0~1 비율로 변환 (기입 항목은 문서를 만든 뒤 따로 저장한다)
+    const fieldsPayload = state.fields.filter(f => f.type !== 'input').map(f => ({
+      signer_index: f.signerIdx || 0,
+      field_type: f.type,
+      ...fieldRatio(f)
+    }));
 
     // 3) 문서 생성 RPC
     const { data, error } = await sb.rpc('esign_create_document', {
@@ -11543,6 +12213,12 @@ async function createDocument() {
     state.lastCreated = data;
     const createLabels = getLabels('lblCreate');
     if (createLabels.length) await setDocLabels([data.document_id], createLabels);
+    // 기입 항목 · 서명자 언어는 알림톡보다 먼저 저장한다 (첫 알림부터 외국어 · 기입 항목이 적용되도록)
+    if (!await attachDocExtras(data, inputFields)) {
+      showToast('알림톡을 보내지 않았습니다. 문서 목록에서 이 문서를 삭제한 뒤 다시 만들어 주세요.');
+      await loadDocuments();
+      return;
+    }
     showAlimStatus(sendAlimtalk('request', [data.document_id]), data.signers.length);
     saveSignersToContacts(signers);
     // 4) 공유 모달
@@ -11579,6 +12255,62 @@ async function createDocument() {
   } finally {
     btn.disabled = false; btn.textContent = '서명 요청 보내기';
   }
+}
+
+// 편집기 픽셀 좌표 → 페이지 대비 0~1 비율
+function fieldRatio(f) {
+  const pg = document.querySelector('#pdfEditor .pdf-page[data-page="' + f.page + '"]');
+  const pw = pg?.offsetWidth || 1, ph = pg?.offsetHeight || 1;
+  return {
+    page: f.page || 1,
+    x: Math.max(0, Math.min(1, f.x / pw)),
+    y: Math.max(0, Math.min(1, f.y / ph)),
+    w: Math.max(0, Math.min(1, f.w / pw)),
+    h: Math.max(0, Math.min(1, f.h / ph))
+  };
+}
+
+// 문서를 만든 직후 기입 항목 · 서명자 언어를 붙인다. 알림톡을 보내도 되면 true
+async function attachDocExtras(data, inputFields) {
+  const created = data.signers || [];
+  // 입력한 서명자 순서 → 서버가 만든 서명자(sign_token). 이름 · 번호로 맞추고, 못 찾으면 같은 순번
+  const tokenOf = idx => {
+    const s = state.signers[idx];
+    if (!s) return null;
+    const ph = String(s.phone || '').replace(/\D/g, '');
+    const m = created.find(x => String(x.name || '').trim() === s.name.trim() &&
+                                String(x.phone || '').replace(/\D/g, '') === ph) || created[idx];
+    return m?.sign_token || null;
+  };
+
+  const langs = state.signers.map((s, i) => ({ sign_token: tokenOf(i), lang: s.lang || 'ko' }))
+    .filter(x => x.sign_token && x.lang !== 'ko');
+  if (langs.length) {
+    try {
+      const { data: r, error } = await sb.rpc('esign_set_signer_langs', { p_document_id: data.document_id, p_langs: langs });
+      if (error || !r?.ok) throw new Error(r?.error || error?.message);
+    } catch (e) {
+      showToast('서명자 언어를 저장하지 못해 알림톡은 한국어로 갑니다. (' + (e.message || '오류') + ')');
+    }
+  }
+
+  if (!inputFields.length) return true;
+  let err = null;
+  try {
+    const payload = inputFields.map(f => ({
+      sign_token: tokenOf(f.signerIdx || 0),
+      kind: f.kind, label: f.label, purpose: f.purpose || '', mode: f.mode,
+      required: f.required !== false, max_len: f.maxLen || 100,
+      ...fieldRatio(f)
+    }));
+    if (payload.some(x => !x.sign_token)) throw new Error('SIGNER_NOT_FOUND');
+    const { data: r, error } = await sb.rpc('esign_set_doc_inputs', { p_document_id: data.document_id, p_fields: payload });
+    if (error || !r?.ok) err = r?.error || error?.message || '알 수 없는 오류';
+  } catch (e) { err = e.message || '알 수 없는 오류'; }
+  if (!err) return true;
+  return confirm('기입 항목을 저장하지 못했습니다. (' + err + ')\n\n' +
+    '[확인] 기입 항목 없이 서명만 받는 문서로 그대로 보내기\n' +
+    '[취소] 보내지 않기');
 }
 
 // 보내기 직전 수신자 확인 창. 맞으면 true
@@ -11669,6 +12401,7 @@ function copyKakaoFallback(url, name, title) {
 
 // ===== SIGNATURE PAD =====
 function openSignPad() {
+  if (!checkSignInputs()) return;   // 작성할 항목부터
   document.getElementById('sigModal').classList.add('active');
   state.currentSigMethod = 0;
   switchSigTab(0);
@@ -11732,6 +12465,7 @@ async function submitSignature() {
   btn.disabled = true; btn.textContent = st('processing');
 
   try {
+    if (!await submitSignInputs()) return;
     const post = sd => fetch(SB_FN, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -11746,7 +12480,8 @@ async function submitSignature() {
     let out = await post(sigData);
     // 필기체 정보가 붙은 형식을 서버가 받지 못하면 이름만으로 한 번 더 보낸다 (서명은 반드시 끝나도록)
     if (!out.ok && methodKey === 'typed' && sigData.includes('||font=') &&
-        !['ALREADY_SIGNED', 'CONSENT_REQUIRED', 'INVALID_TOKEN'].includes(out.error)) {
+        !['ALREADY_SIGNED', 'CONSENT_REQUIRED', 'INVALID_TOKEN'].includes(out.error) &&
+        !String(out.error).includes('INPUTS_REQUIRED')) {
       console.warn('typed font rejected, retry plain', out.error);
       out = await post(sigData.split('||font=')[0]);
     }
@@ -11757,6 +12492,7 @@ async function submitSignature() {
         CONSENT_REQUIRED: st('err_CONSENT_REQUIRED'),
         INVALID_TOKEN: st('err_INVALID_TOKEN')
       };
+      if (String(out.error).includes('INPUTS_REQUIRED')) { closeSigModal(); checkSignInputs(); showToast(st('in_fix')); return; }
       showToast(msgs[out.error] || (st('sign_fail') + out.error));
       return;
     }
