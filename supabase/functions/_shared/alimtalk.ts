@@ -25,6 +25,32 @@ export const isKind = (k: unknown): k is Kind =>
 
 const env = (k: string) => Deno.env.get(k) ?? "";
 
+// ---------- 외국어 알림톡 ----------
+// 서명자 언어(esign.signers.lang)에 맞는 템플릿이 등록돼 있으면 그 템플릿으로 보낸다.
+//   ALIMTALK_TPL_REQUEST_EN · ALIMTALK_TPL_REMIND_ZH · ALIMTALK_TPL_DONE_JA … (docs/알림톡-외국어-템플릿.md)
+// 값이 없는 언어는 한국어 템플릿으로 간다. 변수 이름은 한국어 템플릿과 같다.
+export type Lang = "ko" | "en" | "zh" | "ja" | "vi";
+const LANGS: Lang[] = ["ko", "en", "zh", "ja", "vi"];
+const LOCALE: Record<Lang, string> = { ko: "ko-KR", en: "en-US", zh: "zh-CN", ja: "ja-JP", vi: "vi-VN" };
+const T: Record<Exclude<Lang, "ko">, Record<string, string>> = {
+  en: { none: "Not set", noDeadline: "No deadline", passed: "Deadline passed", days: "{n} day(s)", hours: "{n} hour(s)", line: "· {name} (ending {tail})" },
+  zh: { none: "未指定", noDeadline: "无期限", passed: "已过期限", days: "{n}天", hours: "{n}小时", line: "· {name}（尾号 {tail}）" },
+  ja: { none: "未指定", noDeadline: "期限なし", passed: "期限切れ", days: "{n}日", hours: "{n}時間", line: "· {name} 様（末尾 {tail}）" },
+  vi: { none: "Chưa đặt", noDeadline: "Không có thời hạn", passed: "Đã quá hạn", days: "{n} ngày", hours: "{n} giờ", line: "· {name} (số cuối {tail})" },
+};
+const fill = (t: string, v: Record<string, string | number>) =>
+  Object.entries(v).reduce((a, [k, x]) => a.split(`{${k}}`).join(String(x)), t);
+const asLang = (l: unknown): Lang => (LANGS.includes(l as Lang) ? l as Lang : "ko");
+
+// 이 종류 · 언어로 보낼 템플릿 ID (외국어 템플릿이 없으면 한국어)
+export function templateFor(kind: Kind, lang: Lang = "ko"): { id: string; lang: Lang } {
+  if (lang !== "ko") {
+    const id = env(`${TEMPLATE_ENV[kind]}_${lang.toUpperCase()}`);
+    if (id) return { id, lang };
+  }
+  return { id: env(TEMPLATE_ENV[kind]), lang: "ko" };
+}
+
 export const serviceBase = () =>
   (env("SIGN_BASE_URL") || "https://intoedu.github.io/into-office/").replace(/\/?$/, "/");
 
@@ -43,20 +69,22 @@ async function authHeader(): Promise<string> {
   return `HMAC-SHA256 apiKey=${env("SOLAPI_API_KEY")}, date=${date}, salt=${salt}, signature=${signature}`;
 }
 
-export const fmtDate = (v: string | null | undefined) =>
-  v ? new Date(v).toLocaleString("ko-KR", { timeZone: "Asia/Seoul", dateStyle: "long", timeStyle: "short" })
-    : "미지정";
+export const fmtDate = (v: string | null | undefined, lang: Lang = "ko") =>
+  v ? new Date(v).toLocaleString(LOCALE[lang], { timeZone: "Asia/Seoul", dateStyle: "long", timeStyle: "short" })
+    : (lang === "ko" ? "미지정" : T[lang].none);
 
 export const digits = (p: string) => (p ?? "").replace(/[^0-9]/g, "");
 
 // 서명 기한까지 남은 기간 — 리마인드 템플릿의 #{남은기간}
-export function remainText(deadline: string | null | undefined): string {
-  if (!deadline) return "기한 없음";
+export function remainText(deadline: string | null | undefined, lang: Lang = "ko"): string {
+  const t = lang === "ko" ? null : T[lang];
+  if (!deadline) return t ? t.noDeadline : "기한 없음";
   const ms = new Date(deadline).getTime() - Date.now();
-  if (ms <= 0) return "기한 경과";
+  if (ms <= 0) return t ? t.passed : "기한 경과";
   const days = Math.floor(ms / 86_400_000);
-  if (days >= 1) return `${days}일`;
-  return `${Math.max(1, Math.floor(ms / 3_600_000))}시간`;
+  if (days >= 1) return t ? fill(t.days, { n: days }) : `${days}일`;
+  const hours = Math.max(1, Math.floor(ms / 3_600_000));
+  return t ? fill(t.hours, { n: hours }) : `${hours}시간`;
 }
 
 // 휴대폰 끝 4자리만 남긴다 (010-1234-5678 → 5678)
@@ -68,8 +96,10 @@ export function phoneTail(p: string): string {
 // 서명 요청 · 완료 템플릿의 #{서명자목록} — 함께 서명하는 사람 전원 (줄바꿈으로 구분)
 //   · 홍길동 님 (끝자리 1234)
 //   · 김철수 님 (끝자리 5678)
-function signerLines(targets: Array<{ name: string; phone: string }>): string {
-  return targets.map((t) => `· ${t.name} 님 (끝자리 ${phoneTail(t.phone)})`).join("\n");
+function signerLines(targets: Array<{ name: string; phone: string }>, lang: Lang = "ko"): string {
+  return targets.map((t) => lang === "ko"
+    ? `· ${t.name} 님 (끝자리 ${phoneTail(t.phone)})`
+    : fill(T[lang].line, { name: t.name, tail: phoneTail(t.phone) })).join("\n");
 }
 
 export type Row = {
@@ -77,6 +107,8 @@ export type Row = {
   doc_id: string | null;
   phone: string;
   vars: Record<string, string>;
+  template_id?: string;   // 없으면 그 종류의 한국어 템플릿
+  lang?: Lang;
 };
 
 // 가입 승인 안내 1건 — esign_member_notify_info 결과로 만든다. 연락처가 없으면 null.
@@ -103,31 +135,65 @@ export async function collectDocRows(admin: SupabaseClient, kind: Kind, ids: str
     const { data: info } = await admin.rpc("esign_notify_targets", { p_kind: kind, p_document_id: id });
     if (!info?.ok) { notFound.push(id); continue; }
 
+    // 서명자 언어 { sign_token: lang } — 함수가 없거나 실패하면 모두 한국어
+    let langs: Record<string, string> = {};
+    try {
+      const { data: l, error } = await admin.rpc("esign_signer_langs", { p_document_id: id });
+      if (!error && l && typeof l === "object") langs = l as Record<string, string>;
+    } catch { /* 한국어로 */ }
+
     const doc = info.document;
     // 서명 요청 시점(아직 아무도 서명 안 함)과 완료 통지(kind=done)에는 targets 가 곧 서명자 전원이다
-    const allSigners = (kind === "request" || kind === "done") ? signerLines(info.targets ?? []) : "";
+    const listCache: Partial<Record<Lang, string>> = {};
+    const allSigners = (lang: Lang) => (kind === "request" || kind === "done")
+      ? (listCache[lang] ??= signerLines(info.targets ?? [], lang)) : "";
     for (const t of info.targets ?? []) {
       if (digits(t.phone).length < 10) continue;
+      // 그 언어 템플릿이 등록돼 있을 때만 외국어로 (아니면 한국어 문구 · 한국어 템플릿)
+      const tpl = templateFor(kind, asLang(langs[t.sign_token]));
+      const lang = tpl.lang;
       const common = {
         "#{이름}": t.name,
         "#{문서명}": doc.title,
-        "#{서명링크}": `${base}?s=${t.sign_token}`,   // 본문용 (SMS 대체발송에도 링크가 남도록)
+        // 본문용 (SMS 대체발송에도 링크가 남도록). 외국어는 서명 화면도 그 언어로 열리게 lang 을 붙인다
+        "#{서명링크}": `${base}?s=${t.sign_token}` + (lang === "ko" ? "" : `&lang=${lang}`),
         "#{서명토큰}": t.sign_token,                  // 버튼 URL 의 변수 부분
       };
       const vars: Record<string, string> =
-        kind === "request" ? { ...common, "#{요청자}": doc.requester_name, "#{기한}": fmtDate(doc.deadline),
-                               "#{서명자목록}": allSigners }
-        : kind === "remind" ? { ...common, "#{남은기간}": remainText(doc.deadline), "#{기한}": fmtDate(doc.deadline) }
-        : { ...common, "#{완료일시}": fmtDate(doc.completed_at), "#{서명자목록}": allSigners || doc.signer_names || t.name };
-      rows.push({ org_id: doc.org_id, doc_id: doc.id, phone: t.phone, vars });
+        kind === "request" ? { ...common, "#{요청자}": doc.requester_name, "#{기한}": fmtDate(doc.deadline, lang),
+                               "#{서명자목록}": allSigners(lang) }
+        : kind === "remind" ? { ...common, "#{남은기간}": remainText(doc.deadline, lang), "#{기한}": fmtDate(doc.deadline, lang) }
+        : { ...common, "#{완료일시}": fmtDate(doc.completed_at, lang), "#{서명자목록}": allSigners(lang) || doc.signer_names || t.name };
+      rows.push({ org_id: doc.org_id, doc_id: doc.id, phone: t.phone, vars, template_id: tpl.id, lang });
     }
   }
   return { rows, notFound };
 }
 
-// 발송 + 기록. 키가 없으면 기록만 남긴다.
+// 발송 + 기록. 템플릿(언어)별로 나눠 보낸다.
 export async function sendRows(admin: SupabaseClient, kind: Kind, rows: Row[]) {
-  const templateId = env(TEMPLATE_ENV[kind]);
+  if (!rows.length) return { ok: true, sent: 0, skipped: 0 };
+  const groups = new Map<string, Row[]>();
+  for (const r of rows) {
+    const id = r.template_id ?? env(TEMPLATE_ENV[kind]);
+    groups.set(id, [...(groups.get(id) ?? []), r]);
+  }
+  if (groups.size === 1) {
+    const [[id, list]] = [...groups];
+    return sendGroup(admin, kind, id, list);
+  }
+  let ok = true, sent = 0, skipped = 0;
+  const results: unknown[] = [];
+  for (const [id, list] of groups) {
+    const r = await sendGroup(admin, kind, id, list);
+    ok = ok && r.ok; sent += r.sent; skipped += r.skipped;
+    results.push((r as { result?: unknown }).result ?? null);
+  }
+  return { ok, sent, skipped, result: { groups: results } };
+}
+
+// 한 템플릿으로 묶인 발송 + 기록. 키가 없으면 기록만 남긴다.
+async function sendGroup(admin: SupabaseClient, kind: Kind, templateId: string, rows: Row[]) {
   const ready = providerReady() && !!templateId;
 
   const logBase = (status: string, error: string | null, response: unknown) =>
