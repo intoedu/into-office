@@ -132,6 +132,19 @@ input,select,textarea { font-family:inherit; }
 .lp-hero-cta { display:flex; gap:12px; flex-wrap:wrap; align-items:center; }
 .lp-hero-note { font-size:13px; color:rgba(255,255,255,.55); margin-top:16px; }
 
+.cmp-wrap { max-width:860px; margin:0 auto; overflow-x:auto; border:1px solid var(--border); border-radius:16px; background:var(--card); }
+.cmp-table { width:100%; border-collapse:collapse; min-width:520px; }
+.cmp-table th, .cmp-table td { padding:15px 16px; border-bottom:1px solid var(--border); text-align:left; vertical-align:middle; }
+.cmp-table tbody tr:last-child th, .cmp-table tbody tr:last-child td { border-bottom:none; }
+.cmp-table thead th { font-size:15px; font-weight:800; background:var(--bg); }
+.cmp-table tbody th { font-size:13.5px; font-weight:650; color:var(--text-secondary); width:28%; }
+.cmp-table tbody th small { font-weight:500; color:var(--text-muted); }
+.cmp-table td b { display:block; font-size:16px; font-weight:800; }
+.cmp-table td span { display:block; font-size:12px; color:var(--text-muted); margin-top:2px; }
+.cmp-table .us { background:rgba(4,183,221,.06); }
+.cmp-table thead .us { background:var(--navy); color:#fff; }
+.cmp-table td.us b { color:var(--navy); }
+.cmp-note { max-width:860px; margin:16px auto 0; font-size:12px; line-height:1.8; color:var(--text-muted); text-align:center; }
 .lp-section { max-width:1120px; margin:0 auto; padding:76px 24px; width:100%; }
 .lp-section-alt { background:#fff; border-top:1px solid var(--border); border-bottom:1px solid var(--border); }
 .lp-head { text-align:center; margin-bottom:46px; }
@@ -862,6 +875,13 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
 .io-ad-card .ch span { font-size:11.5px; background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.2); border-radius:999px; padding:4px 9px; }
 .io-ad-card .bt { position:relative; z-index:1; display:block; text-align:center; background:#fff; color:#0e2d4d; font-weight:800; font-size:15px; border-radius:10px; padding:13px; text-decoration:none; }
 .io-ad-card .ft { font-size:11px; color:rgba(255,255,255,.6); margin-top:10px; text-align:center; }
+.sign-lang { margin-left:10px; background:rgba(255,255,255,.12); color:#fff; border:1px solid rgba(255,255,255,.3);
+  border-radius:8px; padding:5px 8px; font-size:12.5px; }
+.sign-lang option { color:#111; }
+.consent-orig { margin:6px 0 10px; }
+.consent-note { font-size:12px !important; color:var(--text-muted) !important; }
+.consent-orig details summary { font-size:12px; color:var(--text-secondary); cursor:pointer; }
+.consent-orig details p { font-size:12px !important; color:var(--text-muted) !important; }
 .typed-font-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
 .typed-font { position:relative; border:1.5px solid var(--border); border-radius:10px; background:#fafbfc; cursor:pointer;
   height:96px; display:flex; align-items:center; justify-content:center; padding:8px 10px 20px; color:#0e2d4d; overflow:hidden; transition:all .15s; }
@@ -928,6 +948,7 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
         <a href="#lpFeatures">기능</a>
         <a href="#lpForms">문서 양식</a>
         <a href="#lpPricing">요금제</a>
+        <a href="#lpCompare">타사 비교</a>
         <a href="#lpFaq">자주 묻는 질문</a>
       </div>
       <div class="lp-nav-cta">
@@ -1156,6 +1177,53 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
       결제는 계좌이체로 진행되며, 입금 확인 후 이용이 시작됩니다.<br>
       세금계산서 및 현금영수증을 발행해 드립니다.
     </div>
+  </section>
+
+  <!-- 타사 비교 — 숫자는 모두싸인 공식 요금 페이지에서 직접 확인한 값만 쓴다 (확인일을 함께 적는다) -->
+  <section class="lp-section" id="lpCompare">
+    <div class="lp-head">
+      <h2>같은 일을, 더 가볍게</h2>
+      <p>널리 쓰이는 전자서명 서비스와 요금을 나란히 놓아 보았습니다.</p>
+    </div>
+    <div class="cmp-wrap">
+      <table class="cmp-table">
+        <thead>
+          <tr><th></th><th class="us">인투오피스</th><th>모두싸인</th></tr>
+        </thead>
+        <tbody>
+          <tr><th>혼자 쓰는 개인</th>
+            <td class="us"><b>월 5,900원</b><span>개인 베이직 · 월 30건</span></td>
+            <td><b>월 9,900원~</b><span>PERSONAL · 월 5건</span></td></tr>
+          <tr><th>3명이 쓰는 팀<br><small>월 결제</small></th>
+            <td class="us"><b>월 6,900원</b><span>스탠다드 · 월 30건</span></td>
+            <td><b>월 55,000원</b><span>TEAM · 월 20건</span></td></tr>
+          <tr><th>3명이 쓰는 팀<br><small>연 결제</small></th>
+            <td class="us"><b>연 69,000원</b><span>스탠다드 · 연 360건</span></td>
+            <td><b>연 382,800원</b><span>TEAM · 연 240건</span></td></tr>
+          <tr><th>여러 명이 쓰는 팀</th>
+            <td class="us"><b>월 19,900원</b><span>팀 · 월 120건 · 10명</span></td>
+            <td><b>월 88,000원</b><span>TEAM PRO · 월 30건 · 5명</span></td></tr>
+          <tr><th>문서 1건 비용<br><small>3명 팀 · 월 결제</small></th>
+            <td class="us"><b>230원</b><span>6,900원 ÷ 30건</span></td>
+            <td><b>2,750원</b><span>55,000원 ÷ 20건</span></td></tr>
+          <tr><th>한도를 넘으면</th>
+            <td class="us"><b>건당 150~300원</b><span>요금제별 초과 단가</span></td>
+            <td><b>건당 1,900원</b><span>충전</span></td></tr>
+          <tr><th>카카오 알림톡 발송</th>
+            <td class="us"><b>✓</b><span>모든 요금제</span></td>
+            <td><b>✓</b><span>이메일 · 카카오톡</span></td></tr>
+          <tr><th>외국어 서명 화면</th>
+            <td class="us"><b>✓</b><span>한 · 영 · 중 · 일 · 베트남어</span></td>
+            <td><b>✓</b><span>한 · 영 · 중 · 일 · 베트남어 · 프랑스어</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="cmp-note">
+      모두싸인은 문서당 서명자 수 · 템플릿 · 외부 서비스 연동 등 더 많은 기능을 제공합니다.
+      인투오피스는 학원 · 유학원 · 소규모 사업자가 자주 쓰는 기능에 집중해 가격을 낮췄습니다.<br>
+      모두싸인 요금은 공식 요금 페이지(modusign.co.kr/pricing)를 2026년 10월 25일에 확인한 값이며 VAT 포함입니다.
+      개인 요금제는 페이지에 함께 표기된 금액 중 낮은 금액을 적었습니다. 각 사의 요금은 바뀔 수 있습니다.
+    </p>
   </section>
 
   <div class="lp-legal">
@@ -1992,6 +2060,7 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
         </div>
         <div id="signerList"></div>
         <button class="btn-add-signer" id="btnAddSigner" onclick="addSigner()">+ 서명자 추가</button>
+        <p class="fld-msg hint" style="margin:8px 2px 0;">🌐 외국인 서명자는 휴대폰 언어에 맞춰 서명 화면이 <b>영어 · 중국어 · 일본어 · 베트남어</b>로 자동 표시되고, 서명자가 직접 바꿀 수도 있습니다. (알림톡 안내 문구는 한국어로 갑니다)</p>
         <label class="save-signers">
           <input type="checkbox" id="saveSignersToggle">
           이번에 입력한 서명자를 주소록에 저장 <span>(이미 저장된 분은 건너뜁니다)</span>
@@ -2084,7 +2153,11 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
   <header class="app-header">
     <img class="logo headerLogoClone" alt="INTO OFFICE">
     <div class="app-header-right">
-      <span class="app-header-user">전자서명</span>
+      <span class="app-header-user" data-sl="hdr">전자서명</span>
+      <select id="signLangSel" class="sign-lang" aria-label="Language" onchange="setSignLang(this.value)">
+        <option value="ko">🌐 한국어</option><option value="en">🌐 English</option><option value="zh">🌐 中文</option>
+        <option value="ja">🌐 日本語</option><option value="vi">🌐 Tiếng Việt</option>
+      </select>
     </div>
   </header>
   <div class="app-body">
@@ -2092,22 +2165,22 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
     <div class="lock-wrap" id="signLockBox" style="display:none;">
       <div class="lock-card">
         <div class="lock-icon">🔐</div>
-        <h3>보호된 문서입니다</h3>
-        <p id="signLockDesc">이 문서를 열람하려면 발송자가 알려드린 접근 암호가 필요합니다.</p>
-        <input type="password" id="signAccessInput" placeholder="접근 암호" maxlength="20"
+        <h3 data-sl="lock_title">보호된 문서입니다</h3>
+        <p id="signLockDesc" data-sl="lock_desc">이 문서를 열람하려면 발송자가 알려드린 접근 암호가 필요합니다.</p>
+        <input type="password" id="signAccessInput" placeholder="접근 암호" data-sl-ph="lock_ph" maxlength="20"
                onkeydown="if(event.key==='Enter')submitAccessCode()">
         <p class="lock-err" id="signLockErr"></p>
-        <button class="btn-action navy" style="width:100%;padding:13px;" onclick="submitAccessCode()">문서 열기</button>
+        <button class="btn-action navy" style="width:100%;padding:13px;" onclick="submitAccessCode()" data-sl="lock_btn">문서 열기</button>
       </div>
     </div>
 
     <div class="sign-container" id="signContainer">
       <div class="sign-header-info">
         <h3 id="signDocTitle">MOU 계약서</h3>
-        <div style="margin-bottom:8px;"><span class="legal-badge">⚖️ 전자서명법 제3조 적용</span></div>
+        <div style="margin-bottom:8px;"><span class="legal-badge" data-sl="legal_badge">⚖️ 전자서명법 제3조 적용</span></div>
         <div class="sign-meta">
-          <span>📋 요청자: <strong id="signRequester">인투유학</strong></span>
-          <span>📅 기한: <strong id="signDeadline">2026-07-25 14:08</strong></span>
+          <span><span data-sl="requester">📋 요청자:</span> <strong id="signRequester"></strong></span>
+          <span><span data-sl="deadline">📅 기한:</span> <strong id="signDeadline"></strong></span>
         </div>
         <div class="signer-progress" id="signerProgress"></div>
       </div>
@@ -2116,17 +2189,25 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
         <div class="pdf-editor" id="signPdfEditor"></div>
       </div>
       <div class="consent-box" id="consentBox">
-        <h4>⚖️ 전자서명 동의</h4>
-        <p>「전자서명법」 제3조 및 「전자문서 및 전자거래 기본법」 제4조에 의거하여, 본 전자서명은 서명, 서명날인 또는 기명날인과 동일한 법적 효력을 가집니다.</p>
-        <p>서명 시 귀하의 IP 주소, 서명 시각, 기기 정보가 감사 추적 기록으로 저장되며, 이는 서명의 진정성을 증명하는 법적 증거로 활용됩니다.</p>
+        <h4 data-sl="consent_title">⚖️ 전자서명 동의</h4>
+        <p data-sl="consent_p1">「전자서명법」 제3조 및 「전자문서 및 전자거래 기본법」 제4조에 의거하여, 본 전자서명은 서명, 서명날인 또는 기명날인과 동일한 법적 효력을 가집니다.</p>
+        <p data-sl="consent_p2">서명 시 귀하의 IP 주소, 서명 시각, 기기 정보가 감사 추적 기록으로 저장되며, 이는 서명의 진정성을 증명하는 법적 증거로 활용됩니다.</p>
+        <div id="consentOrig" class="consent-orig" style="display:none;">
+          <p class="consent-note" data-sl="consent_note"></p>
+          <details><summary data-sl="consent_orig"></summary>
+            <p>「전자서명법」 제3조 및 「전자문서 및 전자거래 기본법」 제4조에 의거하여, 본 전자서명은 서명, 서명날인 또는 기명날인과 동일한 법적 효력을 가집니다.</p>
+            <p>서명 시 귀하의 IP 주소, 서명 시각, 기기 정보가 감사 추적 기록으로 저장되며, 이는 서명의 진정성을 증명하는 법적 증거로 활용됩니다.</p>
+            <p>위 내용을 확인하였으며, 본 문서에 전자서명 방식으로 서명하는 것에 동의합니다.</p>
+          </details>
+        </div>
         <div class="consent-check">
           <input type="checkbox" id="consentCheckbox" onchange="updateSignButton()">
-          <label for="consentCheckbox">위 내용을 확인하였으며, 본 문서에 전자서명 방식으로 서명하는 것에 동의합니다.</label>
+          <label for="consentCheckbox" data-sl="consent_label">위 내용을 확인하였으며, 본 문서에 전자서명 방식으로 서명하는 것에 동의합니다.</label>
         </div>
       </div>
       <div class="sign-actions">
-        <button class="btn-secondary" onclick="goDash()">취소</button>
-        <button class="btn-action" id="signBtn" style="padding:13px 40px;font-size:16px;" onclick="openSignPad()" disabled>✍️ 서명하기</button>
+        <button class="btn-secondary" onclick="goDash()" data-sl="btn_cancel">취소</button>
+        <button class="btn-action" id="signBtn" style="padding:13px 40px;font-size:16px;" onclick="openSignPad()" disabled data-sl="btn_sign">✍️ 서명하기</button>
       </div>
     </div>
   </div>
@@ -2136,58 +2217,58 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
 <div class="modal-overlay" id="sigModal">
   <div class="modal wide">
     <div class="modal-header">
-      <h3>서명 방법을 선택하세요</h3>
+      <h3 data-sl="modal_title">서명 방법을 선택하세요</h3>
       <button class="modal-close" onclick="closeSigModal()">✕</button>
     </div>
     <div class="modal-body">
       <div class="sig-tabs">
-        <div class="sig-tab active" onclick="switchSigTab(0)">✍️ 직접 서명</div>
-        <div class="sig-tab" onclick="switchSigTab(1)">📝 이름 자동입력</div>
-        <div class="sig-tab" onclick="switchSigTab(2)">📤 도장/사인 업로드</div>
-        <div class="sig-tab" onclick="switchSigTab(3)">📁 보관함</div>
+        <div class="sig-tab active" onclick="switchSigTab(0)" data-sl="tab_draw">✍️ 직접 서명</div>
+        <div class="sig-tab" onclick="switchSigTab(1)" data-sl="tab_type">📝 이름 자동입력</div>
+        <div class="sig-tab" onclick="switchSigTab(2)" data-sl="tab_upload">📤 도장/사인 업로드</div>
+        <div class="sig-tab" onclick="switchSigTab(3)" data-sl="tab_vault">📁 보관함</div>
       </div>
       <!-- Tab 3: 보관함 -->
       <div class="sig-tab-content" id="sigTabVault">
-        <p style="font-size:13px;color:var(--text-secondary);margin-bottom:10px;">저장해 둔 사인 또는 도장을 선택하세요.</p>
+        <p style="font-size:13px;color:var(--text-secondary);margin-bottom:10px;" data-sl="vault_desc">저장해 둔 사인 또는 도장을 선택하세요.</p>
         <div class="mk-grid" id="sigVaultGrid"><div class="empty-sm" style="grid-column:1/-1;">불러오는 중...</div></div>
       </div>
       <!-- Tab 0: Draw -->
       <div class="sig-tab-content active" id="sigTabDraw">
-        <p style="font-size:13px;color:var(--text-secondary);margin-bottom:10px;">아래 영역에 서명을 직접 그려주세요.</p>
+        <p style="font-size:13px;color:var(--text-secondary);margin-bottom:10px;" data-sl="draw_desc">아래 영역에 서명을 직접 그려주세요.</p>
         <div class="sig-pad-wrapper">
           <canvas id="signaturePadCanvas"></canvas>
           <div class="sig-pad-actions">
-            <button class="btn-secondary" style="font-size:12px;padding:6px 12px;" onclick="clearSigPad()">지우기</button>
+            <button class="btn-secondary" style="font-size:12px;padding:6px 12px;" onclick="clearSigPad()" data-sl="clear">지우기</button>
           </div>
         </div>
       </div>
       <!-- Tab 1: Type name -->
       <div class="sig-tab-content" id="sigTabType">
-        <p style="font-size:13px;color:var(--text-secondary);margin-bottom:10px;">이름을 적으면 <b>필기체 · 사인</b> 여러 가지로 만들어 드립니다. 마음에 드는 서명을 골라 주세요.</p>
+        <p style="font-size:13px;color:var(--text-secondary);margin-bottom:10px;" data-sl-html="type_desc">이름을 적으면 <b>필기체 · 사인</b> 여러 가지로 만들어 드립니다. 마음에 드는 서명을 골라 주세요.</p>
         <div class="form-group" style="margin-bottom:12px;">
-          <input type="text" id="typedSigName" placeholder="서명자 이름" maxlength="20" oninput="state.typedEnEdited=false;updateTypedPreview()">
+          <input type="text" id="typedSigName" placeholder="서명자 이름" data-sl-ph="type_ph" maxlength="20" oninput="state.typedEnEdited=false;updateTypedPreview()">
         </div>
         <div class="typed-font-grid" id="typedFontGrid"></div>
         <div class="form-group" id="typedEnWrap" style="display:none;margin:12px 0 0;">
-          <label style="font-size:12.5px;">영문 표기 <span style="color:var(--text-muted);font-weight:400;">(자동 변환 — 여권 표기처럼 고칠 수 있어요)</span></label>
+          <label style="font-size:12.5px;"><span data-sl="en_label">영문 표기</span> <span style="color:var(--text-muted);font-weight:400;" data-sl="en_hint">(자동 변환 — 여권 표기처럼 고칠 수 있어요)</span></label>
           <input type="text" id="typedSigEn" maxlength="30" oninput="state.typedEnEdited=true;updateTypedPreview()">
         </div>
       </div>
       <!-- Tab 2: Upload image -->
       <div class="sig-tab-content" id="sigTabUpload">
-        <p style="font-size:13px;color:var(--text-secondary);margin-bottom:10px;">도장, 서명 이미지를 업로드하세요.</p>
+        <p style="font-size:13px;color:var(--text-secondary);margin-bottom:10px;" data-sl="upload_desc">도장, 서명 이미지를 업로드하세요.</p>
         <div class="upload-sig-zone" id="sigUploadZone" onclick="document.getElementById('sigImageInput').click()">
           <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17,8 12,3 7,8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-          <p style="font-size:13px;color:var(--text-secondary);margin-top:6px;">클릭하여 이미지 선택</p>
-          <p class="file-types-hint">JPG, PNG (최대 5MB)</p>
+          <p style="font-size:13px;color:var(--text-secondary);margin-top:6px;" data-sl="upload_click">클릭하여 이미지 선택</p>
+          <p class="file-types-hint" data-sl="upload_hint">JPG, PNG (최대 5MB)</p>
           <img id="sigUploadPreview" style="display:none;">
         </div>
         <input type="file" id="sigImageInput" accept=".jpg,.jpeg,.png" style="display:none" onchange="handleSigImageUpload(event)">
       </div>
     </div>
     <div class="modal-footer">
-      <button class="btn-secondary" onclick="closeSigModal()">취소</button>
-      <button class="btn-action" onclick="submitSignature()">서명 완료</button>
+      <button class="btn-secondary" onclick="closeSigModal()" data-sl="modal_cancel">취소</button>
+      <button class="btn-action" onclick="submitSignature()" data-sl="modal_submit">서명 완료</button>
     </div>
   </div>
 </div>
@@ -2873,12 +2954,12 @@ async function doDeleteDocument() {
 async function downloadSignedForSigner() {
   const btn = document.getElementById('dlBtn');
   const label = btn ? btn.textContent : '';
-  if (btn) { btn.disabled = true; btn.textContent = '문서를 만드는 중...'; }
+  if (btn) { btn.disabled = true; btn.textContent = st('dl_making'); }
 
   try {
     const { data, error } = await sb.rpc('esign_get_completed_doc', { p_token: state.signToken });
     if (error || !data?.ok) throw new Error(
-      data?.error === 'NOT_COMPLETED' ? '아직 모든 서명이 완료되지 않았습니다.' : '문서 정보를 불러올 수 없습니다.');
+      data?.error === 'NOT_COMPLETED' ? st('dl_not_completed') : st('dl_info_fail'));
 
     const doc = data.document;
 
@@ -2886,17 +2967,17 @@ async function downloadSignedForSigner() {
     if (doc.file_type !== 'pdf') {
       const blob = await fileBlob(doc.file_path);
       saveBlob(await blob.arrayBuffer(), safeName(doc.title) + '.' + doc.file_type, blob.type);
-      showToast('문서를 내려받았습니다.', true);
+      showToast(st('dl_ok_orig'), true);
       return;
     }
 
     // 화면에 띄운 합성본이 있으면 그대로 쓴다 (화면과 파일이 같도록)
     const bytes = state.signedPdf?.bytes || await composeSignedPdf(doc, data.signers, data.fields);
     saveBlob(bytes, safeName(doc.title) + '_서명완료.pdf');
-    showToast('완료 문서를 내려받았습니다.', true);
+    showToast(st('dl_ok'), true);
   } catch (e) {
     console.error('완료본 생성 오류:', e);
-    showToast(e.message || '문서 생성 중 오류가 발생했습니다.');
+    showToast(e.message || st('dl_err'));
   } finally {
     if (btn) { btn.disabled = false; btn.textContent = label; }
   }
@@ -2907,11 +2988,11 @@ async function openSignedInBrowser() {
   if (state.signedPdf?.bytes) {
     const url = URL.createObjectURL(new Blob([state.signedPdf.bytes], { type: 'application/pdf' }));
     const w = window.open(url, '_blank');
-    if (!w) showToast('팝업이 차단되었습니다. 「완료 문서 다운로드」를 이용해주세요.');
+    if (!w) showToast(st('popup_blocked'));
     setTimeout(() => URL.revokeObjectURL(url), 60000);
     return;
   }
-  if (!state.signOrigPath) { showToast('원본 문서를 찾을 수 없습니다.'); return; }
+  if (!state.signOrigPath) { showToast(st('orig_missing')); return; }
   try {
     window.open(await fileUrl(state.signOrigPath), '_blank');
   } catch (e) { showToast(e.message); }
@@ -3522,7 +3603,7 @@ async function routeByProfile() {
 // ============================================================
 const SB_FN_ADMIN = SB_URL + '/functions/v1/esign-admin';
 const APP_URL = shareBase();
-const BUILD = '2026-10-19.6';   // 배포 확인용. 화면 하단과 콘솔에 표시된다.
+const BUILD = '2026-10-25.1';   // 배포 확인용. 화면 하단과 콘솔에 표시된다.
 
 
 // ============================================================
@@ -4704,12 +4785,11 @@ async function vaultDelete(id) {
 async function loadSigVaultPicker() {
   const grid = document.getElementById('sigVaultGrid');
   if (!grid) return;
-  grid.innerHTML = '<div class="empty-sm" style="grid-column:1/-1;">불러오는 중...</div>';
+  grid.innerHTML = '<div class="empty-sm" style="grid-column:1/-1;">' + st('loading2') + '</div>';
   const { data } = await sb.rpc('esign_list_signatures');
   const items = data?.ok ? (data.items || []) : [];
   if (!items.length) {
-    grid.innerHTML = '<div class="empty-sm" style="grid-column:1/-1;">' +
-      '저장된 사인이 없습니다.<br>로그인 후 「사인 · 도장」 메뉴에서 미리 만들어 두실 수 있습니다.</div>';
+    grid.innerHTML = '<div class="empty-sm" style="grid-column:1/-1;">' + st('vault_empty') + '</div>';
     return;
   }
   state.pickerItems = items;
@@ -5172,7 +5252,7 @@ function hideAccessLock() {
 
 function submitAccessCode() {
   const v = document.getElementById('signAccessInput').value.trim();
-  if (!v) { document.getElementById('signLockErr').textContent = '접근 암호를 입력해주세요.'; return; }
+  if (!v) { document.getElementById('signLockErr').textContent = st('lock_empty'); return; }
   state.accessCode = v;
   openSignByToken(state.signToken);
 }
@@ -8598,13 +8678,13 @@ function safeName(t) {
 //   'TYPED:이름||font=sign-ko'                 한글 사인 (기울이고 겹쳐 쓰고 밑줄 꼬리)
 //   'TYPED:이름||font=sign-en||text=영문 이름'  영문 사인
 const TYPED_FONTS = [
-  { key: 'Nanum Pen Script',   family: 'Nanum Pen Script',   label: '펜글씨' },
-  { key: 'Nanum Brush Script', family: 'Nanum Brush Script', label: '붓글씨' },
-  { key: 'Gaegu',              family: 'Gaegu',              label: '또박또박', weight: 700 },
-  { key: 'Dokdo',              family: 'Dokdo',              label: '굵은 손글씨' },
-  { key: 'sign-ko', family: 'Nanum Brush Script', label: '한글 사인', sign: true,
+  { key: 'Nanum Pen Script',   family: 'Nanum Pen Script',   label: '펜글씨', sl: 'tf_pen' },
+  { key: 'Nanum Brush Script', family: 'Nanum Brush Script', label: '붓글씨', sl: 'tf_brush' },
+  { key: 'Gaegu',              family: 'Gaegu',              label: '또박또박', weight: 700, sl: 'tf_neat' },
+  { key: 'Dokdo',              family: 'Dokdo',              label: '굵은 손글씨', sl: 'tf_bold' },
+  { key: 'sign-ko', family: 'Nanum Brush Script', label: '한글 사인', sign: true, sl: 'tf_signko',
     skew: -0.42, squeeze: 0.78, overlap: -0.16, jitter: 0.07 },
-  { key: 'sign-en', family: 'Mrs Saint Delafield', label: '영문 사인', sign: true, latin: true,
+  { key: 'sign-en', family: 'Mrs Saint Delafield', label: '영문 사인', sign: true, latin: true, sl: 'tf_signen',
     skew: -0.12, squeeze: 0.92, overlap: -0.04, jitter: 0.03 }
 ];
 const typedStyle = k => TYPED_FONTS.find(x => x.key === k) || null;
@@ -10195,12 +10275,293 @@ function goCreate() {
 }
 
 // 서명자용: 토큰으로 서명 페이지 로딩 (로그인 불필요)
+// ============================================================
+// 서명자 화면 다국어 (한국어 · English · 中文 · 日本語 · Tiếng Việt)
+// 언어: ?lang= → 서명자가 고른 언어(localStorage) → 휴대폰 · 브라우저 언어 → (그 밖의 언어는 영어)
+// 계약 문서 내용은 번역하지 않는다. 법적 동의문은 번역과 함께 한국어 원문을 보여 주고 원문이 우선함을 밝힌다.
+// ============================================================
+const SIGN_LANGS = { ko: '한국어', en: 'English', zh: '中文', ja: '日本語', vi: 'Tiếng Việt' };
+const SIGN_LOCALE = { ko: 'ko-KR', en: 'en-US', zh: 'zh-CN', ja: 'ja-JP', vi: 'vi-VN' };
+const SL = {
+  ko: {
+    hdr: '전자서명', loading: '문서를 불러오는 중...',
+    lock_title: '보호된 문서입니다', lock_desc: '이 문서를 열람하려면 발송자가 알려드린 접근 암호가 필요합니다.',
+    lock_ph: '접근 암호', lock_btn: '문서 열기',
+    lock_locked: '암호를 여러 번 잘못 입력하여 열람이 잠시 제한되었습니다. 10분 후 다시 시도해주세요.',
+    lock_invalid: '접근 암호가 올바르지 않습니다.', lock_remaining: ' (남은 시도 {n}회)', lock_empty: '접근 암호를 입력해주세요.',
+    err_INVALID_TOKEN: '유효하지 않은 서명 링크입니다.', err_DEADLINE_PASSED: '서명 기한이 지났습니다.',
+    err_NOT_YET_ACTIVE: '아직 서명 기간이 시작되지 않았습니다.', err_NOT_YET_ACTIVE_AT: '{date} 부터<br>서명하실 수 있습니다.',
+    err_DOC_CANCELLED: '취소된 문서입니다.', err_DOC_EXPIRED: '만료된 문서입니다.', err_default: '문서를 불러올 수 없습니다.',
+    legal_badge: '⚖️ 전자서명법 제3조 적용', requester: '📋 요청자:', deadline: '📅 기한:', deadline_none: '미지정',
+    consent_title: '⚖️ 전자서명 동의',
+    consent_p1: '「전자서명법」 제3조 및 「전자문서 및 전자거래 기본법」 제4조에 의거하여, 본 전자서명은 서명, 서명날인 또는 기명날인과 동일한 법적 효력을 가집니다.',
+    consent_p2: '서명 시 귀하의 IP 주소, 서명 시각, 기기 정보가 감사 추적 기록으로 저장되며, 이는 서명의 진정성을 증명하는 법적 증거로 활용됩니다.',
+    consent_label: '위 내용을 확인하였으며, 본 문서에 전자서명 방식으로 서명하는 것에 동의합니다.',
+    consent_note: '', consent_orig: '',
+    btn_cancel: '취소', btn_sign: '✍️ 서명하기',
+    signed_done: '✓ 서명이 완료된 문서입니다', dl_btn: '📄 완료 문서 다운로드', open_btn: '새 창에서 열기',
+    kakao_note: '카카오톡에서 열었다면 다운로드가 제한될 수 있습니다.<br>우측 상단 메뉴에서 <b>다른 브라우저로 열기</b>를 이용해주세요.',
+    no_preview: '이 형식은 미리보기를 지원하지 않습니다.', doc_download: '문서 다운로드',
+    field_sign: '서명', field_date: '날짜', field_done: '✓ 서명 완료',
+    modal_title: '서명 방법을 선택하세요', tab_draw: '✍️ 직접 서명', tab_type: '📝 이름 자동입력',
+    tab_upload: '📤 도장/사인 업로드', tab_vault: '📁 보관함',
+    vault_desc: '저장해 둔 사인 또는 도장을 선택하세요.', loading2: '불러오는 중...',
+    vault_empty: '저장된 사인이 없습니다.<br>로그인 후 「사인 · 도장」 메뉴에서 미리 만들어 두실 수 있습니다.',
+    draw_desc: '아래 영역에 서명을 직접 그려주세요.', clear: '지우기',
+    type_desc: '이름을 적으면 <b>필기체 · 사인</b> 여러 가지로 만들어 드립니다. 마음에 드는 서명을 골라 주세요.',
+    type_ph: '서명자 이름', en_label: '영문 표기', en_hint: '(자동 변환 — 여권 표기처럼 고칠 수 있어요)',
+    upload_desc: '도장, 서명 이미지를 업로드하세요.', upload_click: '클릭하여 이미지 선택', upload_hint: 'JPG, PNG (최대 5MB)',
+    modal_cancel: '취소', modal_submit: '서명 완료', processing: '처리 중...',
+    tf_pen: '펜글씨', tf_brush: '붓글씨', tf_neat: '또박또박', tf_bold: '굵은 손글씨', tf_signko: '한글 사인', tf_signen: '영문 사인',
+    sample_name: '홍길동',
+    toast_draw: '서명을 그려주세요.', toast_name: '서명할 이름을 입력해주세요.', toast_upload: '도장/사인 이미지를 업로드해주세요.',
+    toast_img_size: '이미지는 5MB 이하여야 합니다.',
+    err_ALREADY_SIGNED: '이미 서명이 완료되었습니다.', err_CONSENT_REQUIRED: '전자서명 동의가 필요합니다.',
+    sign_fail: '서명 실패: ', sign_ok: '서명이 완료되었습니다!', sign_net_err: '서명 전송 중 오류가 발생했습니다.',
+    done_title: '서명이 완료되었습니다', done_all: '모든 서명자의 서명이 완료되어<br>감사추적인증서가 발급되었습니다.',
+    done_remaining: '남은 서명자: {n}명<br>모든 서명이 완료되면 인증서가 발급됩니다.',
+    audit_title: '감사 추적 기록 완료', audit_time: '서명 시각', audit_ip: 'IP 주소', audit_device: '기기', recorded: '기록됨',
+    done_legal: '본 기록은 「전자서명법」 제3조에 따른 법적 증거로 보관됩니다.',
+    dl_making: '문서를 만드는 중...', dl_not_completed: '아직 모든 서명이 완료되지 않았습니다.', dl_info_fail: '문서 정보를 불러올 수 없습니다.',
+    dl_ok: '완료 문서를 내려받았습니다.', dl_ok_orig: '문서를 내려받았습니다.', dl_err: '문서 생성 중 오류가 발생했습니다.',
+    popup_blocked: '팝업이 차단되었습니다. 「완료 문서 다운로드」를 이용해주세요.', orig_missing: '원본 문서를 찾을 수 없습니다.'
+  },
+  en: {
+    hdr: 'E-Signature', loading: 'Loading the document...',
+    lock_title: 'This document is protected', lock_desc: 'Enter the access code provided by the sender to view this document.',
+    lock_ph: 'Access code', lock_btn: 'Open document',
+    lock_locked: 'Too many incorrect attempts. Viewing is temporarily restricted. Please try again in 10 minutes.',
+    lock_invalid: 'The access code is incorrect.', lock_remaining: ' ({n} attempts left)', lock_empty: 'Please enter the access code.',
+    err_INVALID_TOKEN: 'This signing link is invalid.', err_DEADLINE_PASSED: 'The signing deadline has passed.',
+    err_NOT_YET_ACTIVE: 'The signing period has not started yet.', err_NOT_YET_ACTIVE_AT: 'You can sign from<br>{date}.',
+    err_DOC_CANCELLED: 'This document has been cancelled.', err_DOC_EXPIRED: 'This document has expired.', err_default: 'The document could not be loaded.',
+    legal_badge: '⚖️ Korean Digital Signature Act, Article 3', requester: '📋 Requested by:', deadline: '📅 Deadline:', deadline_none: 'None',
+    consent_title: '⚖️ Consent to Electronic Signature',
+    consent_p1: 'Under Article 3 of the Digital Signature Act and Article 4 of the Framework Act on Electronic Documents and Transactions of the Republic of Korea, this electronic signature has the same legal effect as a handwritten signature, a signature and seal, or a name and seal.',
+    consent_p2: 'When you sign, your IP address, signing time and device information are stored as an audit trail and may be used as legal evidence of the authenticity of your signature.',
+    consent_label: 'I have read the above and agree to sign this document electronically.',
+    consent_note: 'This translation is provided for your convenience. In case of any discrepancy, the Korean original prevails.',
+    consent_orig: 'View the Korean original',
+    btn_cancel: 'Cancel', btn_sign: '✍️ Sign',
+    signed_done: '✓ You have signed this document', dl_btn: '📄 Download completed document', open_btn: 'Open in a new window',
+    kakao_note: 'If you opened this in KakaoTalk, downloads may be restricted.<br>Use <b>Open in another browser</b> from the top-right menu.',
+    no_preview: 'Preview is not available for this file type.', doc_download: 'Download document',
+    field_sign: 'Sign', field_date: 'Date', field_done: '✓ Signed',
+    modal_title: 'Choose how to sign', tab_draw: '✍️ Draw', tab_type: '📝 Type name',
+    tab_upload: '📤 Upload stamp/signature', tab_vault: '📁 Saved',
+    vault_desc: 'Select a saved signature or stamp.', loading2: 'Loading...',
+    vault_empty: 'No saved signatures.<br>Log in and create one in the 「Signature · Stamp」 menu.',
+    draw_desc: 'Draw your signature in the area below.', clear: 'Clear',
+    type_desc: 'Type your name and we will create <b>several handwriting and signature styles</b>. Choose the one you like.',
+    type_ph: 'Signer name', en_label: 'Romanized name', en_hint: '(auto-converted — edit it to match your passport)',
+    upload_desc: 'Upload an image of your stamp or signature.', upload_click: 'Tap to choose an image', upload_hint: 'JPG, PNG (max 5MB)',
+    modal_cancel: 'Cancel', modal_submit: 'Complete signature', processing: 'Processing...',
+    tf_pen: 'Pen', tf_brush: 'Brush', tf_neat: 'Neat', tf_bold: 'Bold hand', tf_signko: 'Korean signature', tf_signen: 'English signature',
+    sample_name: 'Your Name',
+    toast_draw: 'Please draw your signature.', toast_name: 'Please enter the name to sign.', toast_upload: 'Please upload a stamp or signature image.',
+    toast_img_size: 'The image must be 5MB or smaller.',
+    err_ALREADY_SIGNED: 'This document has already been signed.', err_CONSENT_REQUIRED: 'Consent to electronic signature is required.',
+    sign_fail: 'Signing failed: ', sign_ok: 'Your signature is complete!', sign_net_err: 'An error occurred while sending your signature.',
+    done_title: 'Your signature is complete', done_all: 'All signers have signed,<br>and the audit trail certificate has been issued.',
+    done_remaining: 'Remaining signers: {n}<br>The certificate will be issued once everyone has signed.',
+    audit_title: 'Audit trail recorded', audit_time: 'Signed at', audit_ip: 'IP address', audit_device: 'Device', recorded: 'Recorded',
+    done_legal: 'This record is kept as legal evidence under Article 3 of the Korean Digital Signature Act.',
+    dl_making: 'Preparing the document...', dl_not_completed: 'Not everyone has signed yet.', dl_info_fail: 'Could not load the document information.',
+    dl_ok: 'The completed document has been downloaded.', dl_ok_orig: 'The document has been downloaded.', dl_err: 'An error occurred while creating the document.',
+    popup_blocked: 'The pop-up was blocked. Please use 「Download completed document」.', orig_missing: 'The original document could not be found.'
+  },
+  zh: {
+    hdr: '电子签名', loading: '正在加载文件...',
+    lock_title: '此文件受保护', lock_desc: '请输入发件人提供的访问密码以查看此文件。',
+    lock_ph: '访问密码', lock_btn: '打开文件',
+    lock_locked: '密码输入错误次数过多，暂时无法查看。请10分钟后再试。',
+    lock_invalid: '访问密码不正确。', lock_remaining: '（剩余 {n} 次）', lock_empty: '请输入访问密码。',
+    err_INVALID_TOKEN: '签名链接无效。', err_DEADLINE_PASSED: '签名期限已过。',
+    err_NOT_YET_ACTIVE: '签名尚未开始。', err_NOT_YET_ACTIVE_AT: '您可以从<br>{date} 起签名。',
+    err_DOC_CANCELLED: '该文件已被取消。', err_DOC_EXPIRED: '该文件已过期。', err_default: '无法加载文件。',
+    legal_badge: '⚖️ 适用韩国《电子签名法》第3条', requester: '📋 请求方：', deadline: '📅 期限：', deadline_none: '未指定',
+    consent_title: '⚖️ 电子签名同意',
+    consent_p1: '根据韩国《电子签名法》第3条及《电子文件及电子交易基本法》第4条，本电子签名与手写签名、签名盖章或记名盖章具有同等法律效力。',
+    consent_p2: '签名时，您的IP地址、签名时间及设备信息将作为审计追踪记录保存，并可作为证明签名真实性的法律证据。',
+    consent_label: '我已确认上述内容，同意以电子签名方式签署本文件。',
+    consent_note: '本译文仅供参考。如有出入，以韩文原文为准。', consent_orig: '查看韩文原文',
+    btn_cancel: '取消', btn_sign: '✍️ 签名',
+    signed_done: '✓ 您已签署此文件', dl_btn: '📄 下载已完成文件', open_btn: '在新窗口中打开',
+    kakao_note: '如在KakaoTalk中打开，下载可能会受限。<br>请使用右上角菜单中的<b>在其他浏览器中打开</b>。',
+    no_preview: '此文件格式不支持预览。', doc_download: '下载文件',
+    field_sign: '签名', field_date: '日期', field_done: '✓ 已签名',
+    modal_title: '请选择签名方式', tab_draw: '✍️ 手写签名', tab_type: '📝 输入姓名',
+    tab_upload: '📤 上传印章/签名', tab_vault: '📁 已保存',
+    vault_desc: '请选择已保存的签名或印章。', loading2: '加载中...',
+    vault_empty: '没有已保存的签名。<br>登录后可在「签名 · 印章」菜单中创建。',
+    draw_desc: '请在下方区域手写签名。', clear: '清除',
+    type_desc: '输入姓名后，将为您生成<b>多种手写体和签名样式</b>，请选择您喜欢的一种。',
+    type_ph: '签名人姓名', en_label: '英文姓名', en_hint: '（自动转换 — 可按护照写法修改）',
+    upload_desc: '请上传印章或签名图片。', upload_click: '点击选择图片', upload_hint: 'JPG、PNG（最大5MB）',
+    modal_cancel: '取消', modal_submit: '完成签名', processing: '处理中...',
+    tf_pen: '钢笔体', tf_brush: '毛笔体', tf_neat: '工整体', tf_bold: '粗手写体', tf_signko: '韩文签名', tf_signen: '英文签名',
+    sample_name: 'Your Name',
+    toast_draw: '请手写签名。', toast_name: '请输入签名姓名。', toast_upload: '请上传印章或签名图片。',
+    toast_img_size: '图片大小不能超过5MB。',
+    err_ALREADY_SIGNED: '该文件已签署。', err_CONSENT_REQUIRED: '需要同意电子签名。',
+    sign_fail: '签名失败：', sign_ok: '签名完成！', sign_net_err: '发送签名时出错。',
+    done_title: '签名已完成', done_all: '所有签名人均已签名，<br>审计追踪证书已签发。',
+    done_remaining: '剩余签名人：{n} 人<br>全部签名后将签发证书。',
+    audit_title: '审计追踪已记录', audit_time: '签名时间', audit_ip: 'IP地址', audit_device: '设备', recorded: '已记录',
+    done_legal: '本记录将依据韩国《电子签名法》第3条作为法律证据保存。',
+    dl_making: '正在生成文件...', dl_not_completed: '尚未全部签名完成。', dl_info_fail: '无法加载文件信息。',
+    dl_ok: '已下载完成的文件。', dl_ok_orig: '已下载文件。', dl_err: '生成文件时出错。',
+    popup_blocked: '弹出窗口被拦截。请使用「下载已完成文件」。', orig_missing: '找不到原始文件。'
+  },
+  ja: {
+    hdr: '電子署名', loading: '文書を読み込んでいます...',
+    lock_title: '保護された文書です', lock_desc: 'この文書を閲覧するには、送信者から伝えられたアクセスコードが必要です。',
+    lock_ph: 'アクセスコード', lock_btn: '文書を開く',
+    lock_locked: 'コードの入力を複数回間違えたため、閲覧が一時的に制限されています。10分後に再度お試しください。',
+    lock_invalid: 'アクセスコードが正しくありません。', lock_remaining: '（残り {n} 回）', lock_empty: 'アクセスコードを入力してください。',
+    err_INVALID_TOKEN: '無効な署名リンクです。', err_DEADLINE_PASSED: '署名期限が過ぎています。',
+    err_NOT_YET_ACTIVE: '署名期間はまだ始まっていません。', err_NOT_YET_ACTIVE_AT: '{date} から<br>署名できます。',
+    err_DOC_CANCELLED: 'キャンセルされた文書です。', err_DOC_EXPIRED: '期限切れの文書です。', err_default: '文書を読み込めませんでした。',
+    legal_badge: '⚖️ 韓国「電子署名法」第3条適用', requester: '📋 依頼者：', deadline: '📅 期限：', deadline_none: '指定なし',
+    consent_title: '⚖️ 電子署名への同意',
+    consent_p1: '韓国「電子署名法」第3条および「電子文書及び電子取引基本法」第4条に基づき、本電子署名は署名、署名捺印または記名捺印と同一の法的効力を有します。',
+    consent_p2: '署名時に、お客様のIPアドレス、署名日時、端末情報が監査証跡として保存され、署名の真正性を証明する法的証拠として利用されます。',
+    consent_label: '上記の内容を確認し、本文書に電子署名で署名することに同意します。',
+    consent_note: 'この翻訳は参考用です。内容に相違がある場合は韓国語の原文が優先されます。', consent_orig: '韓国語の原文を見る',
+    btn_cancel: 'キャンセル', btn_sign: '✍️ 署名する',
+    signed_done: '✓ 署名済みの文書です', dl_btn: '📄 完了文書をダウンロード', open_btn: '新しいウィンドウで開く',
+    kakao_note: 'カカオトークで開いた場合、ダウンロードが制限されることがあります。<br>右上のメニューから<b>他のブラウザで開く</b>をご利用ください。',
+    no_preview: 'このファイル形式はプレビューに対応していません。', doc_download: '文書をダウンロード',
+    field_sign: '署名', field_date: '日付', field_done: '✓ 署名済み',
+    modal_title: '署名方法を選択してください', tab_draw: '✍️ 手書き署名', tab_type: '📝 名前を入力',
+    tab_upload: '📤 印鑑・サインをアップロード', tab_vault: '📁 保管箱',
+    vault_desc: '保存したサインまたは印鑑を選択してください。', loading2: '読み込み中...',
+    vault_empty: '保存されたサインがありません。<br>ログイン後「サイン・印鑑」メニューで作成できます。',
+    draw_desc: '下の枠内に署名を書いてください。', clear: '消去',
+    type_desc: '名前を入力すると<b>手書き風・サイン風のスタイル</b>を複数作成します。お好みのものを選んでください。',
+    type_ph: '署名者の名前', en_label: 'ローマ字表記', en_hint: '（自動変換 — パスポートの表記に合わせて修正できます）',
+    upload_desc: '印鑑またはサインの画像をアップロードしてください。', upload_click: 'タップして画像を選択', upload_hint: 'JPG、PNG（最大5MB）',
+    modal_cancel: 'キャンセル', modal_submit: '署名を完了', processing: '処理中...',
+    tf_pen: 'ペン字', tf_brush: '筆文字', tf_neat: '丁寧な字', tf_bold: '太い手書き', tf_signko: '韓国語サイン', tf_signen: '英字サイン',
+    sample_name: 'Your Name',
+    toast_draw: '署名を書いてください。', toast_name: '署名する名前を入力してください。', toast_upload: '印鑑またはサインの画像をアップロードしてください。',
+    toast_img_size: '画像は5MB以下にしてください。',
+    err_ALREADY_SIGNED: 'すでに署名が完了しています。', err_CONSENT_REQUIRED: '電子署名への同意が必要です。',
+    sign_fail: '署名に失敗しました：', sign_ok: '署名が完了しました！', sign_net_err: '署名の送信中にエラーが発生しました。',
+    done_title: '署名が完了しました', done_all: 'すべての署名者の署名が完了し、<br>監査証跡証明書が発行されました。',
+    done_remaining: '残りの署名者：{n}名<br>全員の署名が完了すると証明書が発行されます。',
+    audit_title: '監査証跡の記録完了', audit_time: '署名日時', audit_ip: 'IPアドレス', audit_device: '端末', recorded: '記録済み',
+    done_legal: '本記録は韓国「電子署名法」第3条に基づく法的証拠として保管されます。',
+    dl_making: '文書を作成しています...', dl_not_completed: 'まだすべての署名が完了していません。', dl_info_fail: '文書情報を読み込めませんでした。',
+    dl_ok: '完了文書をダウンロードしました。', dl_ok_orig: '文書をダウンロードしました。', dl_err: '文書の作成中にエラーが発生しました。',
+    popup_blocked: 'ポップアップがブロックされました。「完了文書をダウンロード」をご利用ください。', orig_missing: '元の文書が見つかりません。'
+  },
+  vi: {
+    hdr: 'Chữ ký điện tử', loading: 'Đang tải tài liệu...',
+    lock_title: 'Tài liệu được bảo vệ', lock_desc: 'Vui lòng nhập mã truy cập do người gửi cung cấp để xem tài liệu này.',
+    lock_ph: 'Mã truy cập', lock_btn: 'Mở tài liệu',
+    lock_locked: 'Bạn đã nhập sai mã quá nhiều lần nên việc xem tạm thời bị hạn chế. Vui lòng thử lại sau 10 phút.',
+    lock_invalid: 'Mã truy cập không đúng.', lock_remaining: ' (còn {n} lần thử)', lock_empty: 'Vui lòng nhập mã truy cập.',
+    err_INVALID_TOKEN: 'Liên kết ký không hợp lệ.', err_DEADLINE_PASSED: 'Đã quá hạn ký.',
+    err_NOT_YET_ACTIVE: 'Thời gian ký chưa bắt đầu.', err_NOT_YET_ACTIVE_AT: 'Bạn có thể ký từ<br>{date}.',
+    err_DOC_CANCELLED: 'Tài liệu đã bị hủy.', err_DOC_EXPIRED: 'Tài liệu đã hết hạn.', err_default: 'Không thể tải tài liệu.',
+    legal_badge: '⚖️ Áp dụng Điều 3 Luật Chữ ký điện tử Hàn Quốc', requester: '📋 Người yêu cầu:', deadline: '📅 Hạn chót:', deadline_none: 'Không có',
+    consent_title: '⚖️ Đồng ý ký điện tử',
+    consent_p1: 'Theo Điều 3 Luật Chữ ký điện tử và Điều 4 Luật Cơ bản về Văn bản điện tử và Giao dịch điện tử của Hàn Quốc, chữ ký điện tử này có hiệu lực pháp lý tương đương với chữ ký tay, ký tên đóng dấu hoặc ghi tên đóng dấu.',
+    consent_p2: 'Khi ký, địa chỉ IP, thời điểm ký và thông tin thiết bị của bạn được lưu lại làm hồ sơ kiểm tra (audit trail) và có thể được dùng làm bằng chứng pháp lý chứng minh tính xác thực của chữ ký.',
+    consent_label: 'Tôi đã đọc nội dung trên và đồng ý ký tài liệu này bằng chữ ký điện tử.',
+    consent_note: 'Bản dịch này chỉ để tham khảo. Nếu có khác biệt, bản gốc tiếng Hàn được ưu tiên áp dụng.', consent_orig: 'Xem bản gốc tiếng Hàn',
+    btn_cancel: 'Hủy', btn_sign: '✍️ Ký',
+    signed_done: '✓ Bạn đã ký tài liệu này', dl_btn: '📄 Tải tài liệu đã hoàn tất', open_btn: 'Mở trong cửa sổ mới',
+    kakao_note: 'Nếu bạn mở trong KakaoTalk, việc tải xuống có thể bị hạn chế.<br>Hãy dùng <b>Mở bằng trình duyệt khác</b> ở menu góc trên bên phải.',
+    no_preview: 'Định dạng tệp này không hỗ trợ xem trước.', doc_download: 'Tải tài liệu',
+    field_sign: 'Ký', field_date: 'Ngày', field_done: '✓ Đã ký',
+    modal_title: 'Chọn cách ký', tab_draw: '✍️ Ký tay', tab_type: '📝 Nhập tên',
+    tab_upload: '📤 Tải con dấu/chữ ký', tab_vault: '📁 Đã lưu',
+    vault_desc: 'Chọn chữ ký hoặc con dấu đã lưu.', loading2: 'Đang tải...',
+    vault_empty: 'Chưa có chữ ký đã lưu.<br>Hãy đăng nhập và tạo trong menu 「Chữ ký · Con dấu」.',
+    draw_desc: 'Vui lòng ký tay vào ô bên dưới.', clear: 'Xóa',
+    type_desc: 'Nhập tên, chúng tôi sẽ tạo <b>nhiều kiểu chữ viết tay và chữ ký</b>. Hãy chọn kiểu bạn thích.',
+    type_ph: 'Tên người ký', en_label: 'Tên phiên âm Latin', en_hint: '(tự động chuyển — có thể sửa theo hộ chiếu)',
+    upload_desc: 'Tải lên hình ảnh con dấu hoặc chữ ký.', upload_click: 'Chạm để chọn hình ảnh', upload_hint: 'JPG, PNG (tối đa 5MB)',
+    modal_cancel: 'Hủy', modal_submit: 'Hoàn tất ký', processing: 'Đang xử lý...',
+    tf_pen: 'Bút mực', tf_brush: 'Bút lông', tf_neat: 'Ngay ngắn', tf_bold: 'Viết tay đậm', tf_signko: 'Chữ ký tiếng Hàn', tf_signen: 'Chữ ký Latin',
+    sample_name: 'Your Name',
+    toast_draw: 'Vui lòng ký tay.', toast_name: 'Vui lòng nhập tên để ký.', toast_upload: 'Vui lòng tải lên hình con dấu hoặc chữ ký.',
+    toast_img_size: 'Hình ảnh phải từ 5MB trở xuống.',
+    err_ALREADY_SIGNED: 'Tài liệu này đã được ký.', err_CONSENT_REQUIRED: 'Bạn cần đồng ý ký điện tử.',
+    sign_fail: 'Ký thất bại: ', sign_ok: 'Đã ký xong!', sign_net_err: 'Đã xảy ra lỗi khi gửi chữ ký.',
+    done_title: 'Đã ký xong', done_all: 'Tất cả người ký đã ký xong,<br>chứng nhận audit trail đã được cấp.',
+    done_remaining: 'Còn {n} người chưa ký<br>Chứng nhận sẽ được cấp khi tất cả đã ký.',
+    audit_title: 'Đã ghi nhận audit trail', audit_time: 'Thời điểm ký', audit_ip: 'Địa chỉ IP', audit_device: 'Thiết bị', recorded: 'Đã ghi nhận',
+    done_legal: 'Hồ sơ này được lưu giữ làm bằng chứng pháp lý theo Điều 3 Luật Chữ ký điện tử Hàn Quốc.',
+    dl_making: 'Đang tạo tài liệu...', dl_not_completed: 'Chưa phải tất cả người ký đã ký.', dl_info_fail: 'Không thể tải thông tin tài liệu.',
+    dl_ok: 'Đã tải tài liệu hoàn tất.', dl_ok_orig: 'Đã tải tài liệu.', dl_err: 'Đã xảy ra lỗi khi tạo tài liệu.',
+    popup_blocked: 'Cửa sổ bật lên bị chặn. Vui lòng dùng 「Tải tài liệu đã hoàn tất」.', orig_missing: 'Không tìm thấy tài liệu gốc.'
+  }
+};
+
+function pickSignLang() {
+  const q = new URLSearchParams(location.search).get('lang');
+  if (q && SL[q]) return q;
+  try { const saved = localStorage.getItem('io_sign_lang'); if (saved && SL[saved]) return saved; } catch (e) {}
+  const navs = (navigator.languages && navigator.languages.length ? navigator.languages : [navigator.language || 'ko']);
+  for (const n of navs) {
+    const k = String(n).toLowerCase().slice(0, 2);
+    if (SL[k]) return k;
+  }
+  return 'en';   // 지원하지 않는 언어의 브라우저는 영어로 (외국인 서명자가 한국어 화면을 보지 않도록)
+}
+state.signLang = pickSignLang();
+
+// 서명자 화면 문구. {n} · {date} 를 채운다
+function st(key, vars) {
+  let s = (SL[state.signLang] && SL[state.signLang][key] != null && SL[state.signLang][key] !== '') ? SL[state.signLang][key] : SL.ko[key];
+  if (s == null) return key;
+  if (vars) Object.keys(vars).forEach(k => { s = s.split('{' + k + '}').join(vars[k]); });
+  return s;
+}
+function fmtSignDate(iso) {
+  if (!iso) return st('deadline_none');
+  const d = new Date(iso);
+  if (isNaN(d)) return String(iso);
+  return d.toLocaleString(SIGN_LOCALE[state.signLang] || 'ko-KR', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+}
+
+// data-sl(글자) · data-sl-html(HTML) · data-sl-ph(placeholder) 를 현재 언어로 바꾼다
+function applySignLang() {
+  document.querySelectorAll('[data-sl]').forEach(el => { el.textContent = st(el.dataset.sl); });
+  document.querySelectorAll('[data-sl-html]').forEach(el => { el.innerHTML = st(el.dataset.slHtml); });
+  document.querySelectorAll('[data-sl-ph]').forEach(el => { el.placeholder = st(el.dataset.slPh); });
+  const sel = document.getElementById('signLangSel');
+  if (sel) sel.value = state.signLang;
+  // 외국어일 때 동의문 아래에 「번역은 참고용 · 한국어 원문 우선」과 원문을 함께 보여 준다
+  const orig = document.getElementById('consentOrig');
+  if (orig) orig.style.display = state.signLang === 'ko' ? 'none' : '';
+  if (document.getElementById('signPage')?.classList.contains('active')) {
+    document.documentElement.lang = state.signLang;
+  }
+}
+function setSignLang(lang) {
+  if (!SL[lang]) return;
+  state.signLang = lang;
+  try { localStorage.setItem('io_sign_lang', lang); } catch (e) {}
+  applySignLang();
+  // 이미 그려진 문서 정보 · 서명란 글자도 다시 쓴다
+  const d = state.signData?.document;
+  if (d) document.getElementById('signDeadline').textContent = fmtSignDate(d.deadline);
+  document.querySelectorAll('#signPdfEditor .sign-field-label[data-sl-field]').forEach(el => { el.textContent = st(el.dataset.slField); });
+  if (document.getElementById('typedFontGrid')) updateTypedPreview();
+  if (lang !== 'ko') hidePromoBar();
+}
+
 async function openSignByToken(token) {
   state.signToken = token;
   state.signedPdf = null;
   showPage('signPage');
+  applySignLang();
   const editor = document.getElementById('signPdfEditor');
-  editor.innerHTML = '<div class="sign-loading">문서를 불러오는 중...</div>';
+  editor.innerHTML = '<div class="sign-loading">' + st('loading') + '</div>';
 
   const { data, error } = await sb.rpc('esign_get_sign_page', {
     p_token: token,
@@ -10211,14 +10572,13 @@ async function openSignByToken(token) {
   if (!error && data && !data.ok &&
       ['ACCESS_CODE_REQUIRED','ACCESS_CODE_INVALID','ACCESS_CODE_LOCKED'].includes(data.error)) {
     if (data.error === 'ACCESS_CODE_LOCKED') {
-      document.getElementById('signLockDesc').textContent =
-        '암호를 여러 번 잘못 입력하여 열람이 잠시 제한되었습니다. 10분 후 다시 시도해주세요.';
+      document.getElementById('signLockDesc').textContent = st('lock_locked');
       showAccessLock('');
       document.getElementById('signAccessInput').disabled = true;
       return;
     }
     showAccessLock(data.error === 'ACCESS_CODE_INVALID'
-      ? ('접근 암호가 올바르지 않습니다.' + (data.remaining != null ? ' (남은 시도 ' + data.remaining + '회)' : ''))
+      ? (st('lock_invalid') + (data.remaining != null ? st('lock_remaining', { n: data.remaining }) : ''))
       : '');
     state.accessCode = null;
     return;
@@ -10227,16 +10587,15 @@ async function openSignByToken(token) {
 
   if (error || !data?.ok) {
     const msgs = {
-      INVALID_TOKEN: '유효하지 않은 서명 링크입니다.',
-      DEADLINE_PASSED: '서명 기한이 지났습니다.',
+      INVALID_TOKEN: st('err_INVALID_TOKEN'),
+      DEADLINE_PASSED: st('err_DEADLINE_PASSED'),
       NOT_YET_ACTIVE: data?.scheduled_at
-        ? ('아직 서명 기간이 시작되지 않았습니다.<br><br>' +
-           new Date(data.scheduled_at).toLocaleString('ko-KR') + ' 부터<br>서명하실 수 있습니다.')
-        : '아직 서명 기간이 시작되지 않았습니다.',
-      DOC_CANCELLED: '취소된 문서입니다.',
-      DOC_EXPIRED: '만료된 문서입니다.'
+        ? (st('err_NOT_YET_ACTIVE') + '<br><br>' + st('err_NOT_YET_ACTIVE_AT', { date: fmtSignDate(data.scheduled_at) }))
+        : st('err_NOT_YET_ACTIVE'),
+      DOC_CANCELLED: st('err_DOC_CANCELLED'),
+      DOC_EXPIRED: st('err_DOC_EXPIRED')
     };
-    editor.innerHTML = '<div class="sign-loading">' + (msgs[data?.error] || '문서를 불러올 수 없습니다.') + '</div>';
+    editor.innerHTML = '<div class="sign-loading">' + (msgs[data?.error] || st('err_default')) + '</div>';
     document.getElementById('consentBox').style.display = 'none';
     const sa = document.querySelector('.sign-actions'); if (sa) sa.style.display = 'none';
     return;
@@ -10248,7 +10607,7 @@ async function openSignByToken(token) {
   document.getElementById('signDocTitle').textContent = d.title;
   document.getElementById('signRequester').textContent = d.requester_name;
   loadSignPromo(token);
-  document.getElementById('signDeadline').textContent = fmtLocal(d.deadline);
+  document.getElementById('signDeadline').textContent = fmtSignDate(d.deadline);
 
   // 서명 진행 현황
   const prog = document.getElementById('signerProgress');
@@ -10261,20 +10620,19 @@ async function openSignByToken(token) {
   // 이미 서명 완료
   if (s.status === 'signed') {
     document.getElementById('consentBox').style.display = 'none';
-    let done = '<div class="legal-badge" style="padding:12px 24px;font-size:14px;">✓ 서명이 완료된 문서입니다</div>';
+    let done = '<div class="legal-badge" style="padding:12px 24px;font-size:14px;">' + st('signed_done') + '</div>';
     if (d.status === 'complete') {
       state.signOrigPath = d.file_path;
       done =
         '<div style="display:flex;flex-direction:column;gap:10px;align-items:center;width:100%;">' +
           '<button class="btn-action" id="dlBtn" onclick="downloadSignedForSigner()" ' +
           'style="padding:14px 32px;font-size:15px;width:100%;max-width:340px;">' +
-          '📄 완료 문서 다운로드</button>' +
+          st('dl_btn') + '</button>' +
           '<button class="btn-secondary" onclick="openSignedInBrowser()" ' +
           'style="padding:11px 24px;font-size:13px;width:100%;max-width:340px;">' +
-          '새 창에서 열기</button>' +
+          st('open_btn') + '</button>' +
           '<p style="font-size:11.5px;color:var(--text-muted);line-height:1.7;text-align:center;margin-top:2px;">' +
-          '카카오톡에서 열었다면 다운로드가 제한될 수 있습니다.<br>' +
-          '우측 상단 메뉴에서 <b>다른 브라우저로 열기</b>를 이용해주세요.</p>' +
+          st('kakao_note') + '</p>' +
         '</div>';
     }
     document.querySelector('.sign-actions').innerHTML = done;
@@ -10328,8 +10686,8 @@ async function openSignByToken(token) {
       if (completed) renderSignedFields(completed.fields, completed.signers, 'signPdfEditor');
       else renderSignFields(data.fields, 'signPdfEditor', s.status === 'signed');
     } else {
-      editor.innerHTML = '<div class="sign-loading">이 형식은 미리보기를 지원하지 않습니다.<br>' +
-        '<a href="'+pub.publicUrl+'" target="_blank" style="color:var(--cyan);">문서 다운로드</a></div>';
+      editor.innerHTML = '<div class="sign-loading">' + st('no_preview') + '<br>' +
+        '<a href="'+pub.publicUrl+'" target="_blank" style="color:var(--cyan);">' + st('doc_download') + '</a></div>';
     }
   }
 
@@ -10396,7 +10754,10 @@ function renderSignFields(fields, editorId, signedByMe) {
       'top:' + (f.y * pg.offsetHeight) + 'px;' +
       'width:' + (f.w * pg.offsetWidth) + 'px;' +
       'height:' + (f.h * pg.offsetHeight) + 'px;cursor:default;';
-    el.textContent = signedByMe ? '✓ 서명 완료' : (f.field_type === 'date' ? '날짜' : '서명');
+    // 서명자 화면 언어에 맞춘 서명란 글자 (언어를 바꾸면 setSignLang 이 다시 쓴다)
+    el.classList.add('sign-field-label');
+    el.dataset.slField = signedByMe ? 'field_done' : (f.field_type === 'date' ? 'field_date' : 'field_sign');
+    el.textContent = st(el.dataset.slField);
     pg.appendChild(el);
   });
 }
@@ -10754,15 +11115,15 @@ function updateTypedPreview() {
   const enWrap = document.getElementById('typedEnWrap');
   const enInput = document.getElementById('typedSigEn');
   if (enWrap) enWrap.style.display = state.typedFont === 'sign-en' ? '' : 'none';
-  if (enInput && !state.typedEnEdited) enInput.value = romanizeName(name || '홍길동');
+  if (enInput && !state.typedEnEdited) enInput.value = romanizeName(name || st('sample_name'));
   const en = (enInput?.value || '').replace(/\|/g, '').trim();
 
   grid.innerHTML = TYPED_FONTS.map(f =>
     '<div class="typed-font' + (f.key === state.typedFont ? ' sel' : '') + (f.sign ? ' sign' : '') +
       '" onclick="pickTypedFont(\'' + f.key + '\')">' +
       '<img class="tf-img" data-key="' + f.key + '" alt="' + f.label + '">' +
-      '<span class="tf-label">' + f.label + (f.sign ? ' <b>NEW</b>' : '') + '</span></div>').join('');
-  const nm = name || '홍길동';
+      '<span class="tf-label">' + (f.sl ? st(f.sl) : f.label) + (f.sign ? ' <b>NEW</b>' : '') + '</span></div>').join('');
+  const nm = name || st('sample_name');
   const paint = () => grid.querySelectorAll('.tf-img').forEach(im => {
     const k = im.dataset.key;
     im.src = typedSigToPng(nm, 150, 56, k, k === 'sign-en' ? en : null);
@@ -10779,7 +11140,7 @@ function pickTypedFont(key) { state.typedFont = key; updateTypedPreview(); }
 function handleSigImageUpload(e) {
   const file = e.target.files[0];
   if (!file) return;
-  if (file.size > 5*1024*1024) { showToast('이미지는 5MB 이하여야 합니다.'); return; }
+  if (file.size > 5*1024*1024) { showToast(st('toast_img_size')); return; }
   const reader = new FileReader();
   reader.onload = function(ev) {
     state.sigUploadedImage = ev.target.result;
@@ -11350,25 +11711,25 @@ async function submitSignature() {
 
   if (method === 0) {
     if (!state.signaturePad || state.signaturePad.isEmpty()) {
-      showToast('서명을 그려주세요.'); return;
+      showToast(st('toast_draw')); return;
     }
     sigData = state.signaturePad.toDataURL('image/png');
   } else if (method === 1) {
     const nm = (document.getElementById('typedSigName')?.value || '').replace(/\|/g, '').trim();
-    if (!nm) { showToast('서명할 이름을 입력해주세요.'); return; }
+    if (!nm) { showToast(st('toast_name')); return; }
     sigData = 'TYPED:' + nm + (state.typedFont ? '||font=' + state.typedFont : '');
     if (state.typedFont === 'sign-en') {
       const en = (document.getElementById('typedSigEn')?.value || '').replace(/\|/g, '').trim() || romanizeName(nm);
       sigData += '||text=' + en;
     }
   } else {
-    if (!state.sigUploadedImage) { showToast('도장/사인 이미지를 업로드해주세요.'); return; }
+    if (!state.sigUploadedImage) { showToast(st('toast_upload')); return; }
     sigData = state.sigUploadedImage;
   }
 
   const methodKey = ['draw','typed','upload'][method];
   const btn = document.querySelector('#sigModal .btn-action');
-  btn.disabled = true; btn.textContent = '처리 중...';
+  btn.disabled = true; btn.textContent = st('processing');
 
   try {
     const post = sd => fetch(SB_FN, {
@@ -11392,21 +11753,21 @@ async function submitSignature() {
 
     if (!out.ok) {
       const msgs = {
-        ALREADY_SIGNED: '이미 서명이 완료되었습니다.',
-        CONSENT_REQUIRED: '전자서명 동의가 필요합니다.',
-        INVALID_TOKEN: '유효하지 않은 서명 링크입니다.'
+        ALREADY_SIGNED: st('err_ALREADY_SIGNED'),
+        CONSENT_REQUIRED: st('err_CONSENT_REQUIRED'),
+        INVALID_TOKEN: st('err_INVALID_TOKEN')
       };
-      showToast(msgs[out.error] || ('서명 실패: ' + out.error));
+      showToast(msgs[out.error] || (st('sign_fail') + out.error));
       return;
     }
 
     closeSigModal();
-    showToast('서명이 완료되었습니다!', true);
+    showToast(st('sign_ok'), true);
     setTimeout(() => showSignComplete(out), 600);
   } catch (e) {
-    showToast('서명 전송 중 오류가 발생했습니다.');
+    showToast(st('sign_net_err'));
   } finally {
-    btn.disabled = false; btn.textContent = '서명 완료';
+    btn.disabled = false; btn.textContent = st('modal_submit');
   }
 }
 
@@ -11417,23 +11778,22 @@ function showSignComplete(result) {
     '<div style="background:var(--card);border-radius:var(--radius-lg);padding:48px 32px;' +
     'text-align:center;box-shadow:var(--shadow-sm);border:1px solid var(--border);">' +
       '<div style="font-size:56px;margin-bottom:16px;">✅</div>' +
-      '<h2 style="font-size:22px;margin-bottom:10px;">서명이 완료되었습니다</h2>' +
+      '<h2 style="font-size:22px;margin-bottom:10px;">' + st('done_title') + '</h2>' +
       '<p style="color:var(--text-secondary);font-size:14px;line-height:1.7;margin-bottom:20px;">' +
-        (result.all_completed
-          ? '모든 서명자의 서명이 완료되어<br>감사추적인증서가 발급되었습니다.'
-          : '남은 서명자: ' + result.remaining + '명<br>모든 서명이 완료되면 인증서가 발급됩니다.') +
+        (result.all_completed ? st('done_all') : st('done_remaining', { n: result.remaining })) +
       '</p>' +
       '<div style="background:var(--info-bg);border-radius:10px;padding:16px;text-align:left;">' +
         '<p style="font-size:12px;color:var(--text-secondary);line-height:1.8;">' +
-        '<strong>감사 추적 기록 완료</strong><br>' +
-        '서명 시각: ' + new Date().toLocaleString('ko-KR') + '<br>' +
-        'IP 주소: ' + (result.ip || '기록됨') + '<br>' +
-        '기기: ' + (result.device ? result.device.os + ' / ' + result.device.browser : '기록됨') +
+        '<strong>' + st('audit_title') + '</strong><br>' +
+        st('audit_time') + ': ' + new Date().toLocaleString(SIGN_LOCALE[state.signLang] || 'ko-KR') + '<br>' +
+        st('audit_ip') + ': ' + esc(result.ip || st('recorded')) + '<br>' +
+        st('audit_device') + ': ' + esc(result.device ? result.device.os + ' / ' + result.device.browser : st('recorded')) +
         '</p></div>' +
-      '<p class="ip-notice">본 기록은 「전자서명법」 제3조에 따른 법적 증거로 보관됩니다.</p>' +
+      '<p class="ip-notice">' + st('done_legal') + '</p>' +
     '</div>';
   hidePromoBar();
-  if (state.signPromo) c.insertAdjacentHTML('beforeend', promoCardHtml());
+  // 인투오피스 안내는 한국어 화면에서만 (외국인 서명자에게 한국어 광고를 보이지 않는다)
+  if (state.signPromo && state.signLang === 'ko') c.insertAdjacentHTML('beforeend', promoCardHtml());
 }
 
 // ── 서명 화면 인투오피스 안내 (광고) ─────────────────────────
@@ -11444,7 +11804,7 @@ async function loadSignPromo(token) {
   hidePromoBar();
   try {
     const { data, error } = await sb.rpc('esign_sign_promo', { p_token: token });
-    state.signPromo = !error && !!data?.ok && !!data.show;
+    state.signPromo = !error && !!data?.ok && !!data.show && state.signLang === 'ko';
   } catch (e) { state.signPromo = false; }
   if (!state.signPromo) return;
   let closed = false;
