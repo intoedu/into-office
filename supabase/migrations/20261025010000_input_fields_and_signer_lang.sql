@@ -70,7 +70,7 @@ exception when others then
   return false;   -- 2026-02-30 같은 없는 날짜
 end $$;
 
--- 요청자(문서 소유자 또는 같은 조직)인지
+-- 요청자인지 — 문서 목록 · 서명본과 같은 규칙(esign.doc_visible: 소유자, 또는 같은 조직의 owner · admin)
 create or replace function esign.can_manage_doc(p_document_id uuid)
 returns boolean language sql stable security definer
 set search_path to 'esign', 'public', 'pg_temp'
@@ -78,9 +78,7 @@ as $$
   select exists (
     select 1 from esign.documents d
      where d.id = p_document_id
-       and auth.uid() is not null
-       and (d.owner_id = auth.uid()
-            or (d.org_id is not null and d.org_id = esign.my_org_id(auth.uid()))));
+       and esign.doc_visible(d.owner_id, d.org_id, auth.uid()));
 $$;
 revoke all on function esign.can_manage_doc(uuid) from public, anon;
 grant execute on function esign.can_manage_doc(uuid) to authenticated, service_role;
