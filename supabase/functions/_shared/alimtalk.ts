@@ -23,7 +23,8 @@ const TEMPLATE_ENV: Record<Kind, string> = {
 export const isKind = (k: unknown): k is Kind =>
   typeof k === "string" && k in TEMPLATE_ENV;
 
-const env = (k: string) => Deno.env.get(k) ?? "";
+// 붙여 넣을 때 딸려 온 앞뒤 공백 · 줄바꿈 때문에 서명(HMAC)이 틀어지지 않게 다듬는다
+const env = (k: string) => (Deno.env.get(k) ?? "").trim();
 
 // ---------- 외국어 알림톡 ----------
 // 서명자 언어(esign.signers.lang)에 맞는 템플릿이 등록돼 있으면 그 템플릿으로 보낸다.
