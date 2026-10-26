@@ -45,6 +45,7 @@
   --radius-lg: 14px;
 }
 * { margin:0; padding:0; box-sizing:border-box; }
+html { -webkit-text-size-adjust:100%; text-size-adjust:100%; }
 html,body { height:100%; font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif; background:var(--bg); color:var(--text); }
 button { font-family:inherit; cursor:pointer; border:none; background:none; }
 input,select,textarea { font-family:inherit; }
@@ -856,11 +857,24 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
 .signer-num { width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; font-size:12px; font-weight:700; flex-shrink:0; }
 .signer-entry input { padding:9px 12px; border:1.5px solid var(--border); border-radius:6px; font-size:13px; outline:none; }
 .signer-entry input:focus { border-color:var(--cyan); }
-.signer-entry { grid-template-columns:28px 1fr 1fr 112px 32px; }
-.signer-entry select.signer-lang { padding:9px 6px; border:1.5px solid var(--border); border-radius:6px; font-size:12.5px; background:var(--card); min-width:0; }
+.signer-entry { grid-template-columns:28px minmax(0,1fr) minmax(0,1fr) 112px 32px; }
+.signer-entry > * { min-width:0; }
+.signer-entry input, .signer-entry select.signer-lang { width:100%; }
+.signer-entry select.signer-lang { padding:9px 6px; border:1.5px solid var(--border); border-radius:6px; font-size:12.5px; background:var(--card); color:var(--text); }
+/* 휴대폰: 1줄 번호 · 이름 · 삭제 / 2줄 전화번호 · 언어 — 입력 칸이 화면 밖으로 밀려나지 않게 */
 @media (max-width:640px) {
-  .signer-entry { grid-template-columns:28px 1fr 1fr 32px; }
-  .signer-entry .signer-lang { grid-column:2 / 4; grid-row:2; }
+  .create-card { padding:22px 16px; }
+  .signer-entry { grid-template-columns:28px minmax(0,1fr) 118px; gap:8px; padding:10px; }
+  .signer-entry > :nth-child(1) { grid-column:1; grid-row:1; }
+  .signer-entry > :nth-child(2) { grid-column:2; grid-row:1; }
+  .signer-entry > :nth-child(3) { grid-column:2; grid-row:2; }
+  .signer-entry > :nth-child(4) { grid-column:3; grid-row:2; }
+  .signer-entry > :nth-child(5) { grid-column:3; grid-row:1; justify-self:end; }
+  .signer-entry input, .signer-entry select.signer-lang { font-size:16px; padding:10px; }   /* 16px 미만이면 iOS 가 확대한다 */
+  .step-indicator { gap:6px; }
+  .step { font-size:12px; gap:5px; white-space:nowrap; }
+  .step-num { width:24px; height:24px; flex:0 0 24px; }
+  .step-line { flex:1 1 8px; min-width:6px; }
   .req-mode { grid-template-columns:1fr; }
 }
 .btn-remove-signer { width:28px; height:28px; display:flex; align-items:center; justify-content:center; border-radius:6px; color:var(--text-muted); font-size:14px; }
@@ -898,6 +912,7 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
   .contact-list.picker .contact-row { grid-template-columns:22px 1fr 1fr; }
 }
 .doc-meta-row { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:16px; }
+@media (max-width:640px) { .doc-meta-row { grid-template-columns:1fr; gap:0; } .doc-meta-row input { width:100%; min-width:0; } }
 /* Signer field colors */
 .sig-field[data-signer="0"] { border-color:var(--s1); background:rgba(4,183,221,0.08); color:var(--s1); }
 .sig-field[data-signer="1"] { border-color:var(--s2); background:rgba(124,58,237,0.08); color:var(--s2); }
@@ -2125,7 +2140,7 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
         </div>
         <div id="signerList"></div>
         <button class="btn-add-signer" id="btnAddSigner" onclick="addSigner()">+ 서명자 추가</button>
-        <p class="fld-msg hint" style="margin:8px 2px 0;">🌐 외국인 서명자는 오른쪽에서 <b>언어</b>를 고르세요. 서명 화면이 그 언어로 열리고, 외국어 알림톡이 준비된 언어는 알림톡도 그 언어로 갑니다 (준비 전에는 한국어로 발송). 고르지 않아도 서명 화면은 휴대폰 언어에 맞춰 자동 표시됩니다.</p>
+        <p class="fld-msg hint" style="margin:8px 2px 0;">🌐 외국인 서명자는 서명자마다 있는 <b>언어</b> 칸에서 고르세요. 서명 화면이 그 언어로 열리고, 외국어 알림톡이 준비된 언어는 알림톡도 그 언어로 갑니다 (준비 전에는 한국어로 발송). 고르지 않아도 서명 화면은 휴대폰 언어에 맞춰 자동 표시됩니다.</p>
         <label class="save-signers">
           <input type="checkbox" id="saveSignersToggle">
           이번에 입력한 서명자를 주소록에 저장 <span>(이미 저장된 분은 건너뜁니다)</span>
@@ -3684,7 +3699,7 @@ async function routeByProfile() {
 // ============================================================
 const SB_FN_ADMIN = SB_URL + '/functions/v1/esign-admin';
 const APP_URL = shareBase();
-const BUILD = '2026-10-25.2';   // 배포 확인용. 화면 하단과 콘솔에 표시된다.
+const BUILD = '2026-10-26.1';   // 배포 확인용. 화면 하단과 콘솔에 표시된다.
 
 
 // ============================================================
