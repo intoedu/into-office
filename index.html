@@ -3699,7 +3699,7 @@ async function routeByProfile() {
 // ============================================================
 const SB_FN_ADMIN = SB_URL + '/functions/v1/esign-admin';
 const APP_URL = shareBase();
-const BUILD = '2026-10-26.1';   // 배포 확인용. 화면 하단과 콘솔에 표시된다.
+const BUILD = '2026-10-26.2';   // 배포 확인용. 화면 하단과 콘솔에 표시된다.
 
 
 // ============================================================
@@ -10273,7 +10273,14 @@ async function showAlimStatus(promise, count) {
   const r = await promise;
   // 솔라피는 일부 실패도 HTTP 200 으로 돌려주고 실패 건을 failedMessageList 에 담는다
   const failed = r?.result?.failedMessageList || [];
-  const why = r?.error || r?.result?.errorMessage || failed[0]?.statusMessage || failed[0]?.statusCode || '';
+  // 솔라피 오류 코드 → 원인과 조치 (설정 문제는 화면에서 고칠 수 없으므로 관리자에게 알릴 내용을 보여 준다)
+  const ALIM_ERR = {
+    SignatureDoesNotMatch: '솔라피 API Key 와 API Secret 이 서로 맞지 않습니다. 관리자가 Supabase Secrets 의 SOLAPI_API_KEY · SOLAPI_API_SECRET 을 같은 키 한 쌍으로 다시 넣어야 합니다.',
+    InvalidAPIKey: '솔라피 API Key 가 없거나 삭제되었습니다. 관리자가 솔라피에서 키를 확인해야 합니다.',
+    NotEnoughBalance: '솔라피 충전 잔액이 부족합니다. 솔라피에서 충전해 주세요.'
+  };
+  const code = r?.result?.errorCode || '';
+  const why = ALIM_ERR[code] || r?.error || r?.result?.errorMessage || failed[0]?.statusMessage || failed[0]?.statusCode || '';
   if (r?.ok && r.sent > 0 && failed.length) {
     paint('#fffbeb', '#fde68a', '#92400e', '⚠️ 알림톡 ' + (r.sent - failed.length) + '건 접수, <b>' + failed.length + '건 실패</b>했습니다. 실패한 서명자에게는 아래 링크를 직접 보내 주세요.' +
       (why ? '<br><span style="font-size:12px;">사유: ' + esc(String(why)) + '</span>' : ''));
