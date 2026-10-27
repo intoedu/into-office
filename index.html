@@ -839,7 +839,24 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
   .mem-row { grid-template-columns:1fr 92px; row-gap:8px; }
   .pay-row { grid-template-columns:1fr 110px; row-gap:8px; }
 }
-@media (max-width:820px){ .doc-list-header,.doc-item{ grid-template-columns:1fr 90px 130px; } }
+@media (max-width:820px){
+  .doc-list-header,.doc-item{ grid-template-columns:1fr 90px 130px; }
+  /* 3칸(문서명 · 상태 · 메뉴)만 남긴다 — 서명자 · 요청일 칸이 남으면 줄이 밀린다 */
+  .doc-list-header > span:nth-child(2), .doc-list-header > span:nth-child(3), .doc-signer, .doc-date { display:none; }
+}
+/* 휴대폰 상단 바: 로고 · 이름 · 관리자 · 로그아웃을 한 줄에 */
+@media (max-width:640px){
+  .app-header { padding:0 14px; gap:10px; }
+  .app-header .logo { flex:none; height:20px; }
+  .app-header-right { gap:8px; min-width:0; }
+  .app-header-user { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; font-size:12.5px; }
+  .app-header-user .hu-id { display:none; }
+  .app-header .role-pill { white-space:nowrap; flex:none; margin-left:0; padding:3px 8px; }
+  .app-header .btn-logout { white-space:nowrap; flex:none; padding:6px 8px; font-size:12.5px; }
+  /* 문서 목록: 문서명 칸을 넓게 (상태 · 메뉴는 필요한 만큼만) */
+  .doc-list-header, .doc-item { grid-template-columns:minmax(0,1fr) 80px 36px; gap:10px; }
+  .legal-badge { white-space:nowrap; flex:none; }
+}
 
 /* ===== MULTI-PAGE PDF ===== */
 .pdf-editor { display:block; align-items:initial; justify-content:initial; overflow-y:auto; max-height:640px; padding:16px; }
@@ -3687,9 +3704,10 @@ async function routeByProfile() {
   loadOrg();
   const bn = document.getElementById('btnNewNotice');
   if (bn) bn.style.display = state.isAdmin ? '' : 'none';
-  document.getElementById('headerUser').textContent =
-    (state.profile.name || state.user) +
-    (state.profile.username ? ' (' + state.profile.username + ')' : '');
+  // 아이디는 휴대폰에서 숨긴다 (좁은 상단 바에서 이름 · 관리자 · 로그아웃이 줄바꿈되지 않게)
+  document.getElementById('headerUser').innerHTML =
+    esc(state.profile.name || state.user) +
+    (state.profile.username ? '<span class="hu-id"> (' + esc(state.profile.username) + ')</span>' : '');
   return true;
 }
 
@@ -3699,7 +3717,7 @@ async function routeByProfile() {
 // ============================================================
 const SB_FN_ADMIN = SB_URL + '/functions/v1/esign-admin';
 const APP_URL = shareBase();
-const BUILD = '2026-10-26.2';   // 배포 확인용. 화면 하단과 콘솔에 표시된다.
+const BUILD = '2026-10-27.1';   // 배포 확인용. 화면 하단과 콘솔에 표시된다.
 
 
 // ============================================================
