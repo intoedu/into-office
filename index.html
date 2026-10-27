@@ -3780,7 +3780,7 @@ async function routeByProfile() {
 // ============================================================
 const SB_FN_ADMIN = SB_URL + '/functions/v1/esign-admin';
 const APP_URL = shareBase();
-const BUILD = '2026-10-27.2';   // 배포 확인용. 화면 하단과 콘솔에 표시된다.
+const BUILD = '2026-10-27.3';   // 배포 확인용. 화면 하단과 콘솔에 표시된다.
 
 
 // ============================================================
@@ -5175,11 +5175,10 @@ async function bulkRenderPage() {
   holder.style.width = vp.width + 'px';
   holder.style.height = vp.height + 'px';
   const canvas = document.createElement('canvas');
-  canvas.width = vp.width; canvas.height = vp.height;
   holder.appendChild(canvas);
   pane.innerHTML = '';
   pane.appendChild(holder);
-  await page.render({ canvasContext: canvas.getContext('2d'), viewport: vp }).promise;
+  await renderPdfPageSharp(page, vp, canvas, 1);
 
   bulkMountField(holder, 'sig', '서명란');
   if (state.bulkFields.date) bulkMountField(holder, 'date', '날짜란');
@@ -11221,6 +11220,25 @@ async function openSignByToken(token) {
   }).catch(() => {});
 }
 
+// ===== 선명한 PDF 그리기 =====
+// 화면 크기 그대로 그리면 휴대폰에서 두 손가락으로 확대(핀치 줌)할 때 글자가 뭉개진다.
+// 화면 밀도(레티나 2~3배) × 2배까지 촘촘하게 그리고, 화면에는 원래 크기로 줄여 보여 준다.
+// 아이폰은 캔버스 메모리 한도가 있어 페이지 수에 따라 한 장당 화소를 줄인다 (전체 약 4,000만 화소).
+function pdfRenderScale(cssW, cssH, pageCount) {
+  const want = Math.min(4, (window.devicePixelRatio || 1) * 2);
+  const perPage = Math.min(4_000_000, 40_000_000 / Math.max(1, pageCount || 1));
+  const cap = Math.sqrt(perPage / Math.max(1, cssW * cssH));
+  return Math.max(1, Math.min(want, cap));
+}
+async function renderPdfPageSharp(page, svp, canvas, pageCount) {
+  const q = pdfRenderScale(svp.width, svp.height, pageCount);
+  const rvp = page.getViewport({ scale: svp.scale * q });
+  canvas.width = Math.floor(rvp.width);
+  canvas.height = Math.floor(rvp.height);
+  canvas.style.width = svp.width + 'px';   // 높이는 비율대로 (max-width 에 걸려도 찌그러지지 않게)
+  await page.render({ canvasContext: canvas.getContext('2d'), viewport: rvp }).promise;
+}
+
 // PDF 전체 페이지 렌더링 — src 는 URL 문자열 또는 { data: Uint8Array }
 // (pdf.js 는 data 로 받은 버퍼를 넘겨받아 비우므로, 다시 쓸 버퍼는 복사본을 넘긴다)
 async function renderPdfFromUrl(url, editorId) {
@@ -11241,7 +11259,8 @@ async function renderPdfFromUrl(url, editorId) {
       pg.dataset.page = String(i);
 
       const canvas = document.createElement('canvas');
-      canvas.width = svp.width; canvas.height = svp.height;
+      canvas.style.width = svp.width + 'px';
+      canvas.style.height = svp.height + 'px';   // 그리기 전 자리 잡기 (그린 뒤 비율대로 풀린다)
       pg.appendChild(canvas);
 
       if (pdf.numPages > 1) {
@@ -11251,7 +11270,8 @@ async function renderPdfFromUrl(url, editorId) {
         pg.appendChild(lbl);
       }
       editor.appendChild(pg);
-      await page.render({ canvasContext: canvas.getContext('2d'), viewport: svp }).promise;
+      await renderPdfPageSharp(page, svp, canvas, pdf.numPages);
+      canvas.style.height = '';
     }
     return pdf.numPages;
   } catch (e) {
@@ -12362,7 +12382,8 @@ async function renderPdf() {
       pg.dataset.page = String(i);
 
       const canvas = document.createElement('canvas');
-      canvas.width = svp.width; canvas.height = svp.height;
+      canvas.style.width = svp.width + 'px';
+      canvas.style.height = svp.height + 'px';
       pg.appendChild(canvas);
 
       if (pdf.numPages > 1) {
@@ -12373,7 +12394,8 @@ async function renderPdf() {
       }
       editor.appendChild(pg);
 
-      await page.render({ canvasContext: canvas.getContext('2d'), viewport: svp }).promise;
+      await renderPdfPageSharp(page, svp, canvas, pdf.numPages);
+      canvas.style.height = '';
     }
     updatePageNav(pdf.numPages);
   } catch (err) {
