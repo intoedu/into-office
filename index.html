@@ -397,7 +397,9 @@ input,select,textarea { font-family:inherit; }
 .di-row .v.empty { color:var(--text-muted); font-weight:400; }
 /* 서명자 직접 추가 — 요청자 허락 카드 */
 .mk-perm { border:1.5px dashed #d8c7fb; border-radius:10px; padding:12px; margin:-6px 0 16px; background:#faf7ff; }
-.mk-perm .ip-title span:not(.sec-tag) { display:block; margin:3px 0 0; }
+.mk-perm .ip-title { color:#4c1d95; font-size:14px; }
+.mk-perm .ip-title span:not(.sec-tag) { display:block; margin:4px 0 0; color:var(--text); font-size:12.5px; line-height:1.6; }
+.mk-perm .ip-title b { color:#5b21b6; font-weight:800; }
 .mk-perm-list { display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; }
 .mk-perm-item { display:inline-flex; align-items:center; gap:7px; padding:7px 12px; border:1.5px solid var(--border); border-radius:999px; background:var(--card); font-size:13px; cursor:pointer; }
 .mk-perm-item:has(input:checked) { border-color:#7c3aed; background:#f3edff; color:#5b21b6; font-weight:600; }
@@ -407,15 +409,17 @@ input,select,textarea { font-family:inherit; }
 /* 도구 줄만 화면 위에 붙어 있게 (안내까지 붙으면 휴대폰에서 문서를 가린다) */
 .mk-bar { position:sticky; top:60px; z-index:20; background:var(--card); border:1.5px solid #d8c7fb; border-radius:12px; padding:8px 10px; margin-bottom:12px; box-shadow:0 4px 14px rgba(15,23,42,.08); }
 .mk-bar .mk-tools { margin-top:0; }
-.mk-box h4 { font-size:14.5px; color:#5b21b6; margin-bottom:3px; }
-.mk-box .mk-desc { font-size:12.5px; color:var(--text-secondary); line-height:1.6; }
-.mk-box details { margin:6px 0 2px; font-size:12.5px; }
-.mk-box summary { cursor:pointer; color:#6d28d9; font-weight:600; }
-.mk-box ol { margin:6px 0 2px 18px; line-height:1.75; color:var(--text-secondary); }
+.mk-box h4 { font-size:15.5px; color:#5b21b6; margin-bottom:4px; font-weight:800; }
+.mk-box .mk-desc { font-size:13.5px; color:var(--text); line-height:1.65; }
+.mk-box details { margin:8px 0 2px; font-size:13.5px; }
+.mk-box summary { cursor:pointer; color:#6d28d9; font-weight:800; }
+.mk-box ol { margin:6px 0 4px 20px; line-height:1.8; color:var(--text); }
+.mk-box b { color:#4c1d95; font-weight:800; }
+.mk-box .mk-notice { margin-top:6px; padding:8px 10px; border-radius:8px; background:#f3edff; color:#4c1d95; font-weight:600; }
 .mk-tools { display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin-top:10px; }
 .mk-tool { padding:8px 13px; border:1.5px solid var(--border); border-radius:8px; background:#fff; font-size:13.5px; font-weight:600; cursor:pointer; font-family:inherit; color:var(--text); }
 .mk-tool.on { border-color:#7c3aed; background:#7c3aed; color:#fff; }
-.mk-count { font-size:12px; color:var(--text-muted); margin-left:auto; }
+.mk-count { font-size:12.5px; color:#5b21b6; font-weight:700; margin-left:auto; }
 .mk-hint { display:none; margin-top:8px; padding:7px 10px; border-radius:8px; background:#f3edff; color:#5b21b6; font-size:12.5px; font-weight:600; }
 .mk-hint.on { display:flex; align-items:center; justify-content:space-between; gap:8px; }
 .mk-hint button { font-size:12px; color:#6d28d9; text-decoration:underline; background:none; border:none; cursor:pointer; }
@@ -2276,7 +2280,7 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
         </div>
         <div class="mk-perm" id="mkPerm">
           <div class="ip-title">✚ 서명자 직접 추가 허용 <span class="sec-tag">선택</span>
-            <span>체크한 서명자는 문서 어디에나 <b>체크 · 텍스트 · 서명란</b>을 직접 넣을 수 있습니다. 서명자 화면에 사용 방법이 함께 안내되고, 서명이 끝나면 추가한 내용을 하나씩 확인할 수 있습니다.</span></div>
+            <span>체크한 서명자는 문서 어디에나 <b>체크 · 텍스트 · 서명란</b>을 직접 넣을 수 있습니다. 서명자 화면에 <b>사용 방법이 함께 안내</b>되고, 서명이 끝나면 <b>추가한 내용을 하나씩 확인</b>할 수 있습니다.</span></div>
           <div class="mk-perm-list" id="mkPermList"></div>
         </div>
         <div class="page-nav" id="pageNav" style="display:none;"></div>
@@ -3782,7 +3786,7 @@ async function routeByProfile() {
 // ============================================================
 const SB_FN_ADMIN = SB_URL + '/functions/v1/esign-admin';
 const APP_URL = shareBase();
-const BUILD = '2026-10-27.5';   // 배포 확인용. 화면 하단과 콘솔에 표시된다.
+const BUILD = '2026-10-27.6';   // 배포 확인용. 화면 하단과 콘솔에 표시된다.
 
 
 // ============================================================
@@ -10656,13 +10660,13 @@ const SL = {
     in_fix: '작성할 항목을 먼저 확인해 주세요.',
     in_save_fail: '입력 내용을 저장하지 못했습니다: ',
     mk_title: '직접 추가하기',
-    mk_allowed: '요청자가 이 문서에 체크 · 텍스트 · 서명란을 직접 추가할 수 있도록 허락했습니다.',
+    mk_allowed: '요청자가 이 문서에 <b>체크 · 텍스트 · 서명란</b>을 <b>직접 추가</b>할 수 있도록 허락했습니다.',
     mk_how: '사용 방법',
     mk_step1: '아래에서 <b>☑ 체크</b> · <b>T 텍스트</b> · <b>✍ 서명란</b> 중 하나를 누릅니다.',
-    mk_step2: '문서에서 넣고 싶은 곳을 누르면 그 자리에 생깁니다. 텍스트는 바로 내용을 적습니다.',
-    mk_step3: '끌어서 옮기고, 모서리 ◢로 크기를 바꾸고, ✕로 지웁니다. 텍스트 상자를 다시 누르면 고칠 수 있습니다.',
-    mk_step4: '서명란을 누르거나 맨 아래 「서명하기」를 누르면 서명할 수 있고, 그 서명이 모든 서명란에 들어갑니다.',
-    mk_notice: '추가한 내용은 서명 후 요청자가 하나씩 확인합니다.',
+    mk_step2: '문서에서 <b>넣고 싶은 곳을 누르면</b> 그 자리에 생깁니다. 텍스트는 바로 내용을 적습니다.',
+    mk_step3: '<b>끌어서 옮기고</b>, 모서리 <b>◢로 크기</b>를 바꾸고, <b>✕로 지웁니다</b>. 텍스트 상자를 다시 누르면 고칠 수 있습니다.',
+    mk_step4: '<b>서명란을 누르거나</b> 맨 아래 <b>「서명하기」</b>를 누르면 서명할 수 있고, 그 서명이 <b>모든 서명란에</b> 들어갑니다.',
+    mk_notice: '추가한 내용은 서명 후 <b>요청자가 하나씩 확인</b>합니다.',
     mk_check: '☑ 체크',
     mk_text: 'T 텍스트',
     mk_sign: '✍ 서명란',
@@ -10748,13 +10752,13 @@ const SL = {
     in_fix: 'Please complete the information to fill in first.',
     in_save_fail: 'Could not save your entries: ',
     mk_title: 'Add your own',
-    mk_allowed: 'The requester allows you to add check marks, text boxes and signature boxes to this document.',
+    mk_allowed: 'The requester allows you to <b>add your own</b> <b>check marks, text boxes and signature boxes</b> to this document.',
     mk_how: 'How to use',
     mk_step1: 'Tap one of <b>☑ Check</b>, <b>T Text</b> or <b>✍ Signature box</b> below.',
-    mk_step2: 'Tap the spot on the document where you want it. For text, type the content right away.',
-    mk_step3: 'Drag to move, use the ◢ corner to resize, and ✕ to delete. Tap a text box again to edit it.',
-    mk_step4: 'Tap a signature box or the 「Sign」 button at the bottom to sign. Your signature fills every signature box.',
-    mk_notice: 'After you sign, the requester will review each item you added.',
+    mk_step2: '<b>Tap the spot</b> on the document where you want it. For text, type the content right away.',
+    mk_step3: '<b>Drag to move</b>, use the <b>◢ corner to resize</b>, and <b>✕ to delete</b>. Tap a text box again to edit it.',
+    mk_step4: '<b>Tap a signature box</b> or the <b>「Sign」</b> button at the bottom to sign. Your signature fills <b>every signature box</b>.',
+    mk_notice: 'After you sign, <b>the requester will review each item</b> you added.',
     mk_check: '☑ Check',
     mk_text: 'T Text',
     mk_sign: '✍ Signature box',
@@ -10839,13 +10843,13 @@ const SL = {
     in_fix: '请先完成需要填写的信息。',
     in_save_fail: '无法保存填写内容：',
     mk_title: '自行添加',
-    mk_allowed: '请求方允许您在本文件中自行添加勾选、文本框和签名栏。',
+    mk_allowed: '请求方允许您在本文件中<b>自行添加</b><b>勾选、文本框和签名栏</b>。',
     mk_how: '使用方法',
     mk_step1: '在下方点击 <b>☑ 勾选</b>、<b>T 文本</b> 或 <b>✍ 签名栏</b>。',
-    mk_step2: '在文件中点击想放置的位置即可添加。文本请直接输入内容。',
-    mk_step3: '拖动可移动，拖动角落 ◢ 可调整大小，点击 ✕ 删除。再次点击文本框可修改。',
-    mk_step4: '点击签名栏或页面底部的「签名」按钮即可签名，您的签名将填入所有签名栏。',
-    mk_notice: '签名后，请求方将逐项确认您添加的内容。',
+    mk_step2: '<b>在文件中点击想放置的位置</b>即可添加。文本请直接输入内容。',
+    mk_step3: '<b>拖动可移动</b>，拖动<b>角落 ◢ 可调整大小</b>，<b>点击 ✕ 删除</b>。再次点击文本框可修改。',
+    mk_step4: '<b>点击签名栏</b>或页面底部的<b>「签名」</b>按钮即可签名，您的签名将填入<b>所有签名栏</b>。',
+    mk_notice: '签名后，<b>请求方将逐项确认</b>您添加的内容。',
     mk_check: '☑ 勾选',
     mk_text: 'T 文本',
     mk_sign: '✍ 签名栏',
@@ -10930,13 +10934,13 @@ const SL = {
     in_fix: '先に記入項目をご確認ください。',
     in_save_fail: '入力内容を保存できませんでした：',
     mk_title: '自分で追加',
-    mk_allowed: '依頼者が、この文書にチェック・テキスト・署名欄を追加することを許可しています。',
+    mk_allowed: '依頼者が、この文書に<b>チェック・テキスト・署名欄</b>を<b>自分で追加</b>することを許可しています。',
     mk_how: '使い方',
     mk_step1: '下の <b>☑ チェック</b>・<b>T テキスト</b>・<b>✍ 署名欄</b> のいずれかを押します。',
-    mk_step2: '文書の入れたい場所を押すと、そこに追加されます。テキストはそのまま内容を入力します。',
-    mk_step3: 'ドラッグで移動、角の ◢ で大きさを変え、✕ で削除します。テキストはもう一度押すと修正できます。',
-    mk_step4: '署名欄か、いちばん下の「署名する」を押すと署名できます。その署名がすべての署名欄に入ります。',
-    mk_notice: '署名後、依頼者が追加内容を一つずつ確認します。',
+    mk_step2: '文書の<b>入れたい場所を押す</b>と、そこに追加されます。テキストはそのまま内容を入力します。',
+    mk_step3: '<b>ドラッグで移動</b>、角の <b>◢ で大きさ</b>を変え、<b>✕ で削除</b>します。テキストはもう一度押すと修正できます。',
+    mk_step4: '<b>署名欄</b>か、いちばん下の<b>「署名する」</b>を押すと署名できます。その署名が<b>すべての署名欄</b>に入ります。',
+    mk_notice: '署名後、<b>依頼者が追加内容を一つずつ確認</b>します。',
     mk_check: '☑ チェック',
     mk_text: 'T テキスト',
     mk_sign: '✍ 署名欄',
@@ -11021,13 +11025,13 @@ const SL = {
     in_fix: 'Vui lòng hoàn tất thông tin cần điền trước.',
     in_save_fail: 'Không thể lưu nội dung: ',
     mk_title: 'Tự thêm nội dung',
-    mk_allowed: 'Người yêu cầu cho phép bạn tự thêm dấu tích, ô văn bản và ô chữ ký vào tài liệu này.',
+    mk_allowed: 'Người yêu cầu cho phép bạn <b>tự thêm</b> <b>dấu tích, ô văn bản và ô chữ ký</b> vào tài liệu này.',
     mk_how: 'Cách sử dụng',
     mk_step1: 'Nhấn một trong các nút <b>☑ Dấu tích</b>, <b>T Văn bản</b> hoặc <b>✍ Ô chữ ký</b> bên dưới.',
-    mk_step2: 'Chạm vào vị trí muốn đặt trên tài liệu. Với văn bản, hãy nhập nội dung ngay.',
-    mk_step3: 'Kéo để di chuyển, dùng góc ◢ để đổi kích thước, nhấn ✕ để xóa. Chạm lại ô văn bản để sửa.',
-    mk_step4: 'Chạm vào ô chữ ký hoặc nút 「Ký」 ở cuối trang để ký. Chữ ký của bạn sẽ được điền vào mọi ô chữ ký.',
-    mk_notice: 'Sau khi bạn ký, người yêu cầu sẽ kiểm tra từng mục bạn đã thêm.',
+    mk_step2: '<b>Chạm vào vị trí muốn đặt</b> trên tài liệu. Với văn bản, hãy nhập nội dung ngay.',
+    mk_step3: '<b>Kéo để di chuyển</b>, dùng <b>góc ◢ để đổi kích thước</b>, nhấn <b>✕ để xóa</b>. Chạm lại ô văn bản để sửa.',
+    mk_step4: '<b>Chạm vào ô chữ ký</b> hoặc nút <b>「Ký」</b> ở cuối trang để ký. Chữ ký của bạn sẽ được điền vào <b>mọi ô chữ ký</b>.',
+    mk_notice: 'Sau khi bạn ký, <b>người yêu cầu sẽ kiểm tra từng mục</b> bạn đã thêm.',
     mk_check: '☑ Dấu tích',
     mk_text: 'T Văn bản',
     mk_sign: '✍ Ô chữ ký',
@@ -11639,7 +11643,7 @@ function renderSignMarksBox() {
     // 안내는 서명자가 접거나 펼친 그대로 둔다 (항목을 놓을 때마다 접히면 문서 위치가 밀린다)
     '<details' + (state.mkGuideOpen ? ' open' : '') + ' ontoggle="state.mkGuideOpen=this.open"><summary>' + st('mk_how') + '</summary><ol>' +
       '<li>' + st('mk_step1') + '</li><li>' + st('mk_step2') + '</li><li>' + st('mk_step3') + '</li><li>' + st('mk_step4') + '</li>' +
-    '</ol><p class="mk-desc">ℹ️ ' + st('mk_notice') + '</p></details>';
+    '</ol><p class="mk-desc mk-notice">ℹ️ ' + st('mk_notice') + '</p></details>';
   bar.innerHTML =
     '<div class="mk-tools">' +
       ['check', 'text', 'signature'].map(k =>
