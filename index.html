@@ -3782,7 +3782,7 @@ async function routeByProfile() {
 // ============================================================
 const SB_FN_ADMIN = SB_URL + '/functions/v1/esign-admin';
 const APP_URL = shareBase();
-const BUILD = '2026-10-27.4';   // 배포 확인용. 화면 하단과 콘솔에 표시된다.
+const BUILD = '2026-10-27.5';   // 배포 확인용. 화면 하단과 콘솔에 표시된다.
 
 
 // ============================================================
@@ -8812,7 +8812,7 @@ async function composeSignedPdf(doc, signers, fields, inputs, marks) {
       await loadTypedFont(t);
       du = typedSigToPng(t.name, bw, bh, t.font, t.text);
     } else if (s.sig_data && s.sig_data.startsWith('data:image')) {
-      du = s.sig_data;
+      du = await knockoutBg(s.sig_data);   // 바탕 없이 서명만
     }
     if (!du) continue;
 
@@ -9051,6 +9051,51 @@ function fieldTextToPng(text, w, h) {
   while (ctx.measureText(text).width > c.width - pad * 2 && size > 8) { size -= 2; ctx.font = font(size); }
   ctx.fillText(text, pad, c.height / 2);
   return c.toDataURL('image/png');
+}
+
+// ===== 서명 이미지 바탕 지우기 (크로마키) =====
+// 예전 서명(연회색 바탕) · 종이에 찍어 올린 도장/사인 사진의 바탕을 투명하게 만들어
+// 문서 위에 종이에 직접 쓴 것처럼 서명만 얹는다.
+// 테두리 픽셀로 바탕 밝기를 재고, 바탕과 비슷한 무채색은 투명 · 어두운 잉크는 그대로 둔다.
+// 빨간 인주처럼 색이 있는 잉크는 건드리지 않는다. 큰 사진은 1200px 로 줄인다.
+const _sigKo = new Map();
+function knockoutBg(src) {
+  if (!src || !String(src).startsWith('data:image')) return Promise.resolve(src);
+  if (_sigKo.has(src)) return _sigKo.get(src);
+  const job = new Promise(resolve => {
+    const im = new Image();
+    im.onload = () => {
+      try {
+        const k = Math.min(1, 1200 / Math.max(im.naturalWidth, im.naturalHeight, 1));
+        const c = document.createElement('canvas');
+        c.width = Math.max(1, Math.round(im.naturalWidth * k)); c.height = Math.max(1, Math.round(im.naturalHeight * k));
+        const ctx = c.getContext('2d');
+        ctx.drawImage(im, 0, 0, c.width, c.height);
+        const img = ctx.getImageData(0, 0, c.width, c.height), a = img.data, W = c.width, H = c.height;
+        // 바탕 밝기 = 테두리 픽셀 중 불투명한 것들의 밝기 중앙값
+        const ls = [];
+        const take = (x, y) => { const i = (y * W + x) * 4; if (a[i + 3] > 200) ls.push((a[i] + a[i + 1] + a[i + 2]) / 3); };
+        for (let x = 0; x < W; x += Math.max(1, W >> 6)) { take(x, 0); take(x, H - 1); }
+        for (let y = 0; y < H; y += Math.max(1, H >> 6)) { take(0, y); take(W - 1, y); }
+        ls.sort((p, q) => p - q);
+        const bg = ls.length ? ls[ls.length >> 1] : 255;
+        if (ls.length && bg < 150) { resolve(src); return; }   // 어두운 바탕(흰 글씨 등)은 손대지 않는다
+        for (let i = 0; i < a.length; i += 4) {
+          const r = a[i], g = a[i + 1], b = a[i + 2];
+          if (Math.max(r, g, b) - Math.min(r, g, b) > 45) continue;   // 색 있는 잉크
+          const l = (r + g + b) / 3;
+          const keep = Math.max(0, Math.min(1, (bg - l - 12) / 48));
+          a[i + 3] = Math.round(a[i + 3] * keep);
+        }
+        ctx.putImageData(img, 0, 0);
+        resolve(c.toDataURL('image/png'));
+      } catch (e) { resolve(src); }
+    };
+    im.onerror = () => resolve(src);
+    im.src = src;
+  });
+  _sigKo.set(src, job);
+  return job;
 }
 
 // 체크 표시 (✓ 글꼴이 없는 기기에서도 같게 보이도록 선으로 그린다)
@@ -11839,9 +11884,10 @@ function renderMarkReviewOverlays() {
     else if (s?.status === 'signed' && s.sig_method === 'typed') {
       const t = parseTypedSig(s.sig_data, s.name);
       inner = '<img alt="" src="' + typedSigToPng(t.name, w, h, t.font, t.text) + '">';
-    } else if (s?.status === 'signed' && String(s.sig_data || '').startsWith('data:image')) inner = '<img alt="" src="' + s.sig_data + '">';
+    } else if (s?.status === 'signed' && String(s.sig_data || '').startsWith('data:image')) inner = '<img alt="" data-ko="1" src="' + s.sig_data + '">';
     else inner = '<span style="margin:auto;">✍</span>';
     el.innerHTML = inner + '<span class="no">' + (i + 1) + '</span>';
+    el.querySelectorAll('img[data-ko]').forEach(im => knockoutBg(im.src).then(u => { im.src = u; }));
     pg.appendChild(el);
   });
 }
@@ -11906,6 +11952,7 @@ function renderSignedFields(fields, signers, editorId) {
       'left:' + (f.x * pg.offsetWidth) + 'px;top:' + (f.y * pg.offsetHeight) + 'px;' +
       'width:' + w + 'px;height:' + h + 'px;';
     pg.appendChild(im);
+    if (!typed && f.field_type !== 'date') knockoutBg(src).then(u => { im.src = u; });   // 바탕 없이 서명만
     // 필기체가 아직 내려받아지지 않았으면 받은 뒤 다시 그린다
     if (typed?.font) loadTypedFont(typed).then(() => { im.src = typedSigToPng(typed.name, w, h, typed.font, typed.text); });
   });
@@ -13063,7 +13110,7 @@ function openSignPad() {
     canvas.height = 200;
     if (!state.signaturePad) {
       state.signaturePad = new SignaturePad(canvas, {
-        backgroundColor: 'rgba(250,251,252,1)',
+        backgroundColor: 'rgba(0,0,0,0)',   // 투명 — 종이 위에 쓴 것처럼 서명만 남는다 (회색 바탕은 .sig-pad-wrapper 가 보여 준다)
         penColor: '#0e2d4d',
         minWidth: 1.5,
         maxWidth: 3
