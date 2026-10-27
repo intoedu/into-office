@@ -1058,6 +1058,8 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
 
 /* ===== LEGAL / CONSENT ===== */
 .consent-box { background:var(--info-bg); border:1.5px solid var(--border); border-radius:var(--radius); padding:20px; margin-bottom:20px; }
+.consent-box.attn { animation:consentAttn 1s 2; border-color:#7c3aed; }
+@keyframes consentAttn { 50% { box-shadow:0 0 0 6px rgba(124,58,237,.25); } }
 .consent-box h4 { font-size:15px; font-weight:600; margin-bottom:10px; color:var(--navy); display:flex; align-items:center; gap:6px; }
 .consent-box p { font-size:13px; color:var(--text-secondary); line-height:1.7; margin-bottom:12px; }
 .consent-check { display:flex; align-items:flex-start; gap:10px; cursor:pointer; }
@@ -3780,7 +3782,7 @@ async function routeByProfile() {
 // ============================================================
 const SB_FN_ADMIN = SB_URL + '/functions/v1/esign-admin';
 const APP_URL = shareBase();
-const BUILD = '2026-10-27.3';   // 배포 확인용. 화면 하단과 콘솔에 표시된다.
+const BUILD = '2026-10-27.4';   // 배포 확인용. 화면 하단과 콘솔에 표시된다.
 
 
 // ============================================================
@@ -10614,7 +10616,7 @@ const SL = {
     mk_step1: '아래에서 <b>☑ 체크</b> · <b>T 텍스트</b> · <b>✍ 서명란</b> 중 하나를 누릅니다.',
     mk_step2: '문서에서 넣고 싶은 곳을 누르면 그 자리에 생깁니다. 텍스트는 바로 내용을 적습니다.',
     mk_step3: '끌어서 옮기고, 모서리 ◢로 크기를 바꾸고, ✕로 지웁니다. 텍스트 상자를 다시 누르면 고칠 수 있습니다.',
-    mk_step4: '서명란에는 마지막에 하는 서명이 그대로 들어갑니다.',
+    mk_step4: '서명란을 누르거나 맨 아래 「서명하기」를 누르면 서명할 수 있고, 그 서명이 모든 서명란에 들어갑니다.',
     mk_notice: '추가한 내용은 서명 후 요청자가 하나씩 확인합니다.',
     mk_check: '☑ 체크',
     mk_text: 'T 텍스트',
@@ -10622,13 +10624,14 @@ const SL = {
     mk_tap: '문서에서 넣을 곳을 누르세요',
     mk_cancel: '취소',
     mk_count: '내가 추가한 항목 {n}개',
-    mk_sign_ph: '서명',
+    mk_sign_ph: '눌러서 서명',
     mk_text_title: '텍스트 입력',
     mk_text_ph: '추가할 내용을 적어 주세요 (200자까지)',
     mk_ok: '확인',
     mk_delete: '삭제',
     mk_empty: '비어 있는 텍스트 상자가 있습니다. 내용을 쓰거나 ✕로 지워 주세요.',
-    mk_save_fail: '추가한 내용을 저장하지 못했습니다: '
+    mk_save_fail: '추가한 내용을 저장하지 못했습니다: ',
+    consent_first: '아래 「전자서명 동의」에 체크하면 바로 서명할 수 있습니다.'
   },
   en: {
     hdr: 'E-Signature', loading: 'Loading the document...',
@@ -10705,7 +10708,7 @@ const SL = {
     mk_step1: 'Tap one of <b>☑ Check</b>, <b>T Text</b> or <b>✍ Signature box</b> below.',
     mk_step2: 'Tap the spot on the document where you want it. For text, type the content right away.',
     mk_step3: 'Drag to move, use the ◢ corner to resize, and ✕ to delete. Tap a text box again to edit it.',
-    mk_step4: 'Your final signature will be placed in each signature box.',
+    mk_step4: 'Tap a signature box or the 「Sign」 button at the bottom to sign. Your signature fills every signature box.',
     mk_notice: 'After you sign, the requester will review each item you added.',
     mk_check: '☑ Check',
     mk_text: 'T Text',
@@ -10713,13 +10716,14 @@ const SL = {
     mk_tap: 'Tap where to place it on the document',
     mk_cancel: 'Cancel',
     mk_count: '{n} item(s) added',
-    mk_sign_ph: 'Sign',
+    mk_sign_ph: 'Tap to sign',
     mk_text_title: 'Enter text',
     mk_text_ph: 'Enter the text to add (up to 200 characters)',
     mk_ok: 'OK',
     mk_delete: 'Delete',
     mk_empty: 'There is an empty text box. Please type in it or delete it with ✕.',
-    mk_save_fail: 'Could not save the items you added: '
+    mk_save_fail: 'Could not save the items you added: ',
+    consent_first: 'Check the e-signature consent below, then you can sign right away.'
   },
   zh: {
     hdr: '电子签名', loading: '正在加载文件...',
@@ -10795,7 +10799,7 @@ const SL = {
     mk_step1: '在下方点击 <b>☑ 勾选</b>、<b>T 文本</b> 或 <b>✍ 签名栏</b>。',
     mk_step2: '在文件中点击想放置的位置即可添加。文本请直接输入内容。',
     mk_step3: '拖动可移动，拖动角落 ◢ 可调整大小，点击 ✕ 删除。再次点击文本框可修改。',
-    mk_step4: '签名栏中将放入您最后完成的签名。',
+    mk_step4: '点击签名栏或页面底部的「签名」按钮即可签名，您的签名将填入所有签名栏。',
     mk_notice: '签名后，请求方将逐项确认您添加的内容。',
     mk_check: '☑ 勾选',
     mk_text: 'T 文本',
@@ -10803,13 +10807,14 @@ const SL = {
     mk_tap: '请在文件中点击放置位置',
     mk_cancel: '取消',
     mk_count: '已添加 {n} 项',
-    mk_sign_ph: '签名',
+    mk_sign_ph: '点击签名',
     mk_text_title: '输入文本',
     mk_text_ph: '请输入要添加的内容（最多200字）',
     mk_ok: '确定',
     mk_delete: '删除',
     mk_empty: '有空的文本框。请填写内容或点击 ✕ 删除。',
-    mk_save_fail: '无法保存添加的内容：'
+    mk_save_fail: '无法保存添加的内容：',
+    consent_first: '请先勾选下方的电子签名同意，即可立即签名。'
   },
   ja: {
     hdr: '電子署名', loading: '文書を読み込んでいます...',
@@ -10885,7 +10890,7 @@ const SL = {
     mk_step1: '下の <b>☑ チェック</b>・<b>T テキスト</b>・<b>✍ 署名欄</b> のいずれかを押します。',
     mk_step2: '文書の入れたい場所を押すと、そこに追加されます。テキストはそのまま内容を入力します。',
     mk_step3: 'ドラッグで移動、角の ◢ で大きさを変え、✕ で削除します。テキストはもう一度押すと修正できます。',
-    mk_step4: '署名欄には、最後に行う署名がそのまま入ります。',
+    mk_step4: '署名欄か、いちばん下の「署名する」を押すと署名できます。その署名がすべての署名欄に入ります。',
     mk_notice: '署名後、依頼者が追加内容を一つずつ確認します。',
     mk_check: '☑ チェック',
     mk_text: 'T テキスト',
@@ -10893,13 +10898,14 @@ const SL = {
     mk_tap: '文書で入れる場所を押してください',
     mk_cancel: 'キャンセル',
     mk_count: '追加した項目 {n}件',
-    mk_sign_ph: '署名',
+    mk_sign_ph: 'タップして署名',
     mk_text_title: 'テキスト入力',
     mk_text_ph: '追加する内容を入力してください（200文字まで）',
     mk_ok: 'OK',
     mk_delete: '削除',
     mk_empty: '空のテキストボックスがあります。内容を入力するか ✕ で削除してください。',
-    mk_save_fail: '追加した内容を保存できませんでした：'
+    mk_save_fail: '追加した内容を保存できませんでした：',
+    consent_first: '下の電子署名の同意にチェックすると、すぐに署名できます。'
   },
   vi: {
     hdr: 'Chữ ký điện tử', loading: 'Đang tải tài liệu...',
@@ -10975,7 +10981,7 @@ const SL = {
     mk_step1: 'Nhấn một trong các nút <b>☑ Dấu tích</b>, <b>T Văn bản</b> hoặc <b>✍ Ô chữ ký</b> bên dưới.',
     mk_step2: 'Chạm vào vị trí muốn đặt trên tài liệu. Với văn bản, hãy nhập nội dung ngay.',
     mk_step3: 'Kéo để di chuyển, dùng góc ◢ để đổi kích thước, nhấn ✕ để xóa. Chạm lại ô văn bản để sửa.',
-    mk_step4: 'Chữ ký cuối cùng của bạn sẽ được đặt vào mỗi ô chữ ký.',
+    mk_step4: 'Chạm vào ô chữ ký hoặc nút 「Ký」 ở cuối trang để ký. Chữ ký của bạn sẽ được điền vào mọi ô chữ ký.',
     mk_notice: 'Sau khi bạn ký, người yêu cầu sẽ kiểm tra từng mục bạn đã thêm.',
     mk_check: '☑ Dấu tích',
     mk_text: 'T Văn bản',
@@ -10983,13 +10989,14 @@ const SL = {
     mk_tap: 'Chạm vào vị trí cần đặt trên tài liệu',
     mk_cancel: 'Hủy',
     mk_count: 'Đã thêm {n} mục',
-    mk_sign_ph: 'Ký',
+    mk_sign_ph: 'Chạm để ký',
     mk_text_title: 'Nhập văn bản',
     mk_text_ph: 'Nhập nội dung cần thêm (tối đa 200 ký tự)',
     mk_ok: 'Xác nhận',
     mk_delete: 'Xóa',
     mk_empty: 'Có ô văn bản trống. Vui lòng nhập nội dung hoặc xóa bằng ✕.',
-    mk_save_fail: 'Không thể lưu các mục đã thêm: '
+    mk_save_fail: 'Không thể lưu các mục đã thêm: ',
+    consent_first: 'Hãy đánh dấu đồng ý chữ ký điện tử bên dưới, sau đó bạn có thể ký ngay.'
   }
 };
 
@@ -11300,6 +11307,8 @@ function renderSignFields(fields, editorId, signedByMe) {
     el.classList.add('sign-field-label');
     el.dataset.slField = signedByMe ? 'field_done' : (f.field_type === 'date' ? 'field_date' : 'field_sign');
     el.textContent = st(el.dataset.slField);
+    // 서명란을 누르면 바로 서명 (동의 전이면 동의 칸으로 안내)
+    if (!signedByMe && f.field_type !== 'date') { el.style.cursor = 'pointer'; el.onclick = goSignFromField; }
     pg.appendChild(el);
   });
 }
@@ -11668,6 +11677,7 @@ function markPointerDown(e) {
     document.removeEventListener('pointermove', mv); document.removeEventListener('pointerup', up);
     if (act === 'rs' || (moved && m.kind === 'check')) renderMyMarks();
     if (!moved && act !== 'rs' && m.kind === 'text') openMarkText(m.key);
+    if (!moved && act !== 'rs' && m.kind === 'signature') goSignFromField();
   };
   document.addEventListener('pointermove', mv); document.addEventListener('pointerup', up);
 }
@@ -13016,6 +13026,23 @@ function copyKakaoFallback(url, name, title) {
 }
 
 // ===== SIGNATURE PAD =====
+// 서명란(요청자가 놓은 것 · 서명자가 직접 추가한 것)을 눌렀을 때
+// 동의에 체크하지 않았으면 동의 칸으로 데려가고, 체크했으면 서명 창을 연다
+function goSignFromField() {
+  if (state.signData?.signer?.status === 'signed' || state.markTool) return;   // 도구를 고른 중이면 놓기가 우선
+  const cb = document.getElementById('consentCheckbox');
+  if (cb && !cb.checked) {
+    const box = document.getElementById('consentBox');
+    if (box) {
+      box.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      box.classList.remove('attn'); void box.offsetWidth; box.classList.add('attn');
+    }
+    showToast(st('consent_first'));
+    return;
+  }
+  openSignPad();
+}
+
 function openSignPad() {
   if (!checkSignInputs()) return;   // 작성할 항목부터
   if (!checkSignMarks()) return;    // 비어 있는 텍스트 상자
