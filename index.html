@@ -395,6 +395,57 @@ input,select,textarea { font-family:inherit; }
 .di-row .k { color:var(--text-muted); }
 .di-row .v { font-weight:600; word-break:break-all; }
 .di-row .v.empty { color:var(--text-muted); font-weight:400; }
+/* 서명자 직접 추가 — 요청자 허락 카드 */
+.mk-perm { border:1.5px dashed #d8c7fb; border-radius:10px; padding:12px; margin:-6px 0 16px; background:#faf7ff; }
+.mk-perm .ip-title span:not(.sec-tag) { display:block; margin:3px 0 0; }
+.mk-perm-list { display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; }
+.mk-perm-item { display:inline-flex; align-items:center; gap:7px; padding:7px 12px; border:1.5px solid var(--border); border-radius:999px; background:var(--card); font-size:13px; cursor:pointer; }
+.mk-perm-item:has(input:checked) { border-color:#7c3aed; background:#f3edff; color:#5b21b6; font-weight:600; }
+.mk-perm-item input { width:16px; height:16px; accent-color:#7c3aed; }
+/* 서명자 화면 — 직접 추가 도구 */
+.mk-box { background:var(--card); border:1.5px solid #d8c7fb; border-radius:var(--radius-lg); padding:14px 16px; margin-bottom:8px; }
+/* 도구 줄만 화면 위에 붙어 있게 (안내까지 붙으면 휴대폰에서 문서를 가린다) */
+.mk-bar { position:sticky; top:60px; z-index:20; background:var(--card); border:1.5px solid #d8c7fb; border-radius:12px; padding:8px 10px; margin-bottom:12px; box-shadow:0 4px 14px rgba(15,23,42,.08); }
+.mk-bar .mk-tools { margin-top:0; }
+.mk-box h4 { font-size:14.5px; color:#5b21b6; margin-bottom:3px; }
+.mk-box .mk-desc { font-size:12.5px; color:var(--text-secondary); line-height:1.6; }
+.mk-box details { margin:6px 0 2px; font-size:12.5px; }
+.mk-box summary { cursor:pointer; color:#6d28d9; font-weight:600; }
+.mk-box ol { margin:6px 0 2px 18px; line-height:1.75; color:var(--text-secondary); }
+.mk-tools { display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin-top:10px; }
+.mk-tool { padding:8px 13px; border:1.5px solid var(--border); border-radius:8px; background:#fff; font-size:13.5px; font-weight:600; cursor:pointer; font-family:inherit; color:var(--text); }
+.mk-tool.on { border-color:#7c3aed; background:#7c3aed; color:#fff; }
+.mk-count { font-size:12px; color:var(--text-muted); margin-left:auto; }
+.mk-hint { display:none; margin-top:8px; padding:7px 10px; border-radius:8px; background:#f3edff; color:#5b21b6; font-size:12.5px; font-weight:600; }
+.mk-hint.on { display:flex; align-items:center; justify-content:space-between; gap:8px; }
+.mk-hint button { font-size:12px; color:#6d28d9; text-decoration:underline; background:none; border:none; cursor:pointer; }
+#signPdfEditor.mk-placing .pdf-page { cursor:crosshair; outline:2px dashed #a78bfa; outline-offset:2px; }
+.smk-item { position:absolute; border:1.5px dashed #7c3aed; background:rgba(124,58,237,.07); border-radius:4px; color:#4c1d95; display:flex; align-items:center; justify-content:center; touch-action:none; cursor:move; user-select:none; overflow:visible; z-index:5; font-weight:600; }
+.smk-item.text { justify-content:flex-start; padding:0 4px; }
+.smk-item .mk-val { overflow:hidden; white-space:nowrap; text-overflow:ellipsis; max-width:100%; pointer-events:none; }
+.smk-item .mk-x { position:absolute; top:-9px; right:-9px; width:18px; height:18px; border-radius:50%; background:var(--danger); color:#fff; font-size:10px; display:flex; align-items:center; justify-content:center; cursor:pointer; }
+.smk-item .mk-rs { position:absolute; right:-6px; bottom:-6px; width:13px; height:13px; border-radius:3px; background:#7c3aed; cursor:nwse-resize; }
+.smk-item.ro { cursor:default; border-style:solid; }
+.smk-item.ro .mk-x, .smk-item.ro .mk-rs { display:none; }
+/* 요청자 — 서명자 추가 내용 확인 */
+.mk-badge { display:inline-block; margin-left:6px; padding:2px 8px; border-radius:999px; background:#f3edff; color:#6d28d9; font-size:11.5px; font-weight:700; cursor:pointer; white-space:nowrap; }
+#mrModal .modal { max-width:920px; width:calc(100vw - 24px); }
+.mr-summary { font-size:13px; color:var(--text-secondary); margin-bottom:10px; line-height:1.6; }
+.mr-list { display:grid; gap:6px; margin-bottom:12px; max-height:220px; overflow-y:auto; }
+.mr-row { display:grid; grid-template-columns:26px minmax(0,1fr) auto; gap:10px; align-items:center; padding:8px 10px; border:1px solid var(--border); border-radius:8px; font-size:13px; cursor:pointer; }
+.mr-row.done { background:#f0fdf4; border-color:#bbf7d0; }
+.mr-row .no { width:24px; height:24px; border-radius:50%; background:#7c3aed; color:#fff; font-weight:700; font-size:12px; display:flex; align-items:center; justify-content:center; }
+.mr-row.done .no { background:#16a34a; }
+.mr-row .what { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.mr-row label { display:flex; gap:5px; align-items:center; font-size:12.5px; white-space:nowrap; cursor:pointer; }
+#mrEditor { max-height:60vh; }
+.mr-mark { position:absolute; border:2px solid #7c3aed; background:rgba(124,58,237,.08); border-radius:4px; display:flex; align-items:center; justify-content:flex-start; overflow:visible; font-size:12px; color:#1e1b4b; }
+.mr-mark.done { border-color:#16a34a; background:rgba(22,163,74,.06); }
+.mr-mark img { width:100%; height:100%; object-fit:contain; }
+.mr-mark .no { position:absolute; top:-11px; left:-11px; width:20px; height:20px; border-radius:50%; background:#7c3aed; color:#fff; font-size:11px; font-weight:700; display:flex; align-items:center; justify-content:center; }
+.mr-mark.done .no { background:#16a34a; }
+.mr-mark.flash { animation:mrflash 1.2s 2; }
+@keyframes mrflash { 50% { box-shadow:0 0 0 6px rgba(124,58,237,.35); } }
 /* 서명자 화면 — 작성할 항목 */
 .sign-inputs { background:var(--card); border:1.5px solid #b6e6f2; border-radius:var(--radius-lg); padding:18px 18px 8px; margin-bottom:16px; }
 .sign-inputs h4 { font-size:15px; margin-bottom:4px; color:var(--navy); }
@@ -2221,6 +2272,11 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
           <div class="ip-title">기입 항목<span>위에서 고른 서명자에게 받을 정보를 눌러 문서에 배치하세요 · ✎ 로 이름 · 필수 여부를 고칠 수 있습니다</span></div>
           <div class="ip-chips" id="ipChips"></div>
         </div>
+        <div class="mk-perm" id="mkPerm">
+          <div class="ip-title">✚ 서명자 직접 추가 허용 <span class="sec-tag">선택</span>
+            <span>체크한 서명자는 문서 어디에나 <b>체크 · 텍스트 · 서명란</b>을 직접 넣을 수 있습니다. 서명자 화면에 사용 방법이 함께 안내되고, 서명이 끝나면 추가한 내용을 하나씩 확인할 수 있습니다.</span></div>
+          <div class="mk-perm-list" id="mkPermList"></div>
+        </div>
         <div class="page-nav" id="pageNav" style="display:none;"></div>
         <div class="pdf-editor" id="pdfEditor"></div>
         <div style="margin-top:16px;">
@@ -2294,6 +2350,8 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
         <div class="signer-progress" id="signerProgress"></div>
       </div>
       <div id="doneMsgBox" style="display:none;background:linear-gradient(135deg,#ecfdf5,#f0f9ff);border:1.5px solid #a7f3d0;border-radius:var(--radius-lg);padding:24px;text-align:center;margin-bottom:20px;color:var(--navy);"></div>
+      <div class="mk-box" id="signMarksBox" style="display:none;"></div>
+      <div class="mk-bar" id="signMarksBar" style="display:none;"></div>
       <div class="sign-pdf-area">
         <div class="pdf-editor" id="signPdfEditor"></div>
       </div>
@@ -3082,8 +3140,11 @@ async function downloadSignedForSigner() {
     }
 
     // 화면에 띄운 합성본이 있으면 그대로 쓴다 (화면과 파일이 같도록)
-    if (!state.signedPdf?.bytes) await loadSignInputs(state.signToken);   // 그 사이 완료됐으면 전원 기입 값
-    const bytes = state.signedPdf?.bytes || await composeSignedPdf(doc, data.signers, data.fields, state.signInputs);
+    if (!state.signedPdf?.bytes) {   // 그 사이 완료됐으면 전원 기입 값 · 추가 항목
+      await loadSignInputs(state.signToken);
+      await loadSignMarks(state.signToken);
+    }
+    const bytes = state.signedPdf?.bytes || await composeSignedPdf(doc, data.signers, data.fields, state.signInputs, state.signMarks);
     saveBlob(bytes, safeName(doc.title) + '_서명완료.pdf');
     showToast(st('dl_ok'), true);
   } catch (e) {
@@ -3171,6 +3232,7 @@ function openDocMenu(ev, id) {
     it('audit','📋','상세 · 감사 기록', true) +
     it('preview','👁','서명 화면 미리보기', true) +
     it('inputs','📝','기입 내용 보기', true) +
+    it('marks','✚','서명자 추가 내용 확인', true) +
     it('labels','🏷','라벨 편집', !!state.labelsReady) +
     '<div class="rm-sep"></div><div class="rm-label">발송</div>' +
     it('remind','🔔','서명 리마인드', canRemind) +
@@ -3189,6 +3251,7 @@ function rmAct(id, act) {
     audit:   () => showAuditTrail(id),
     preview: () => goSign(id),
     inputs:  () => openDocInputs(id),
+    marks:   () => openMarkReview(id),
     labels:  () => openLabelEditor(id),
     remind:  () => openRemind(id),
     send:    () => openSendDone(id),
@@ -3717,7 +3780,7 @@ async function routeByProfile() {
 // ============================================================
 const SB_FN_ADMIN = SB_URL + '/functions/v1/esign-admin';
 const APP_URL = shareBase();
-const BUILD = '2026-10-27.1';   // 배포 확인용. 화면 하단과 콘솔에 표시된다.
+const BUILD = '2026-10-27.2';   // 배포 확인용. 화면 하단과 콘솔에 표시된다.
 
 
 // ============================================================
@@ -8709,7 +8772,7 @@ function shareDoneKakao(url, name) {
 // ============================================================
 // 서명 합성 PDF 생성 (공통) — 저장 없이 즉석 생성
 // ============================================================
-async function composeSignedPdf(doc, signers, fields, inputs) {
+async function composeSignedPdf(doc, signers, fields, inputs, marks) {
   const buf = await fetch(await fileUrl(doc.file_path)).then(r => {
     if (!r.ok) throw new Error('원본 문서를 불러올 수 없습니다.');
     return r.arrayBuffer();
@@ -8722,7 +8785,8 @@ async function composeSignedPdf(doc, signers, fields, inputs) {
   const sm = {};
   (signers || []).forEach(s => { sm[s.id] = s; });
 
-  for (const f of (fields || [])) {
+  // 서명자가 직접 추가한 서명란은 서명란과 똑같이 그린다
+  for (const f of (fields || []).concat(markSigFields(marks))) {
     const s = sm[f.signer_id];
     if (!s || s.status !== 'signed') continue;
     const page = pages[(f.page || 1) - 1];
@@ -8770,6 +8834,18 @@ async function composeSignedPdf(doc, signers, fields, inputs) {
     const bw = Number(f.w) * pw, bh = Number(f.h) * ph;
     const png = await pdfDoc.embedPng(fieldTextToPng(inputDisplay(f, f.value), bw, bh));
     page.drawImage(png, { x: Number(f.x) * pw, y: ph - Number(f.y) * ph - bh, width: bw, height: bh });
+  }
+
+  // 서명자가 직접 추가한 체크 · 텍스트
+  for (const m of (marks || [])) {
+    if (m.kind === 'signature' || sm[m.signer_id]?.status !== 'signed') continue;
+    if (m.kind === 'text' && !m.value) continue;
+    const page = pages[(m.page || 1) - 1];
+    if (!page) continue;
+    const { width: pw, height: ph } = page.getSize();
+    const bw = Number(m.w) * pw, bh = Number(m.h) * ph;
+    const png = await pdfDoc.embedPng(m.kind === 'check' ? checkToPng(bw, bh) : fieldTextToPng(m.value, bw, bh));
+    page.drawImage(png, { x: Number(m.x) * pw, y: ph - Number(m.y) * ph - bh, width: bw, height: bh });
   }
 
   // 검증 스탬프
@@ -8976,6 +9052,25 @@ function fieldTextToPng(text, w, h) {
   return c.toDataURL('image/png');
 }
 
+// 체크 표시 (✓ 글꼴이 없는 기기에서도 같게 보이도록 선으로 그린다)
+function checkToPng(w, h) {
+  const scale = 3;
+  const c = document.createElement('canvas');
+  c.width = Math.max(12, w) * scale; c.height = Math.max(12, h) * scale;
+  const ctx = c.getContext('2d');
+  const sz = Math.min(c.width, c.height), ox = (c.width - sz) / 2, oy = (c.height - sz) / 2;
+  ctx.strokeStyle = '#0e2d4d'; ctx.lineWidth = Math.max(2, sz * 0.13); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  ctx.beginPath();
+  ctx.moveTo(ox + sz * 0.18, oy + sz * 0.55);
+  ctx.lineTo(ox + sz * 0.42, oy + sz * 0.78);
+  ctx.lineTo(ox + sz * 0.84, oy + sz * 0.24);
+  ctx.stroke();
+  return c.toDataURL('image/png');
+}
+// 직접 추가한 서명란 → 서명란 필드 모양
+const markSigFields = marks => (marks || []).filter(m => m.kind === 'signature')
+  .map(m => ({ id: 'mk_' + m.id, signer_id: m.signer_id, field_type: 'signature', page: m.page, x: m.x, y: m.y, w: m.w, h: m.h }));
+
 async function downloadSignedDoc(docId) {
   showToast('서명 문서를 생성하는 중...');
   try {
@@ -8997,7 +9092,12 @@ async function downloadSignedDoc(docId) {
       const { data: di } = await sb.rpc('esign_doc_inputs', { p_document_id: docId });
       if (di?.ok) inputs = di.fields || [];
     } catch (e) { /* 기입 항목 기능이 없는 서버 — 서명만 합성 */ }
-    const bytes = await composeSignedPdf(doc, data.signers, data.fields, inputs);
+    let marks = [];
+    try {
+      const { data: dm } = await sb.rpc('esign_doc_marks', { p_document_id: docId });
+      if (dm?.ok) marks = dm.marks || [];
+    } catch (e) { /* 직접 추가 기능이 없는 서버 */ }
+    const bytes = await composeSignedPdf(doc, data.signers, data.fields, inputs, marks);
     saveBlob(bytes, safeName(doc.title) + '_서명완료.pdf');
     sb.rpc('esign_log_download', { p_document_id: docId, p_kind: 'signed_pdf' }).then(() => {});
     showToast('서명 문서가 다운로드되었습니다.', true);
@@ -10423,6 +10523,7 @@ async function loadDocuments() {
   state.stats = data.stats;
   updateTrashBadge(data.trash_count || 0);
   await loadDocLabels();
+  await loadMarksPending();
   renderDocList();
 }
 
@@ -10507,7 +10608,28 @@ const SL = {
     in_err_long: '글자 수가 너무 많습니다.',
     in_err_invalid: '입력한 내용을 확인해 주세요.',
     in_fix: '작성할 항목을 먼저 확인해 주세요.',
-    in_save_fail: '입력 내용을 저장하지 못했습니다: '
+    in_save_fail: '입력 내용을 저장하지 못했습니다: ',
+    mk_title: '직접 추가하기',
+    mk_allowed: '요청자가 이 문서에 체크 · 텍스트 · 서명란을 직접 추가할 수 있도록 허락했습니다.',
+    mk_how: '사용 방법',
+    mk_step1: '아래에서 <b>☑ 체크</b> · <b>T 텍스트</b> · <b>✍ 서명란</b> 중 하나를 누릅니다.',
+    mk_step2: '문서에서 넣고 싶은 곳을 누르면 그 자리에 생깁니다. 텍스트는 바로 내용을 적습니다.',
+    mk_step3: '끌어서 옮기고, 모서리 ◢로 크기를 바꾸고, ✕로 지웁니다. 텍스트 상자를 다시 누르면 고칠 수 있습니다.',
+    mk_step4: '서명란에는 마지막에 하는 서명이 그대로 들어갑니다.',
+    mk_notice: '추가한 내용은 서명 후 요청자가 하나씩 확인합니다.',
+    mk_check: '☑ 체크',
+    mk_text: 'T 텍스트',
+    mk_sign: '✍ 서명란',
+    mk_tap: '문서에서 넣을 곳을 누르세요',
+    mk_cancel: '취소',
+    mk_count: '내가 추가한 항목 {n}개',
+    mk_sign_ph: '서명',
+    mk_text_title: '텍스트 입력',
+    mk_text_ph: '추가할 내용을 적어 주세요 (200자까지)',
+    mk_ok: '확인',
+    mk_delete: '삭제',
+    mk_empty: '비어 있는 텍스트 상자가 있습니다. 내용을 쓰거나 ✕로 지워 주세요.',
+    mk_save_fail: '추가한 내용을 저장하지 못했습니다: '
   },
   en: {
     hdr: 'E-Signature', loading: 'Loading the document...',
@@ -10577,7 +10699,28 @@ const SL = {
     in_err_long: 'This entry is too long.',
     in_err_invalid: 'Please check your entry.',
     in_fix: 'Please complete the information to fill in first.',
-    in_save_fail: 'Could not save your entries: '
+    in_save_fail: 'Could not save your entries: ',
+    mk_title: 'Add your own',
+    mk_allowed: 'The requester allows you to add check marks, text boxes and signature boxes to this document.',
+    mk_how: 'How to use',
+    mk_step1: 'Tap one of <b>☑ Check</b>, <b>T Text</b> or <b>✍ Signature box</b> below.',
+    mk_step2: 'Tap the spot on the document where you want it. For text, type the content right away.',
+    mk_step3: 'Drag to move, use the ◢ corner to resize, and ✕ to delete. Tap a text box again to edit it.',
+    mk_step4: 'Your final signature will be placed in each signature box.',
+    mk_notice: 'After you sign, the requester will review each item you added.',
+    mk_check: '☑ Check',
+    mk_text: 'T Text',
+    mk_sign: '✍ Signature box',
+    mk_tap: 'Tap where to place it on the document',
+    mk_cancel: 'Cancel',
+    mk_count: '{n} item(s) added',
+    mk_sign_ph: 'Sign',
+    mk_text_title: 'Enter text',
+    mk_text_ph: 'Enter the text to add (up to 200 characters)',
+    mk_ok: 'OK',
+    mk_delete: 'Delete',
+    mk_empty: 'There is an empty text box. Please type in it or delete it with ✕.',
+    mk_save_fail: 'Could not save the items you added: '
   },
   zh: {
     hdr: '电子签名', loading: '正在加载文件...',
@@ -10646,7 +10789,28 @@ const SL = {
     in_err_long: '内容过长。',
     in_err_invalid: '请检查填写内容。',
     in_fix: '请先完成需要填写的信息。',
-    in_save_fail: '无法保存填写内容：'
+    in_save_fail: '无法保存填写内容：',
+    mk_title: '自行添加',
+    mk_allowed: '请求方允许您在本文件中自行添加勾选、文本框和签名栏。',
+    mk_how: '使用方法',
+    mk_step1: '在下方点击 <b>☑ 勾选</b>、<b>T 文本</b> 或 <b>✍ 签名栏</b>。',
+    mk_step2: '在文件中点击想放置的位置即可添加。文本请直接输入内容。',
+    mk_step3: '拖动可移动，拖动角落 ◢ 可调整大小，点击 ✕ 删除。再次点击文本框可修改。',
+    mk_step4: '签名栏中将放入您最后完成的签名。',
+    mk_notice: '签名后，请求方将逐项确认您添加的内容。',
+    mk_check: '☑ 勾选',
+    mk_text: 'T 文本',
+    mk_sign: '✍ 签名栏',
+    mk_tap: '请在文件中点击放置位置',
+    mk_cancel: '取消',
+    mk_count: '已添加 {n} 项',
+    mk_sign_ph: '签名',
+    mk_text_title: '输入文本',
+    mk_text_ph: '请输入要添加的内容（最多200字）',
+    mk_ok: '确定',
+    mk_delete: '删除',
+    mk_empty: '有空的文本框。请填写内容或点击 ✕ 删除。',
+    mk_save_fail: '无法保存添加的内容：'
   },
   ja: {
     hdr: '電子署名', loading: '文書を読み込んでいます...',
@@ -10715,7 +10879,28 @@ const SL = {
     in_err_long: '文字数が多すぎます。',
     in_err_invalid: '入力内容をご確認ください。',
     in_fix: '先に記入項目をご確認ください。',
-    in_save_fail: '入力内容を保存できませんでした：'
+    in_save_fail: '入力内容を保存できませんでした：',
+    mk_title: '自分で追加',
+    mk_allowed: '依頼者が、この文書にチェック・テキスト・署名欄を追加することを許可しています。',
+    mk_how: '使い方',
+    mk_step1: '下の <b>☑ チェック</b>・<b>T テキスト</b>・<b>✍ 署名欄</b> のいずれかを押します。',
+    mk_step2: '文書の入れたい場所を押すと、そこに追加されます。テキストはそのまま内容を入力します。',
+    mk_step3: 'ドラッグで移動、角の ◢ で大きさを変え、✕ で削除します。テキストはもう一度押すと修正できます。',
+    mk_step4: '署名欄には、最後に行う署名がそのまま入ります。',
+    mk_notice: '署名後、依頼者が追加内容を一つずつ確認します。',
+    mk_check: '☑ チェック',
+    mk_text: 'T テキスト',
+    mk_sign: '✍ 署名欄',
+    mk_tap: '文書で入れる場所を押してください',
+    mk_cancel: 'キャンセル',
+    mk_count: '追加した項目 {n}件',
+    mk_sign_ph: '署名',
+    mk_text_title: 'テキスト入力',
+    mk_text_ph: '追加する内容を入力してください（200文字まで）',
+    mk_ok: 'OK',
+    mk_delete: '削除',
+    mk_empty: '空のテキストボックスがあります。内容を入力するか ✕ で削除してください。',
+    mk_save_fail: '追加した内容を保存できませんでした：'
   },
   vi: {
     hdr: 'Chữ ký điện tử', loading: 'Đang tải tài liệu...',
@@ -10784,7 +10969,28 @@ const SL = {
     in_err_long: 'Nội dung quá dài.',
     in_err_invalid: 'Vui lòng kiểm tra nội dung đã nhập.',
     in_fix: 'Vui lòng hoàn tất thông tin cần điền trước.',
-    in_save_fail: 'Không thể lưu nội dung: '
+    in_save_fail: 'Không thể lưu nội dung: ',
+    mk_title: 'Tự thêm nội dung',
+    mk_allowed: 'Người yêu cầu cho phép bạn tự thêm dấu tích, ô văn bản và ô chữ ký vào tài liệu này.',
+    mk_how: 'Cách sử dụng',
+    mk_step1: 'Nhấn một trong các nút <b>☑ Dấu tích</b>, <b>T Văn bản</b> hoặc <b>✍ Ô chữ ký</b> bên dưới.',
+    mk_step2: 'Chạm vào vị trí muốn đặt trên tài liệu. Với văn bản, hãy nhập nội dung ngay.',
+    mk_step3: 'Kéo để di chuyển, dùng góc ◢ để đổi kích thước, nhấn ✕ để xóa. Chạm lại ô văn bản để sửa.',
+    mk_step4: 'Chữ ký cuối cùng của bạn sẽ được đặt vào mỗi ô chữ ký.',
+    mk_notice: 'Sau khi bạn ký, người yêu cầu sẽ kiểm tra từng mục bạn đã thêm.',
+    mk_check: '☑ Dấu tích',
+    mk_text: 'T Văn bản',
+    mk_sign: '✍ Ô chữ ký',
+    mk_tap: 'Chạm vào vị trí cần đặt trên tài liệu',
+    mk_cancel: 'Hủy',
+    mk_count: 'Đã thêm {n} mục',
+    mk_sign_ph: 'Ký',
+    mk_text_title: 'Nhập văn bản',
+    mk_text_ph: 'Nhập nội dung cần thêm (tối đa 200 ký tự)',
+    mk_ok: 'Xác nhận',
+    mk_delete: 'Xóa',
+    mk_empty: 'Có ô văn bản trống. Vui lòng nhập nội dung hoặc xóa bằng ✕.',
+    mk_save_fail: 'Không thể lưu các mục đã thêm: '
   }
 };
 
@@ -10838,6 +11044,7 @@ function setSignLang(lang) {
   const d = state.signData?.document;
   if (d) document.getElementById('signDeadline').textContent = fmtSignDate(d.deadline);
   document.querySelectorAll('#signPdfEditor .sign-field-label[data-sl-field]').forEach(el => { el.textContent = st(el.dataset.slField); });
+  if (state.signMarksAllow) { renderSignMarksBox(); renderMyMarks(); }
   if (myInputs().length) {
     renderSignInputsBox();
     myInputs().forEach(f => {
@@ -10905,6 +11112,8 @@ async function openSignByToken(token) {
     applySignLang();
   }
   renderSignInputsBox();
+  await loadSignMarks(token);
+  renderSignMarksBox();
 
   document.getElementById('signDocTitle').textContent = d.title;
   document.getElementById('signRequester').textContent = d.requester_name;
@@ -10965,7 +11174,7 @@ async function openSignByToken(token) {
       let shown = false;
       try {
         state.signedPdf = {
-          bytes: await composeSignedPdf(completed.document, completed.signers, completed.fields, state.signInputs),
+          bytes: await composeSignedPdf(completed.document, completed.signers, completed.fields, state.signInputs, state.signMarks),
           title: completed.document.title
         };
         shown = (await renderPdfFromUrl({ data: state.signedPdf.bytes.slice() }, 'signPdfEditor')) > 0;
@@ -10974,13 +11183,15 @@ async function openSignByToken(token) {
       }
       if (!shown) {   // 합성에 실패하면 원본 + 서명 이미지 덧그리기로 대신한다
         await renderPdfFromUrl(await fileUrl(d.file_path), 'signPdfEditor');
-        renderSignedFields(completed.fields, completed.signers, 'signPdfEditor');
+        renderSignedFields(completed.fields.concat(markSigFields(state.signMarks)), completed.signers, 'signPdfEditor');
         renderSignedInputs(state.signInputs, completed.signers, 'signPdfEditor');
+        renderSignedMarks(state.signMarks, completed.signers, 'signPdfEditor');
       }
     } else if (d.file_type === 'pdf') {
       await renderPdfFromUrl(await fileUrl(d.file_path), 'signPdfEditor');
       renderSignFields(data.fields, 'signPdfEditor', s.status === 'signed');
       renderSignInputOverlays('signPdfEditor');
+      renderMyMarks();
     } else if (['jpg','jpeg','png'].includes(d.file_type)) {
       const docUrl = await fileUrl(d.file_path);
       editor.innerHTML = '<div class="pdf-page" data-page="1">' +
@@ -10988,11 +11199,13 @@ async function openSignByToken(token) {
       const im = editor.querySelector('img');
       await new Promise(r => { im.onload = r; im.onerror = r; });
       if (completed) {
-        renderSignedFields(completed.fields, completed.signers, 'signPdfEditor');
+        renderSignedFields(completed.fields.concat(markSigFields(state.signMarks)), completed.signers, 'signPdfEditor');
         renderSignedInputs(state.signInputs, completed.signers, 'signPdfEditor');
+        renderSignedMarks(state.signMarks, completed.signers, 'signPdfEditor');
       } else {
         renderSignFields(data.fields, 'signPdfEditor', s.status === 'signed');
         renderSignInputOverlays('signPdfEditor');
+        renderMyMarks();
       }
     } else {
       editor.innerHTML = '<div class="sign-loading">' + st('no_preview') + '<br>' +
@@ -11306,6 +11519,328 @@ function copyDocInputs() {
     .catch(() => showToast('복사하지 못했습니다.'));
 }
 
+// ===== 서명자 직접 추가 (체크 · 텍스트 · 서명란) =====
+// 요청자: 서명자별 허락
+function renderMarkPerms() {
+  const box = document.getElementById('mkPermList');
+  if (!box) return;
+  box.innerHTML = state.signers.map((s, i) =>
+    '<label class="mk-perm-item"><input type="checkbox"' + (s.allowMarks ? ' checked' : '') +
+    ' onchange="state.signers[' + i + '].allowMarks=this.checked">' +
+    '<span class="signer-num" style="background:' + SIGNER_COLORS[i] + ';width:20px;height:20px;font-size:11px;">' + (i + 1) + '</span>' +
+    esc(s.name || SIGNER_LABELS[i]) + '</label>').join('');
+}
+// 요청자: 확인할 추가 항목이 남은 문서 { document_id: 건수 }
+async function loadMarksPending() {
+  try {
+    const { data, error } = await sb.rpc('esign_marks_pending');
+    state.marksPending = (!error && data && typeof data === 'object') ? data : {};
+  } catch (e) { state.marksPending = {}; }
+}
+
+// 서명자: 허락 여부 · 내 항목 (완료 문서면 전원 항목)
+async function loadSignMarks(token) {
+  state.signMarks = []; state.signMarksAllow = false; state.markTool = null;
+  try {
+    const { data, error } = await sb.rpc('esign_sign_marks', { p_token: token });
+    if (error || !data?.ok) return;
+    state.signMarks = data.marks || [];
+    state.signMarksAllow = !!data.allow && state.signData?.signer?.status !== 'signed' &&
+      !['complete', 'cancelled', 'expired'].includes(state.signData?.document?.status);
+    state.myMarks = state.signMarks.filter(m => m.mine).map(m => ({ ...m, key: 'k' + Math.random().toString(36).slice(2) }));
+    state.mkGuideOpen = !state.myMarks.length;   // 처음 온 서명자에게는 사용 방법을 펼쳐 보여 준다
+  } catch (e) { /* 기능이 없는 서버 */ }
+}
+const MK_SIZE = { check: [24, 24], text: [170, 26], signature: [130, 48] };
+
+function renderSignMarksBox() {
+  const box = document.getElementById('signMarksBox'), bar = document.getElementById('signMarksBar');
+  if (!box || !bar) return;
+  if (!state.signMarksAllow) { box.style.display = bar.style.display = 'none'; box.innerHTML = bar.innerHTML = ''; return; }
+  const t = state.markTool;
+  box.style.display = bar.style.display = '';
+  box.innerHTML =
+    '<h4>✚ ' + st('mk_title') + '</h4>' +
+    '<p class="mk-desc">' + st('mk_allowed') + '</p>' +
+    // 안내는 서명자가 접거나 펼친 그대로 둔다 (항목을 놓을 때마다 접히면 문서 위치가 밀린다)
+    '<details' + (state.mkGuideOpen ? ' open' : '') + ' ontoggle="state.mkGuideOpen=this.open"><summary>' + st('mk_how') + '</summary><ol>' +
+      '<li>' + st('mk_step1') + '</li><li>' + st('mk_step2') + '</li><li>' + st('mk_step3') + '</li><li>' + st('mk_step4') + '</li>' +
+    '</ol><p class="mk-desc">ℹ️ ' + st('mk_notice') + '</p></details>';
+  bar.innerHTML =
+    '<div class="mk-tools">' +
+      ['check', 'text', 'signature'].map(k =>
+        '<button type="button" class="mk-tool' + (t === k ? ' on' : '') + '" onclick="setMarkTool(\'' + k + '\')">' +
+        st(k === 'check' ? 'mk_check' : k === 'text' ? 'mk_text' : 'mk_sign') + '</button>').join('') +
+      '<span class="mk-count">' + st('mk_count', { n: (state.myMarks || []).length }) + '</span>' +
+    '</div>' +
+    '<div class="mk-hint' + (t ? ' on' : '') + '"><span>👆 ' + st('mk_tap') + '</span>' +
+      '<button type="button" onclick="setMarkTool(null)">' + st('mk_cancel') + '</button></div>';
+  document.getElementById('signPdfEditor')?.classList.toggle('mk-placing', !!t);
+}
+function setMarkTool(k) {
+  state.markTool = state.markTool === k ? null : k;
+  renderSignMarksBox();
+}
+
+// 문서를 누르면 고른 도구로 그 자리에 놓는다
+function onMarkPlace(e) {
+  if (!state.markTool || !state.signMarksAllow) return;
+  if (e.target.closest('.smk-item, .si-row')) return;
+  const pg = e.target.closest('#signPdfEditor .pdf-page');
+  if (!pg) return;
+  const r = pg.getBoundingClientRect();
+  const [w, h] = MK_SIZE[state.markTool];
+  const px = Math.max(0, Math.min(r.width - w, e.clientX - r.left - w / 2));
+  const py = Math.max(0, Math.min(r.height - h, e.clientY - r.top - h / 2));
+  const m = { key: 'k' + Math.random().toString(36).slice(2), kind: state.markTool, page: parseInt(pg.dataset.page, 10) || 1,
+    x: px / r.width, y: py / r.height, w: w / r.width, h: h / r.height, value: '' };
+  state.myMarks = (state.myMarks || []).concat(m);
+  state.markTool = null;
+  renderSignMarksBox();
+  renderMyMarks();
+  if (m.kind === 'text') openMarkText(m.key);
+}
+document.addEventListener('click', e => { if (e.target.closest && e.target.closest('#signPdfEditor')) onMarkPlace(e); });
+
+function renderMyMarks() {
+  document.querySelectorAll('#signPdfEditor .smk-item').forEach(el => el.remove());
+  const ro = !state.signMarksAllow;
+  (state.myMarks || []).forEach(m => {
+    const pg = document.querySelector('#signPdfEditor .pdf-page[data-page="' + (m.page || 1) + '"]');
+    if (!pg) return;
+    const el = document.createElement('div');
+    el.className = 'smk-item ' + m.kind + (ro ? ' ro' : '');
+    el.dataset.key = m.key;
+    el.style.cssText = 'left:' + (m.x * pg.offsetWidth) + 'px;top:' + (m.y * pg.offsetHeight) + 'px;' +
+      'width:' + (m.w * pg.offsetWidth) + 'px;height:' + (m.h * pg.offsetHeight) + 'px;';
+    const fs = Math.max(10, Math.min(18, m.h * pg.offsetHeight * 0.6));
+    el.innerHTML =
+      (m.kind === 'check' ? '<img alt="✓" style="width:100%;height:100%;pointer-events:none;" src="' + checkToPng(m.w * pg.offsetWidth, m.h * pg.offsetHeight) + '">'
+       : m.kind === 'text' ? '<span class="mk-val" style="font-size:' + fs + 'px;">' + esc(m.value || '…') + '</span>'
+       : '<span class="mk-val" style="text-align:center;font-size:' + fs + 'px;">✍ ' + esc(st('mk_sign_ph')) + '</span>') +
+      '<span class="mk-x" data-act="x">✕</span>' + (m.kind === 'check' ? '' : '<span class="mk-rs" data-act="rs"></span>');
+    if (!ro) el.addEventListener('pointerdown', markPointerDown);
+    pg.appendChild(el);
+  });
+}
+// 끌어서 옮기기 · 모서리로 크기 바꾸기 · ✕ 지우기 · 텍스트는 눌러서 고치기
+function markPointerDown(e) {
+  const el = e.currentTarget, m = (state.myMarks || []).find(x => x.key === el.dataset.key);
+  if (!m) return;
+  e.preventDefault(); e.stopPropagation();
+  const act = e.target.dataset.act;
+  if (act === 'x') { state.myMarks = state.myMarks.filter(x => x !== m); el.remove(); renderSignMarksBox(); return; }
+  const pg = el.parentElement, W = pg.offsetWidth, H = pg.offsetHeight;
+  const sx = e.clientX, sy = e.clientY, ox = m.x * W, oy = m.y * H, ow = m.w * W, oh = m.h * H;
+  let moved = false;
+  const mv = ev => {
+    const dx = ev.clientX - sx, dy = ev.clientY - sy;
+    if (Math.abs(dx) + Math.abs(dy) > 4) moved = true;
+    if (act === 'rs') {
+      const nw = Math.max(40, Math.min(W - ox, ow + dx)), nh = Math.max(16, Math.min(H - oy, oh + dy));
+      el.style.width = nw + 'px'; el.style.height = nh + 'px'; m.w = nw / W; m.h = nh / H;
+    } else {
+      const nx = Math.max(0, Math.min(W - ow, ox + dx)), ny = Math.max(0, Math.min(H - oh, oy + dy));
+      el.style.left = nx + 'px'; el.style.top = ny + 'px'; m.x = nx / W; m.y = ny / H;
+    }
+  };
+  const up = () => {
+    document.removeEventListener('pointermove', mv); document.removeEventListener('pointerup', up);
+    if (act === 'rs' || (moved && m.kind === 'check')) renderMyMarks();
+    if (!moved && act !== 'rs' && m.kind === 'text') openMarkText(m.key);
+  };
+  document.addEventListener('pointermove', mv); document.addEventListener('pointerup', up);
+}
+// 텍스트 상자 내용 입력 (작은 칸에 바로 쓰기 어려운 휴대폰을 위해 창으로 받는다)
+function openMarkText(key) {
+  const m = (state.myMarks || []).find(x => x.key === key);
+  if (!m) return;
+  let ov = document.getElementById('mkTextModal');
+  if (!ov) {
+    ov = document.createElement('div');
+    ov.id = 'mkTextModal'; ov.className = 'modal-overlay';
+    document.body.appendChild(ov);
+  }
+  ov.innerHTML = '<div class="modal" style="max-width:440px;"><div class="modal-header"><h3>' + st('mk_text_title') + '</h3></div>' +
+    '<div class="modal-body"><textarea id="mkTextVal" rows="3" maxlength="200" placeholder="' + esc(st('mk_text_ph')) + '" ' +
+    'style="width:100%;padding:11px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:16px;font-family:inherit;outline:none;">' + esc(m.value || '') + '</textarea></div>' +
+    '<div class="modal-footer"><button class="btn-secondary" id="mkTextDel">' + st('mk_delete') + '</button>' +
+    '<button class="btn-primary" style="width:auto;padding:11px 20px;" id="mkTextOk">' + st('mk_ok') + '</button></div></div>';
+  ov.classList.add('active');
+  const ta = ov.querySelector('#mkTextVal');
+  setTimeout(() => ta.focus(), 50);
+  ov.querySelector('#mkTextOk').onclick = () => {
+    m.value = ta.value.replace(/\s+/g, ' ').trim().slice(0, 200);
+    ov.classList.remove('active');
+    if (!m.value) state.myMarks = state.myMarks.filter(x => x !== m);
+    renderMyMarks(); renderSignMarksBox();
+  };
+  ov.querySelector('#mkTextDel').onclick = () => {
+    ov.classList.remove('active');
+    state.myMarks = state.myMarks.filter(x => x !== m);
+    renderMyMarks(); renderSignMarksBox();
+  };
+}
+function checkSignMarks() {
+  if (!state.signMarksAllow) return true;
+  const empty = (state.myMarks || []).find(m => m.kind === 'text' && !String(m.value || '').trim());
+  if (!empty) return true;
+  showToast(st('mk_empty'));
+  document.querySelector('#signPdfEditor .smk-item[data-key="' + empty.key + '"]')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  return false;
+}
+// 서명 직전에 추가한 항목을 낸다 (허락받지 않았으면 건너뜀)
+async function submitSignMarks() {
+  if (!state.signMarksAllow) return true;
+  if (!checkSignMarks()) { closeSigModal(); return false; }
+  const marks = (state.myMarks || []).map(m => ({ kind: m.kind, page: m.page, x: m.x, y: m.y, w: m.w, h: m.h, value: m.kind === 'text' ? m.value : null }));
+  const { data, error } = await sb.rpc('esign_submit_marks', { p_token: state.signToken, p_marks: marks });
+  if (error || !data?.ok) {
+    const why = data?.error || error?.message || '';
+    if (/EMPTY_TEXT/.test(why)) { closeSigModal(); showToast(st('mk_empty')); }
+    else showToast(st('mk_save_fail') + why);
+    return false;
+  }
+  return true;
+}
+// 완료 문서(이미지 문서 · 합성 실패 시)에 체크 · 텍스트를 그린다 (서명란은 renderSignedFields 가 그린다)
+function renderSignedMarks(marks, signers, editorId) {
+  const sm = {};
+  (signers || []).forEach(x => { sm[x.id] = x; });
+  (marks || []).forEach(m => {
+    if (m.kind === 'signature' || sm[m.signer_id]?.status !== 'signed' || (m.kind === 'text' && !m.value)) return;
+    const pg = document.querySelector('#' + editorId + ' .pdf-page[data-page="' + (m.page || 1) + '"]');
+    if (!pg) return;
+    const w = m.w * pg.offsetWidth, h = m.h * pg.offsetHeight;
+    const im = document.createElement('img');
+    im.src = m.kind === 'check' ? checkToPng(w, h) : fieldTextToPng(m.value, w, h);
+    im.style.cssText = 'position:absolute;pointer-events:none;left:' + (m.x * pg.offsetWidth) + 'px;top:' + (m.y * pg.offsetHeight) + 'px;width:' + w + 'px;height:' + h + 'px;';
+    pg.appendChild(im);
+  });
+}
+
+// 요청자: 서명자가 추가한 내용을 하나씩 확인
+const MK_KIND_KO = { check: '☑ 체크', text: 'T 텍스트', signature: '✍ 서명란' };
+async function openMarkReview(docId) {
+  let marks = null, sd = null, err = null;
+  try {
+    const [a, b] = await Promise.all([
+      sb.rpc('esign_doc_marks', { p_document_id: docId }),
+      sb.rpc('esign_get_signed_document', { p_document_id: docId })
+    ]);
+    if (a.error || !a.data?.ok) err = a.data?.error || a.error?.message || '오류';
+    else marks = a.data.marks || [];
+    if (!b.error && b.data?.ok) sd = b.data;
+  } catch (e) { err = e.message; }
+  let ov = document.getElementById('mrModal');
+  if (!ov) {
+    ov = document.createElement('div');
+    ov.id = 'mrModal'; ov.className = 'modal-overlay';
+    ov.onclick = e => { if (e.target === ov) closeMarkReview(); };
+    document.body.appendChild(ov);
+  }
+  state.mrDoc = docId; state.mrMarks = marks || []; state.mrSigned = sd;
+  const title = sd?.document?.title || state.documents.find(x => x.id === docId)?.title || '';
+  const final = state.mrMarks.filter(m => m.signer_status === 'signed');
+  ov.innerHTML =
+    '<div class="modal"><div class="modal-header"><h3>✚ 서명자 추가 내용 확인</h3></div><div class="modal-body">' +
+      '<p class="mr-summary"><b>' + esc(title) + '</b><br>' +
+      (err ? '추가 내용을 불러오지 못했습니다. (' + esc(err) + ')'
+        : !state.mrMarks.length ? '서명자가 직접 추가한 내용이 없습니다.'
+        : '서명자가 직접 추가한 항목 <b>' + state.mrMarks.length + '개</b>입니다. 번호를 누르면 문서의 그 자리로 이동합니다. 확인한 항목은 체크해 두세요.' +
+          (final.length < state.mrMarks.length ? '<br><span style="color:#b45309;">아직 서명하지 않은 서명자의 항목은 서명 전까지 바뀔 수 있습니다.</span>' : '')) + '</p>' +
+      '<div class="mr-list" id="mrList"></div>' +
+      '<div class="pdf-editor" id="mrEditor"></div>' +
+    '</div><div class="modal-footer">' +
+      (final.length ? '<button class="btn-secondary" onclick="reviewAllMarks()">모두 확인</button>' : '') +
+      '<button class="btn-primary" style="width:auto;padding:11px 20px;" onclick="closeMarkReview()">닫기</button>' +
+    '</div></div>';
+  ov.classList.add('active');
+  renderMarkReviewList();
+  if (!state.mrMarks.length || !sd?.document?.file_path) return;
+  const d = sd.document, ed = document.getElementById('mrEditor');
+  try {
+    if (d.file_type === 'pdf') {
+      await renderPdfFromUrl(await fileUrl(d.file_path), 'mrEditor');
+    } else if (['jpg', 'jpeg', 'png'].includes(d.file_type)) {
+      ed.innerHTML = '<div class="pdf-page" data-page="1"><img src="' + await fileUrl(d.file_path) + '" style="max-width:' + (ed.clientWidth - 48) + 'px;display:block;"></div>';
+      const im = ed.querySelector('img');
+      await new Promise(r => { im.onload = r; im.onerror = r; });
+    } else { ed.style.display = 'none'; return; }
+  } catch (e) { ed.innerHTML = '<div class="sign-loading">문서를 표시할 수 없습니다.</div>'; return; }
+  renderMarkReviewOverlays();
+}
+function closeMarkReview() {
+  document.getElementById('mrModal')?.classList.remove('active');
+  if (state.mrChanged) { state.mrChanged = false; loadMarksPending().then(renderDocList); }
+}
+function markWhat(m) {
+  return MK_KIND_KO[m.kind] + (m.kind === 'text' ? ' “' + (m.value || '') + '”' : '');
+}
+function renderMarkReviewList() {
+  const box = document.getElementById('mrList');
+  if (!box) return;
+  box.innerHTML = state.mrMarks.map((m, i) =>
+    '<div class="mr-row' + (m.reviewed_at ? ' done' : '') + '" onclick="focusMark(' + i + ')">' +
+      '<span class="no">' + (i + 1) + '</span>' +
+      '<span class="what">' + esc(m.signer_name) + ' · ' + m.page + '쪽 · ' + esc(markWhat(m)) +
+        (m.signer_status === 'signed' ? '' : ' <small style="color:#b45309;">(서명 전)</small>') + '</span>' +
+      (m.signer_status === 'signed'
+        ? '<label onclick="event.stopPropagation()"><input type="checkbox"' + (m.reviewed_at ? ' checked' : '') +
+          ' onchange="reviewMark(' + i + ', this.checked)"> 확인</label>' : '<span></span>') +
+    '</div>').join('');
+}
+function renderMarkReviewOverlays() {
+  document.querySelectorAll('#mrEditor .mr-mark').forEach(el => el.remove());
+  const sg = {};
+  (state.mrSigned?.signers || []).forEach(x => { sg[x.id] = x; });
+  state.mrMarks.forEach((m, i) => {
+    const pg = document.querySelector('#mrEditor .pdf-page[data-page="' + (m.page || 1) + '"]');
+    if (!pg) return;
+    const W = pg.offsetWidth, H = pg.offsetHeight, w = m.w * W, h = m.h * H;
+    const el = document.createElement('div');
+    el.className = 'mr-mark' + (m.reviewed_at ? ' done' : '');
+    el.id = 'mrm_' + i;
+    el.style.cssText = 'left:' + (m.x * W) + 'px;top:' + (m.y * H) + 'px;width:' + w + 'px;height:' + h + 'px;';
+    let inner = '';
+    const s = sg[m.signer_id];
+    if (m.kind === 'check') inner = '<img alt="✓" src="' + checkToPng(w, h) + '">';
+    else if (m.kind === 'text') inner = '<img alt="" src="' + fieldTextToPng(m.value || '', w, h) + '">';
+    else if (s?.status === 'signed' && s.sig_method === 'typed') {
+      const t = parseTypedSig(s.sig_data, s.name);
+      inner = '<img alt="" src="' + typedSigToPng(t.name, w, h, t.font, t.text) + '">';
+    } else if (s?.status === 'signed' && String(s.sig_data || '').startsWith('data:image')) inner = '<img alt="" src="' + s.sig_data + '">';
+    else inner = '<span style="margin:auto;">✍</span>';
+    el.innerHTML = inner + '<span class="no">' + (i + 1) + '</span>';
+    pg.appendChild(el);
+  });
+}
+function focusMark(i) {
+  const el = document.getElementById('mrm_' + i);
+  if (!el) return;
+  el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash');
+}
+async function reviewMark(i, on) {
+  const m = state.mrMarks[i];
+  const { data, error } = await sb.rpc('esign_review_marks', { p_document_id: state.mrDoc, p_mark_ids: [m.id], p_reviewed: on });
+  if (error || !data?.ok) { showToast('확인 표시를 저장하지 못했습니다.'); renderMarkReviewList(); return; }
+  m.reviewed_at = on ? new Date().toISOString() : null;
+  state.mrChanged = true;
+  renderMarkReviewList(); renderMarkReviewOverlays();
+}
+async function reviewAllMarks() {
+  const ids = state.mrMarks.filter(m => m.signer_status === 'signed' && !m.reviewed_at).map(m => m.id);
+  if (!ids.length) { showToast('모두 확인했습니다.', true); return; }
+  const { data, error } = await sb.rpc('esign_review_marks', { p_document_id: state.mrDoc, p_mark_ids: ids, p_reviewed: true });
+  if (error || !data?.ok) { showToast('확인 표시를 저장하지 못했습니다.'); return; }
+  const now = new Date().toISOString();
+  state.mrMarks.forEach(m => { if (ids.includes(m.id)) m.reviewed_at = now; });
+  state.mrChanged = true;
+  renderMarkReviewList(); renderMarkReviewOverlays();
+  showToast(ids.length + '개 항목을 확인했습니다.', true);
+}
+
 // 완료 문서 데이터 (서명 이미지 포함). 실패하면 null.
 async function loadCompletedDoc(token) {
   try {
@@ -11380,6 +11915,7 @@ function renderDocList() {
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>
           <span>${esc(d.title)}</span>
           ${lbls.map(l => '<span class="doc-label">' + esc(l) + '</span>').join('')}
+          ${state.marksPending?.[d.id] ? '<span class="mk-badge" title="서명자가 직접 추가한 내용" onclick="event.stopPropagation();openMarkReview(\'' + d.id + '\')">✚ 확인 ' + state.marksPending[d.id] + '건</span>' : ''}
         </div>
         <div class="doc-signer">${esc(d.signer)}</div>
         <div class="doc-date">${d.date}${d.scheduled_at && d.status==='scheduled' ? '<div class="sched-badge">🕒 '+d.scheduled_at+'</div>' : ''}${d.reminder_count ? '<div class="post-meta">🔔 리마인드 '+d.reminder_count+'회</div>' : ''}</div>
@@ -11555,6 +12091,7 @@ function goStep(n) {
     if (dup >= 0 && !confirm('서명자 ' + (nums.indexOf(nums[dup]) + 1) + '번과 ' + (dup + 1) + '번의 휴대전화 번호가 같습니다.\n' +
         '한 사람이 두 번 서명하는 것이 맞나요?\n\n[확인] 그대로 진행  ·  [취소] 번호 고치기')) { goStep(2); return; }
     populateFieldSignerSelect();
+    renderMarkPerms();
     renderPdf().then(() => {
       state.fields.forEach(f => renderField(f));
     });
@@ -12175,10 +12712,15 @@ async function createDocument() {
     showToast('기입 항목을 문서에 하나 이상 배치하거나, 「서명만 요청」을 골라 주세요.');
     return;
   }
-  if (inputFields.length) {
+  const wantMarks = state.signers.some(s => s.allowMarks);
+  if (inputFields.length || wantMarks) {
     const { data: rd, error: re } = await sb.rpc('esign_inputs_ready');
     if (re || !rd?.ok) {
       showToast('기입 항목 기능의 서버 준비가 아직 끝나지 않았습니다. 「서명만 요청」으로 보내 주세요.');
+      return;
+    }
+    if (wantMarks && !(rd.version >= 2)) {
+      showToast('「서명자 직접 추가」의 서버 준비가 아직 끝나지 않았습니다. 체크를 풀고 보내 주세요.');
       return;
     }
   }
@@ -12334,6 +12876,18 @@ async function attachDocExtras(data, inputFields) {
     }
   }
 
+  const perms = state.signers.map((s, i) => ({ sign_token: tokenOf(i), allow_marks: !!s.allowMarks }))
+    .filter(x => x.sign_token && x.allow_marks);
+  if (perms.length) {
+    let perr = null;
+    try {
+      const { data: r, error } = await sb.rpc('esign_set_signer_perms', { p_document_id: data.document_id, p_perms: perms });
+      if (error || !r?.ok) perr = r?.error || error?.message || '알 수 없는 오류';
+    } catch (e) { perr = e.message || '알 수 없는 오류'; }
+    if (perr && !confirm('「서명자 직접 추가」 허락을 저장하지 못했습니다. (' + perr + ')\n\n' +
+        '[확인] 직접 추가 없이 그대로 보내기\n[취소] 보내지 않기')) return false;
+  }
+
   if (!inputFields.length) return true;
   let err = null;
   try {
@@ -12442,6 +12996,7 @@ function copyKakaoFallback(url, name, title) {
 // ===== SIGNATURE PAD =====
 function openSignPad() {
   if (!checkSignInputs()) return;   // 작성할 항목부터
+  if (!checkSignMarks()) return;    // 비어 있는 텍스트 상자
   document.getElementById('sigModal').classList.add('active');
   state.currentSigMethod = 0;
   switchSigTab(0);
@@ -12506,6 +13061,7 @@ async function submitSignature() {
 
   try {
     if (!await submitSignInputs()) return;
+    if (!await submitSignMarks()) return;
     const post = sd => fetch(SB_FN, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
