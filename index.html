@@ -354,6 +354,14 @@ input,select,textarea { font-family:inherit; }
 .sig-field .resize-handle { position:absolute; bottom:-4px; right:-4px; width:12px; height:12px; background:var(--cyan); border-radius:50%; cursor:nwse-resize; }
 .sig-field .remove-field { position:absolute; top:-8px; right:-8px; width:18px; height:18px; background:var(--danger); color:#fff; border-radius:50%; font-size:10px; display:flex; align-items:center; justify-content:center; cursor:pointer; opacity:0; transition:opacity .2s; }
 .sig-field:hover .remove-field { opacity:1; }
+/* 서명 기한 — 보내는 시각부터 고른 기간 */
+.dl-chips { display:flex; flex-wrap:wrap; gap:6px; }
+.dl-chip { padding:9px 14px; border:1.5px solid var(--border); border-radius:8px; background:var(--card); font-size:13.5px; font-weight:600; cursor:pointer; font-family:inherit; color:var(--text); }
+.dl-chip:hover { border-color:var(--cyan); }
+.dl-chip.on { border-color:var(--cyan); background:var(--cyan); color:#fff; }
+.dl-preview { font-size:12.5px; color:var(--text-secondary); margin-top:8px; line-height:1.6; }
+.dl-preview b { color:var(--navy); }
+.dl-confirm { margin-top:12px; padding:10px 12px; border-radius:8px; background:#ecfeff; border:1px solid #a5f3fc; font-size:13.5px; line-height:1.6; color:var(--navy); }
 /* 서명만 요청 / 서명 + 정보 기입 요청 */
 .req-mode { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:4px 0 14px; }
 .rm-opt { text-align:left; padding:12px 14px; border:1.5px solid var(--border); border-radius:10px; background:var(--card); cursor:pointer; transition:all .2s; font:inherit; }
@@ -1985,8 +1993,9 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
         <div class="bulk-step">
           <h4><span class="bulk-num">4</span> 발송 설정</h4>
           <div class="form-group">
-            <label>서명 기한</label>
-            <input type="datetime-local" id="bulkDeadline">
+            <label>서명 기한 <span class="sec-tag">보내는 시각부터</span></label>
+            <div class="dl-chips" id="dlBulk"></div>
+            <p class="dl-preview" id="dlBulkPrev"></p>
           </div>
           <div class="sec-box">
             <div class="sec-title">🔐 보안 설정 <span class="sec-tag">선택</span></div>
@@ -2214,8 +2223,9 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
             <input type="text" id="docTitle" placeholder="MOU 계약서">
           </div>
           <div class="form-group">
-            <label>서명 기한</label>
-            <input type="datetime-local" id="sigDeadline">
+            <label>서명 기한 <span class="sec-tag">보내는 시각부터</span></label>
+            <div class="dl-chips" id="dlCreate"></div>
+            <p class="dl-preview" id="dlCreatePrev"></p>
           </div>
         </div>
         <div class="sched-box">
@@ -3220,6 +3230,7 @@ function openDocMenu(ev, id) {
   if (!d) return;
   const done = d.status === 'complete';
   const canRemind = ['waiting','progress'].includes(d.status);
+  const canExtend = ['waiting','progress','expired'].includes(d.status);
   const it = (act, ico, label, on, danger) =>
     '<button class="rm-item' + (danger ? ' danger' : '') + '" ' +
     (on ? 'onclick="rmAct(\'' + id + '\',\'' + act + '\')"' : 'disabled') +
@@ -3234,6 +3245,7 @@ function openDocMenu(ev, id) {
     it('labels','🏷','라벨 편집', !!state.labelsReady) +
     '<div class="rm-sep"></div><div class="rm-label">발송</div>' +
     it('remind','🔔','서명 리마인드', canRemind) +
+    it('extend','⏰','서명 기한 연장', canExtend) +
     it('send','🎉','완료 문서 전달', done) +
     '<div class="rm-sep"></div><div class="rm-label">다운로드</div>' +
     it('signed','📄','서명본 내려받기', done) +
@@ -3252,6 +3264,7 @@ function rmAct(id, act) {
     marks:   () => openMarkReview(id),
     labels:  () => openLabelEditor(id),
     remind:  () => openRemind(id),
+    extend:  () => openExtend([id], null),
     send:    () => openSendDone(id),
     signed:  () => downloadSignedDoc(id),
     cert:    () => downloadCertificate(id),
@@ -3778,7 +3791,7 @@ async function routeByProfile() {
 // ============================================================
 const SB_FN_ADMIN = SB_URL + '/functions/v1/esign-admin';
 const APP_URL = shareBase();
-const BUILD = '2026-10-30.2';   // 배포 확인용. 화면 하단과 콘솔에 표시된다.
+const BUILD = '2026-10-30.3';   // 배포 확인용. 화면 하단과 콘솔에 표시된다.
 
 
 // ============================================================
@@ -5000,7 +5013,8 @@ function bulkReset(show) {
   w.style.display = show ? 'block' : 'none';
   document.getElementById('bulkFieldStep').style.display = 'none';
   document.getElementById('bulkTitle').value = '';
-  document.getElementById('bulkDeadline').value = '';
+  state.dlChoice.bulk = '1w';
+  renderDeadlineChips('bulk');
   document.getElementById('bulkAccessCode').value = '';
   clearLabels('lblBulk');
   document.getElementById('bulkPdfName').textContent = '클릭하여 PDF 문서를 선택하세요';
@@ -5240,7 +5254,8 @@ async function bulkSend() {
   if (!confirm(rows.length + '명에게 「' + title + '」 문서를 발송합니다.\n' +
       '서명란 ' + placed.filter(f => f.type === 'signature').length + '개 · 날짜란 ' + placed.filter(f => f.type === 'date').length + '개' +
       (inputs.length ? ' · 기입 항목 ' + inputs.length + '개' : '') + (allowMarks ? ' · 서명자 직접 추가 허용' : '') +
-      '\n계속하시겠습니까?')) return;
+      '\n\n⏰ 서명 기한: ' + fmtDeadlineKo(deadlineFor('bulk')) + '까지 (보내는 시각부터 ' + dlOpt(state.dlChoice.bulk).label + ')' +
+      '\n\n계속하시겠습니까?')) return;
 
   const btn = document.getElementById('bulkSendBtn');
   btn.disabled = true; btn.textContent = '발송 중...';
@@ -5250,7 +5265,6 @@ async function bulkSend() {
       .upload(filePath, state.bulkPdf, { contentType: 'application/pdf' });
     if (upErr) throw new Error('파일 업로드 실패: ' + upErr.message);
 
-    const dl = document.getElementById('bulkDeadline').value;
     const { data, error } = await sb.rpc('esign_create_bulk', {
       p_title: title,
       p_requester_name: '인투오피스',
@@ -5259,7 +5273,7 @@ async function bulkSend() {
       p_file_type: 'pdf',
       p_file_size: state.bulkPdf.size,
       p_file_hash: await sha256Hex(state.bulkPdfData),
-      p_deadline: dl ? new Date(dl).toISOString() : null,
+      p_deadline: deadlineFor('bulk').toISOString(),   // 보내는 시각 + 고른 기간
       p_rows: rows.map(r => ({ name: r.name.trim(), phone: r.phone.trim() })),
       p_fields: fields,
       p_access_code: code || null,
@@ -5425,7 +5439,8 @@ async function openBatch(id) {
   const items = data?.ok ? (data.items || []) : [];
   const base = signLinkBase();
   const st = { waiting: '대기', complete: '완료', cancelled: '취소', expired: '만료', scheduled: '예약' };
-  box.innerHTML = '<div class="bulk-table-wrap" style="margin-top:12px;"><table class="bulk-table">' +
+  box.innerHTML = '<div style="margin-top:12px;"><button class="btn-mini" onclick="openExtend(null,\'' + id + '\')">⏰ 이 묶음의 서명 기한 연장</button></div>' +
+    '<div class="bulk-table-wrap" style="margin-top:10px;"><table class="bulk-table">' +
     '<thead><tr><th>이름</th><th>연락처</th><th>상태</th><th>서명일시</th><th></th></tr></thead><tbody>' +
     items.map(it =>
       '<tr><td>' + esc(it.name) + '</td><td>' + esc(it.phone) + '</td>' +
@@ -10583,6 +10598,7 @@ async function loadDocuments() {
     phone: (d.signers || [])[0]?.phone || '',
     date: fmtLocal(d.created_at, false),
     deadline: fmtLocal(d.deadline),
+    deadline_at: d.deadline,
     pdfHash: d.file_hash, file_path: d.file_path, file_type: d.file_type,
     scheduled_at: d.scheduled_at ? fmtLocal(d.scheduled_at) : null,
     signed_file_path: d.signed_file_path,
@@ -12153,6 +12169,8 @@ async function saveLabelEditor() {
 // ===== CREATE DOCUMENT =====
 function resetCreate() {
   leaveBulkEditor();
+  state.dlChoice.create = '1w';
+  renderDeadlineChips('create');
   state.currentPdf = null;
   state.currentPdfData = null;
   state.fields = [];
@@ -12171,6 +12189,49 @@ function resetCreate() {
   goStep(1);
 }
 
+// ===== 서명 기한 =====
+// 날짜 · 시각을 직접 고르지 않고, 보내는 시각(예약 발송이면 예약 시각)부터의 기간을 고른다
+const DL_OPTS = [
+  { k: '30m', label: '30분', min: 30 }, { k: '1h', label: '1시간', min: 60 }, { k: '3h', label: '3시간', min: 180 },
+  { k: '1d', label: '1일', min: 1440 }, { k: '1w', label: '1주', min: 10080 }
+];
+const dlOpt = k => DL_OPTS.find(o => o.k === k) || DL_OPTS[DL_OPTS.length - 1];
+state.dlChoice = { create: '1w', bulk: '1w' };
+const fmtDeadlineKo = d => d.toLocaleString('ko-KR', { month: 'long', day: 'numeric', weekday: 'short', hour: 'numeric', minute: '2-digit' });
+function deadlineBase(key) {
+  if (key === 'create' && document.getElementById('schedToggle')?.checked) {
+    const v = document.getElementById('schedAt')?.value;
+    if (v && new Date(v) > new Date()) return { at: new Date(v), sched: true };
+  }
+  return { at: new Date(), sched: false };
+}
+function deadlineFor(key) {
+  return new Date(deadlineBase(key).at.getTime() + dlOpt(state.dlChoice[key]).min * 60000);
+}
+// 보내기 전 확인 창에 넣는 문장
+function deadlineSentence(key) {
+  const b = deadlineBase(key), o = dlOpt(state.dlChoice[key]);
+  return '⏰ 서명 기한: <b>' + fmtDeadlineKo(deadlineFor(key)) + '까지</b> (' + (b.sched ? '예약 시각' : '보내는 시각') + '부터 ' + o.label + ')';
+}
+function renderDeadlineChips(key) {
+  const box = document.getElementById(key === 'create' ? 'dlCreate' : 'dlBulk');
+  if (!box) return;
+  box.innerHTML = DL_OPTS.map(o =>
+    '<button type="button" class="dl-chip' + (state.dlChoice[key] === o.k ? ' on' : '') +
+    '" onclick="setDeadlineChoice(\'' + key + '\',\'' + o.k + '\')">' + o.label + '</button>').join('');
+  updateDeadlinePreview(key);
+}
+function setDeadlineChoice(key, k) { state.dlChoice[key] = k; renderDeadlineChips(key); }
+function updateDeadlinePreview(key) {
+  const el = document.getElementById(key === 'create' ? 'dlCreatePrev' : 'dlBulkPrev');
+  if (!el) return;
+  const b = deadlineBase(key);
+  el.innerHTML = (b.sched ? '예약 시각부터 ' : '지금 보내면 ') + '<b>' + fmtDeadlineKo(deadlineFor(key)) + '까지</b> 서명할 수 있습니다.';
+}
+// 보이는 안내 시각을 30초마다 새로 (시간이 흐르면 「지금 보내면」 기준도 흐른다)
+setInterval(() => { updateDeadlinePreview('create'); updateDeadlinePreview('bulk'); }, 30000);
+document.addEventListener('change', e => { if (e.target?.id === 'schedAt' || e.target?.id === 'schedToggle') updateDeadlinePreview('create'); });
+
 function goStep(n) {
   ['createStep1','createStep2','createStep3'].forEach((id,i) => {
     document.getElementById(id).style.display = (i+1===n)?'':'none';
@@ -12181,8 +12242,7 @@ function goStep(n) {
   });
   if (n === 2) {
     renderSignerList();
-    const dl = document.getElementById('sigDeadline');
-    if (!dl.value) { dl.value = toLocalInput(new Date(Date.now()+7*86400000)); }
+    renderDeadlineChips('create');
   }
   if (n === 3) {
     // Validate signers
@@ -12812,7 +12872,6 @@ function removeField(id) {
 // ===== CREATE DOCUMENT =====
 async function createDocument() {
   const title = document.getElementById('docTitle').value.trim() || '무제 문서';
-  const deadline = document.getElementById('sigDeadline').value;
   const signers = state.signers.filter(s => s.name.trim() && s.phone.trim());
   if (signers.length < 2) {
     showToast('최소 2명의 서명자 정보를 입력해주세요.');
@@ -12837,8 +12896,8 @@ async function createDocument() {
       return;
     }
   }
-  // 보내기 전에 이름 · 번호를 한 번 더 확인 — 번호가 틀리면 다른 사람에게 알림톡이 간다
-  if (!await confirmRecipients(signers)) return;
+  // 보내기 전에 이름 · 번호 · 서명 기한을 한 번 더 확인 — 번호가 틀리면 다른 사람에게 알림톡이 간다
+  if (!await confirmRecipients(signers, deadlineSentence('create'))) return;
   const name = signers.map(s => s.name).join(', ');
   const phone = signers[0].phone;
   // 예약 시각
@@ -12880,7 +12939,7 @@ async function createDocument() {
       p_file_type: state.uploadedFileType || null,
       p_file_size: state.uploadedFile?.size || null,
       p_file_hash: state.currentPdfHash || null,
-      p_deadline: deadline ? new Date(deadline).toISOString() : null,
+      p_deadline: deadlineFor('create').toISOString(),   // 보내는 시각(예약이면 예약 시각) + 고른 기간
       p_signers: signers.map(s => ({ name: s.name, phone: s.phone })),
       p_fields: fieldsPayload,
       p_scheduled_at: schedAt
@@ -13020,8 +13079,80 @@ async function attachDocExtras(data, inputFields) {
     '[취소] 보내지 않기');
 }
 
+// ===== 서명 기한 연장 =====
+// docIds: 문서 몇 건 / batchId: 대량발송 묶음 전체. 새 기한 = 지금 기한(지났으면 지금) + 고른 기간
+function openExtend(docIds, batchId) {
+  const docs = (docIds || []).map(id => state.documents.find(x => x.id === id)).filter(Boolean);
+  state.exReq = { docIds: docIds || [], batchId: batchId || null, docs, k: '1d' };
+  let ov = document.getElementById('exModal');
+  if (!ov) {
+    ov = document.createElement('div');
+    ov.id = 'exModal'; ov.className = 'modal-overlay';
+    ov.onclick = e => { if (e.target === ov) ov.classList.remove('active'); };
+    document.body.appendChild(ov);
+  }
+  ov.classList.add('active');
+  renderExtend();
+}
+function renderExtend() {
+  const r = state.exReq, ov = document.getElementById('exModal');
+  if (!r || !ov) return;
+  const o = dlOpt(r.k);
+  const one = r.docs.length === 1 ? r.docs[0] : null;
+  let now = '', after = '';
+  if (one) {
+    const cur = one.deadline_at ? new Date(one.deadline_at) : null;
+    const passed = !cur || cur < new Date();
+    const base = passed ? new Date() : cur;
+    now = '<p style="font-size:13.5px;line-height:1.8;"><b>' + esc(one.title) + '</b><br>지금 기한: ' +
+      (cur ? fmtDeadlineKo(cur) + (passed ? ' <b style="color:var(--danger);">(지남)</b>' : '') : '없음') + '</p>';
+    after = '새 기한: <b>' + fmtDeadlineKo(new Date(base.getTime() + o.min * 60000)) + '까지</b>' +
+      (passed ? ' (기한이 지나 지금부터 셉니다)' : ' (지금 기한에서 ' + o.label + ' 늘림)');
+  } else {
+    now = '<p style="font-size:13.5px;line-height:1.8;">' + (r.batchId ? '이 대량발송 묶음의 <b>서명 대기 · 진행 · 만료 문서 전체</b>' : '<b>' + r.docs.length + '건</b>의 문서') + '</p>';
+    after = '문서마다 지금 기한에서 <b>' + o.label + '</b> 늘립니다. 이미 기한이 지난 문서는 지금부터 셉니다.';
+  }
+  ov.innerHTML =
+    '<div class="modal" style="max-width:460px;"><div class="modal-header"><h3>⏰ 서명 기한 연장</h3></div><div class="modal-body">' + now +
+      '<div class="dl-chips">' + DL_OPTS.map(x =>
+        '<button type="button" class="dl-chip' + (r.k === x.k ? ' on' : '') + '" onclick="state.exReq.k=\'' + x.k + '\';renderExtend()">+ ' + x.label + '</button>').join('') + '</div>' +
+      '<div class="dl-confirm">' + after + '</div>' +
+      '<p class="bulk-hint" style="margin-top:8px;">만료된 문서는 다시 서명할 수 있는 상태로 바뀝니다. 완료 · 취소된 문서는 바뀌지 않습니다.</p>' +
+      '<label style="display:flex;gap:8px;align-items:center;margin-top:12px;font-size:13.5px;cursor:pointer;">' +
+        '<input type="checkbox" id="exRemind" checked style="width:17px;height:17px;"> 아직 서명하지 않은 분께 새 기한을 리마인드 알림톡으로 알리기</label>' +
+    '</div><div class="modal-footer">' +
+      '<button class="btn-secondary" onclick="document.getElementById(\'exModal\').classList.remove(\'active\')">취소</button>' +
+      '<button class="btn-primary" id="exGo" style="width:auto;padding:11px 20px;" onclick="submitExtend()">연장하기</button>' +
+    '</div></div>';
+}
+async function submitExtend() {
+  const r = state.exReq;
+  const btn = document.getElementById('exGo');
+  const remind = document.getElementById('exRemind')?.checked;
+  btn.disabled = true; btn.textContent = '연장 중...';
+  try {
+    const { data, error } = await sb.rpc('esign_extend_deadline', {
+      p_document_ids: r.docIds, p_minutes: dlOpt(r.k).min, p_batch_id: r.batchId });
+    if (error) {
+      throw new Error(/esign_extend_deadline|function/i.test(error.message)
+        ? '기한 연장 기능의 서버 준비가 아직 끝나지 않았습니다.' : error.message);
+    }
+    if (!data?.ok) throw new Error({ BAD_MINUTES: '연장 기간이 올바르지 않습니다.', NO_DOCUMENTS: '연장할 문서가 없습니다.' }[data?.error] || data?.error);
+    document.getElementById('exModal').classList.remove('active');
+    if (!data.count) { showToast('연장할 수 있는 문서가 없습니다. (완료 · 취소된 문서는 연장되지 않습니다)'); return; }
+    showToast(data.count + '건의 서명 기한을 연장했습니다.', true);
+    if (remind) sendAlimtalk('remind', (data.documents || []).map(x => x.id), { verbose: true });
+    await loadDocuments();
+    if (r.batchId) loadBulkBatches();
+  } catch (e) {
+    showToast(e.message || '기한을 연장하지 못했습니다.');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '연장하기'; }
+  }
+}
+
 // 보내기 직전 수신자 확인 창. 맞으면 true
-function confirmRecipients(signers) {
+function confirmRecipients(signers, deadlineHtml) {
   return new Promise(resolve => {
     let ov = document.getElementById('rcModal');
     if (!ov) {
@@ -13038,8 +13169,9 @@ function confirmRecipients(signers) {
           '<div class="rc-row"><span class="signer-num" style="background:' + SIGNER_COLORS[i] + '">' + (i + 1) + '</span>' +
           '<span class="nm">' + esc(s.name.trim()) + '</span><span class="ph">' + esc(fmtPhone(s.phone)) + '</span></div>').join('') +
         '</div>' +
+        (deadlineHtml ? '<div class="dl-confirm">' + deadlineHtml + '</div>' : '') +
         '<label style="display:flex;gap:8px;align-items:center;margin-top:14px;font-size:13.5px;cursor:pointer;">' +
-          '<input type="checkbox" id="rcCheck" style="width:18px;height:18px;"> 이름과 전화번호를 모두 확인했습니다</label>' +
+          '<input type="checkbox" id="rcCheck" style="width:18px;height:18px;"> 이름 · 전화번호 · 서명 기한을 모두 확인했습니다</label>' +
       '</div>' +
       '<div class="modal-footer">' +
         '<button class="btn-secondary" id="rcBack">번호 고치기</button>' +
@@ -13340,9 +13472,9 @@ function init() {
   lpSetCycle('m');
   document.querySelectorAll('.headerLogoClone').forEach(el => el.src = LOGO_W);
   initSigners();
-  // Set default deadline
-  const d = new Date(Date.now() + 7*86400000);
-  document.getElementById('sigDeadline').value = toLocalInput(d);
+  // 서명 기한 선택 (기본 1주)
+  renderDeadlineChips('create');
+  renderDeadlineChips('bulk');
   sb.auth.onAuthStateChange((event) => {
     if (event === 'PASSWORD_RECOVERY') showPage('resetPage');
   });
