@@ -3786,7 +3786,7 @@ async function routeByProfile() {
 // ============================================================
 const SB_FN_ADMIN = SB_URL + '/functions/v1/esign-admin';
 const APP_URL = shareBase();
-const BUILD = '2026-10-27.6';   // 배포 확인용. 화면 하단과 콘솔에 표시된다.
+const BUILD = '2026-10-30.1';   // 배포 확인용. 화면 하단과 콘솔에 표시된다.
 
 
 // ============================================================
@@ -5031,7 +5031,9 @@ function bulkRenderTable() {
     state.bulkRows.map((r, i) =>
       '<tr>' +
         '<td>' + (i + 1) + '</td>' +
-        '<td class="' + (r.name.trim() ? '' : 'bad') + '"><input value="' + esc(r.name) + '" placeholder="이름" oninput="bulkEditRow(' + i + ',\'name\',this.value)"></td>' +
+        '<td class="' + (r.name.trim() ? '' : 'bad') + '"><input value="' + esc(r.name) + '" placeholder="이름" ' +
+          // 입력할 때마다 빨간 표시를 다시 계산 (전에는 처음 그릴 때만 계산해 이름을 넣어도 빨갛게 남았다)
+          'oninput="bulkEditRow(' + i + ',\'name\',this.value);this.parentElement.classList.toggle(\'bad\',!this.value.trim())"></td>' +
         '<td class="' + (bulkPhoneOk(r.phone) ? '' : 'bad') + '"><input value="' + esc(r.phone) + '" inputmode="numeric" maxlength="13" placeholder="010-0000-0000" ' +
           'oninput="bulkEditRow(' + i + ',\'phone\',phoneInput(this));this.parentElement.classList.toggle(\'bad\',!phoneOk(this.value))"></td>' +
         '<td><button class="btn-del" onclick="bulkDelRow(' + i + ')">삭제</button></td>' +
