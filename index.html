@@ -354,6 +354,10 @@ input,select,textarea { font-family:inherit; }
 .sig-field .resize-handle { position:absolute; bottom:-4px; right:-4px; width:12px; height:12px; background:var(--cyan); border-radius:50%; cursor:nwse-resize; }
 .sig-field .remove-field { position:absolute; top:-8px; right:-8px; width:18px; height:18px; background:var(--danger); color:#fff; border-radius:50%; font-size:10px; display:flex; align-items:center; justify-content:center; cursor:pointer; opacity:0; transition:opacity .2s; }
 .sig-field:hover .remove-field { opacity:1; }
+/* 서명 되돌리기 */
+.undo-box { margin-top:14px; text-align:center; }
+.undo-box .btn-undo { padding:11px 20px; border:1.5px solid #f59e0b; background:#fffbeb; color:#92400e; border-radius:10px; font-size:14px; font-weight:700; cursor:pointer; font-family:inherit; }
+.undo-box p { font-size:12px; color:var(--text-secondary); margin-top:8px; line-height:1.6; }
 /* 서명 기한 — 보내는 시각부터 고른 기간 */
 .dl-chips { display:flex; flex-wrap:wrap; gap:6px; }
 .dl-chip { padding:9px 14px; border:1.5px solid var(--border); border-radius:8px; background:var(--card); font-size:13.5px; font-weight:600; cursor:pointer; font-family:inherit; color:var(--text); }
@@ -3791,7 +3795,7 @@ async function routeByProfile() {
 // ============================================================
 const SB_FN_ADMIN = SB_URL + '/functions/v1/esign-admin';
 const APP_URL = shareBase();
-const BUILD = '2026-10-30.3';   // 배포 확인용. 화면 하단과 콘솔에 표시된다.
+const BUILD = '2026-11-02.1';   // 배포 확인용. 화면 하단과 콘솔에 표시된다.
 
 
 // ============================================================
@@ -10716,7 +10720,16 @@ const SL = {
     mk_delete: '삭제',
     mk_empty: '비어 있는 텍스트 상자가 있습니다. 내용을 쓰거나 ✕로 지워 주세요.',
     mk_save_fail: '추가한 내용을 저장하지 못했습니다: ',
-    consent_first: '아래 「전자서명 동의」에 체크하면 바로 서명할 수 있습니다.'
+    consent_first: '아래 「전자서명 동의」에 체크하면 바로 서명할 수 있습니다.',
+    undo_btn: '↩ 서명 되돌리고 고치기',
+    undo_note: '빠뜨린 것이 있으면 되돌려 고친 뒤 다시 서명할 수 있습니다. <b>서명 후 30분 안</b>, 다른 분이 모두 서명하기 전까지만 가능하며 입력한 내용 · 추가한 항목은 그대로 남습니다.',
+    undo_confirm: '서명을 되돌릴까요?\n입력한 내용과 추가한 항목은 그대로 남고, 고친 뒤 다시 서명하면 됩니다.',
+    undo_ok: '서명을 되돌렸습니다. 고친 뒤 다시 서명해 주세요.',
+    undo_err_UNDO_TIME_PASSED: '서명한 지 30분이 지나 되돌릴 수 없습니다.',
+    undo_err_DOC_COMPLETE: '모든 서명이 끝난 문서는 되돌릴 수 없습니다.',
+    undo_err_DEADLINE_PASSED: '서명 기한이 지나 되돌릴 수 없습니다.',
+    undo_err_default: '서명을 되돌리지 못했습니다.',
+    final_confirm: '이 서명으로 문서가 최종 완료되며, 완료 후에는 되돌릴 수 없습니다.\n\n빠뜨린 내용은 없나요?\n[확인] 서명 완료   [취소] 돌아가서 고치기'
   },
   en: {
     hdr: 'E-Signature', loading: 'Loading the document...',
@@ -10808,7 +10821,16 @@ const SL = {
     mk_delete: 'Delete',
     mk_empty: 'There is an empty text box. Please type in it or delete it with ✕.',
     mk_save_fail: 'Could not save the items you added: ',
-    consent_first: 'Check the e-signature consent below, then you can sign right away.'
+    consent_first: 'Check the e-signature consent below, then you can sign right away.',
+    undo_btn: '↩ Undo signature and edit',
+    undo_note: 'If you missed something, you can undo, edit and sign again — <b>within 30 minutes of signing</b> and before everyone else has signed. Your entries and added items are kept.',
+    undo_confirm: 'Undo your signature?\nYour entries and added items are kept. Edit them and sign again.',
+    undo_ok: 'Your signature has been undone. Please edit and sign again.',
+    undo_err_UNDO_TIME_PASSED: 'More than 30 minutes have passed since you signed, so it cannot be undone.',
+    undo_err_DOC_COMPLETE: 'A document signed by everyone cannot be undone.',
+    undo_err_DEADLINE_PASSED: 'The signing deadline has passed, so it cannot be undone.',
+    undo_err_default: 'Could not undo your signature.',
+    final_confirm: 'Your signature will complete this document, and it cannot be undone afterwards.\n\nHave you checked everything?\n[OK] Finish signing   [Cancel] Go back and edit'
   },
   zh: {
     hdr: '电子签名', loading: '正在加载文件...',
@@ -10899,7 +10921,16 @@ const SL = {
     mk_delete: '删除',
     mk_empty: '有空的文本框。请填写内容或点击 ✕ 删除。',
     mk_save_fail: '无法保存添加的内容：',
-    consent_first: '请先勾选下方的电子签名同意，即可立即签名。'
+    consent_first: '请先勾选下方的电子签名同意，即可立即签名。',
+    undo_btn: '↩ 撤回签名并修改',
+    undo_note: '如有遗漏，可撤回签名、修改后重新签名。<b>仅限签名后30分钟内</b>，且在其他人全部签名之前。已填写和添加的内容将保留。',
+    undo_confirm: '要撤回签名吗？\n已填写和添加的内容将保留，修改后重新签名即可。',
+    undo_ok: '已撤回签名。请修改后重新签名。',
+    undo_err_UNDO_TIME_PASSED: '签名已超过30分钟，无法撤回。',
+    undo_err_DOC_COMPLETE: '所有人已签名完成的文件无法撤回。',
+    undo_err_DEADLINE_PASSED: '已过签名期限，无法撤回。',
+    undo_err_default: '无法撤回签名。',
+    final_confirm: '您的签名将使本文件最终完成，完成后无法撤回。\n\n确认没有遗漏吗？\n[确定] 完成签名   [取消] 返回修改'
   },
   ja: {
     hdr: '電子署名', loading: '文書を読み込んでいます...',
@@ -10990,7 +11021,16 @@ const SL = {
     mk_delete: '削除',
     mk_empty: '空のテキストボックスがあります。内容を入力するか ✕ で削除してください。',
     mk_save_fail: '追加した内容を保存できませんでした：',
-    consent_first: '下の電子署名の同意にチェックすると、すぐに署名できます。'
+    consent_first: '下の電子署名の同意にチェックすると、すぐに署名できます。',
+    undo_btn: '↩ 署名を取り消して修正',
+    undo_note: '記入漏れがあれば、取り消して修正し、もう一度署名できます。<b>署名後30分以内</b>、ほかの方が全員署名する前のみ可能です。入力内容・追加項目はそのまま残ります。',
+    undo_confirm: '署名を取り消しますか？\n入力内容と追加項目はそのまま残ります。修正してもう一度署名してください。',
+    undo_ok: '署名を取り消しました。修正して、もう一度署名してください。',
+    undo_err_UNDO_TIME_PASSED: '署名から30分が過ぎたため取り消せません。',
+    undo_err_DOC_COMPLETE: '全員の署名が完了した文書は取り消せません。',
+    undo_err_DEADLINE_PASSED: '署名期限が過ぎたため取り消せません。',
+    undo_err_default: '署名を取り消せませんでした。',
+    final_confirm: 'この署名で文書が最終的に完了し、完了後は取り消せません。\n\n記入漏れはありませんか？\n[OK] 署名を完了   [キャンセル] 戻って修正'
   },
   vi: {
     hdr: 'Chữ ký điện tử', loading: 'Đang tải tài liệu...',
@@ -11081,7 +11121,16 @@ const SL = {
     mk_delete: 'Xóa',
     mk_empty: 'Có ô văn bản trống. Vui lòng nhập nội dung hoặc xóa bằng ✕.',
     mk_save_fail: 'Không thể lưu các mục đã thêm: ',
-    consent_first: 'Hãy đánh dấu đồng ý chữ ký điện tử bên dưới, sau đó bạn có thể ký ngay.'
+    consent_first: 'Hãy đánh dấu đồng ý chữ ký điện tử bên dưới, sau đó bạn có thể ký ngay.',
+    undo_btn: '↩ Hoàn tác chữ ký và sửa',
+    undo_note: 'Nếu bỏ sót nội dung, bạn có thể hoàn tác, sửa rồi ký lại — <b>trong vòng 30 phút sau khi ký</b> và trước khi mọi người khác ký xong. Nội dung đã nhập và các mục đã thêm được giữ nguyên.',
+    undo_confirm: 'Hoàn tác chữ ký?\nNội dung đã nhập và các mục đã thêm được giữ nguyên. Hãy sửa rồi ký lại.',
+    undo_ok: 'Đã hoàn tác chữ ký. Vui lòng sửa và ký lại.',
+    undo_err_UNDO_TIME_PASSED: 'Đã quá 30 phút kể từ khi ký nên không thể hoàn tác.',
+    undo_err_DOC_COMPLETE: 'Không thể hoàn tác tài liệu mà mọi người đã ký xong.',
+    undo_err_DEADLINE_PASSED: 'Đã quá hạn ký nên không thể hoàn tác.',
+    undo_err_default: 'Không thể hoàn tác chữ ký.',
+    final_confirm: 'Chữ ký của bạn sẽ hoàn tất tài liệu này và không thể hoàn tác sau đó.\n\nBạn đã kiểm tra kỹ chưa?\n[OK] Hoàn tất ký   [Hủy] Quay lại sửa'
   }
 };
 
@@ -11222,7 +11271,8 @@ async function openSignByToken(token) {
   // 이미 서명 완료
   if (s.status === 'signed') {
     document.getElementById('consentBox').style.display = 'none';
-    let done = '<div class="legal-badge" style="padding:12px 24px;font-size:14px;">' + st('signed_done') + '</div>';
+    let done = '<div style="display:flex;flex-direction:column;align-items:center;width:100%;">' +
+      '<div class="legal-badge" style="padding:12px 24px;font-size:14px;">' + st('signed_done') + '</div>' + undoBoxHtml() + '</div>';
     if (d.status === 'complete') {
       state.signOrigPath = d.file_path;
       done =
@@ -13317,6 +13367,10 @@ async function submitSignature() {
     sigData = state.sigUploadedImage;
   }
 
+  // 마지막 서명자: 이 서명으로 문서가 완료되어 되돌릴 수 없으므로 한 번 더 확인
+  const left = (state.signData?.all_signers || []).filter(x => x.status !== 'signed').length;
+  if (left <= 1 && !confirm(st('final_confirm'))) { closeSigModal(); return; }
+
   const methodKey = ['draw','typed','upload'][method];
   const btn = document.querySelector('#sigModal .btn-action');
   btn.disabled = true; btn.textContent = st('processing');
@@ -13366,6 +13420,31 @@ async function submitSignature() {
 }
 
 // 서명 완료 화면
+// ===== 서명 되돌리기 =====
+// 서명 후 30분 안, 다른 서명자가 남아 있을 때만. 기입 항목 · 직접 추가한 내용은 그대로 남는다.
+function undoBoxHtml() {
+  return '<div class="undo-box"><button type="button" class="btn-undo" onclick="undoMySignature(this)">' + st('undo_btn') + '</button>' +
+    '<p>' + st('undo_note') + '</p></div>';
+}
+async function undoMySignature(btn) {
+  if (!confirm(st('undo_confirm'))) return;
+  if (btn) { btn.disabled = true; btn.textContent = st('processing'); }
+  try {
+    const { data, error } = await sb.rpc('esign_undo_signature', { p_token: state.signToken });
+    if (error || !data?.ok) {
+      const code = data?.error || '';
+      showToast(st('undo_err_' + code) !== 'undo_err_' + code ? st('undo_err_' + code) : st('undo_err_default'));
+      if (btn) { btn.disabled = false; btn.textContent = st('undo_btn'); }
+      return;
+    }
+    showToast(st('undo_ok'), true);
+    setTimeout(() => location.reload(), 900);   // 서명 전 화면으로 (입력 · 추가한 내용은 서버에 그대로)
+  } catch (e) {
+    showToast(st('undo_err_default'));
+    if (btn) { btn.disabled = false; btn.textContent = st('undo_btn'); }
+  }
+}
+
 function showSignComplete(result) {
   const c = document.querySelector('#signPage .sign-container');
   c.innerHTML =
@@ -13384,6 +13463,7 @@ function showSignComplete(result) {
         st('audit_device') + ': ' + esc(result.device ? result.device.os + ' / ' + result.device.browser : st('recorded')) +
         '</p></div>' +
       '<p class="ip-notice">' + st('done_legal') + '</p>' +
+      (result.all_completed ? '' : undoBoxHtml()) +
     '</div>';
   hidePromoBar();
   // 인투오피스 안내는 한국어 화면에서만 (외국인 서명자에게 한국어 광고를 보이지 않는다)
