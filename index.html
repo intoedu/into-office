@@ -496,6 +496,16 @@ input,select,textarea { font-family:inherit; }
 .smk-area.flash { animation:mkAreaFlash .5s 3; }
 @keyframes mkAreaFlash { 50% { background:rgba(124,58,237,.28); } }
 .mk-area-note { color:#5b21b6 !important; }
+.an-form { border:1.5px solid #fde68a; background:#fffbeb; border-radius:var(--radius-lg); padding:14px 16px; margin:0 0 14px; }
+.an-form textarea, .an-form input { width:100%; padding:10px 12px; border:1.5px solid var(--border); border-radius:8px; font-size:15px; font-family:inherit; background:#fff; }
+.an-count { float:right; font-size:11.5px; color:var(--text-muted); font-weight:500; }
+.an-count.over { color:var(--danger); }
+.after-note { background:#fffbeb; border:1.5px solid #fcd34d; border-radius:var(--radius-lg); padding:14px 16px; margin:14px 0; text-align:left; }
+.after-note .an-h { font-size:14.5px; font-weight:800; color:#92400e; margin-bottom:6px; }
+.after-note .an-t { font-size:14px; line-height:1.7; color:var(--text); white-space:pre-wrap; word-break:break-word; }
+.after-note .an-link { display:flex; align-items:center; justify-content:center; gap:6px; margin-top:10px; padding:12px 14px; border-radius:10px; background:#f59e0b; color:#fff; font-weight:800; font-size:14.5px; text-decoration:none; flex-wrap:wrap; }
+.after-note .an-link small { font-weight:500; opacity:.9; font-size:12px; word-break:break-all; }
+.after-note .an-w { font-size:11.5px; color:var(--text-muted); margin-top:6px; }
 #pdfEditor .sig-field:not(.mark-area), #bulkPdfPane .sig-field:not(.mark-area) { z-index:1; }
 /* 서명자 화면 — 직접 추가 도구 */
 .mk-box { background:var(--card); border:1.5px solid #d8c7fb; border-radius:var(--radius-lg); padding:14px 16px; margin-bottom:8px; }
@@ -2084,6 +2094,19 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
             <div class="dl-chips" id="dlBulk"></div>
             <p class="dl-preview" id="dlBulkPrev"></p>
           </div>
+          <div class="an-form">
+            <div class="sec-title">📌 서명 후 안내 <span class="sec-tag">선택</span></div>
+            <p class="bulk-hint" style="margin:-2px 0 10px;">서명을 <b>마친 서명자에게만</b> 서명 완료 화면에 보입니다. 서명과 별도로 더 받아야 할 것이 있을 때 쓰세요.
+              예) 「추가 서류(통장 사본)는 아래 링크로 올려 주세요」 · 설문 · 업로드 · 안내 페이지 링크</p>
+            <div class="form-group" style="margin-bottom:10px;">
+              <label>안내 문구 <span class="an-count" id="anBulkCount">0 / 200</span></label>
+              <textarea id="anBulkNote" rows="3" maxlength="200" placeholder="최대 200자" oninput="anCount('Bulk')"></textarea>
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label>참고 링크</label>
+              <input type="url" id="anBulkLink" maxlength="500" placeholder="https://forms.gle/... (http · https 주소)" autocomplete="off">
+            </div>
+          </div>
           <div class="sec-box">
             <div class="sec-title">🔐 보안 설정 <span class="sec-tag">선택</span></div>
             <div class="form-group" style="margin-bottom:10px;">
@@ -2390,7 +2413,20 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
             <p class="bulk-hint">문서 목록에서 라벨별로 모아 볼 수 있습니다. 예) 2026 신학기, 학부모 동의서</p>
           </div>
           </div>
-        <div class="sec-box" style="margin-top:4px;">
+        <div class="an-form">
+            <div class="sec-title">📌 서명 후 안내 <span class="sec-tag">선택</span></div>
+            <p class="bulk-hint" style="margin:-2px 0 10px;">서명을 <b>마친 서명자에게만</b> 서명 완료 화면에 보입니다. 서명과 별도로 더 받아야 할 것이 있을 때 쓰세요.
+              예) 「추가 서류(통장 사본)는 아래 링크로 올려 주세요」 · 설문 · 업로드 · 안내 페이지 링크</p>
+            <div class="form-group" style="margin-bottom:10px;">
+              <label>안내 문구 <span class="an-count" id="anCreateCount">0 / 200</span></label>
+              <textarea id="anCreateNote" rows="3" maxlength="200" placeholder="최대 200자" oninput="anCount('Create')"></textarea>
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label>참고 링크</label>
+              <input type="url" id="anCreateLink" maxlength="500" placeholder="https://forms.gle/... (http · https 주소)" autocomplete="off">
+            </div>
+          </div>
+          <div class="sec-box" style="margin-top:4px;">
           <div class="sec-title">🔐 보안 설정 <span class="sec-tag">선택</span></div>
           <div class="form-group" style="margin-bottom:10px;">
             <label>문서 접근 암호</label>
@@ -2456,6 +2492,7 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
       <div class="sign-pdf-area">
         <div class="pdf-editor" id="signPdfEditor"></div>
       </div>
+      <div class="after-note" id="afterNoteBox" style="display:none;"></div>
       <div class="signer-acct" id="signerAcct" style="display:none;"></div>
       <div class="sign-inputs" id="signInputsBox" style="display:none;"></div>
       <div class="consent-box" id="consentBox">
@@ -3342,6 +3379,7 @@ function openDocMenu(ev, id) {
     it('remind','🔔','서명 리마인드', canRemind) +
     it('extend','⏰','서명 기한 연장', canExtend) +
     it('rerequest','↻','재요청하기 (고칠 곳 알려 주기)', canRerequest) +
+    it('afternote','📌','서명 후 안내 (문구 · 링크)', true) +
     it('send','🎉','완료 문서 전달', done) +
     '<div class="rm-sep"></div><div class="rm-label">다운로드</div>' +
     it('signed','📄','서명본 내려받기', done) +
@@ -3362,6 +3400,7 @@ function rmAct(id, act) {
     remind:  () => openRemind(id),
     extend:  () => openExtend([id], null),
     rerequest: () => openRerequest(id),
+    afternote: () => openAfterNote(id),
     send:    () => openSendDone(id),
     signed:  () => downloadSignedDoc(id),
     cert:    () => downloadCertificate(id),
@@ -3895,7 +3934,7 @@ async function routeByProfile() {
 // ============================================================
 const SB_FN_ADMIN = SB_URL + '/functions/v1/esign-admin';
 const APP_URL = shareBase();
-const BUILD = '2026-11-10.1';   // 배포 확인용. 화면 하단과 콘솔에 표시된다.
+const BUILD = '2026-11-10.2';   // 배포 확인용. 화면 하단과 콘솔에 표시된다.
 
 
 // ============================================================
@@ -5115,6 +5154,7 @@ function bulkReset(show) {
   state.bulkPair = true;
   renderBulkPartyA();
   state.bulkAllowMarks = false;
+  clearAfterNote('Bulk');
   if (state.feBulk) { state.fields = []; setReqMode('sign'); renderMarkPerms(); }
   const w = document.getElementById('bulkWizard');
   w.style.display = show ? 'block' : 'none';
@@ -5486,6 +5526,8 @@ async function bulkSend() {
 
   const code = document.getElementById('bulkAccessCode').value.trim();
   if (code && code.length < 4) { showToast('접근 암호는 4자 이상이어야 합니다.'); return; }
+  const afterNote = readAfterNote('Bulk');
+  if (afterNote.err) { showToast(afterNote.err); document.getElementById(afterNote.focus)?.focus(); return; }
 
   // 서명란 · 날짜란 · 기입 항목 (일반 발송과 같은 편집기)
   if (!state.feBulk) await bulkEnterEditor(false);
@@ -5518,6 +5560,7 @@ async function bulkSend() {
       rows.length + '명에게 「' + title + '」 문서를 발송합니다.\n' +
       '서명란 ' + placed.filter(f => f.type === 'signature').length + '개 · 날짜란 ' + placed.filter(f => f.type === 'date').length + '개' +
       (inputs.length ? ' · 기입 항목 ' + inputs.length + '개' : '') + (allowMarks ? ' · 서명자 직접 추가 허용' + (markAreas.length ? ' (영역 ' + markAreas.length + '개 안에서만)' : '') : '') +
+      (afterNote.note || afterNote.link ? '\n📌 서명 후 안내: ' + (afterNote.note ? afterNote.note.slice(0, 40) + (afterNote.note.length > 40 ? '…' : '') : '') + (afterNote.link ? ' 🔗' : '') : '') +
       '\n\n⏰ 서명 기한: ' + fmtDeadlineKo(deadlineFor('bulk')) + '까지 (보내는 시각부터 ' + dlOpt(state.dlChoice.bulk).label + ')' +
       '\n\n계속하시겠습니까?')) return;
 
@@ -5571,8 +5614,8 @@ async function bulkSend() {
         warn = '서명란 · 날짜란 ' + fields.length + '개 중 ' + (sd.fields || []).length + '개만 저장되었습니다.';
     } catch (e) { /* 확인 실패는 발송을 막지 않는다 */ }
     // 기입 항목 · 직접 추가 허용은 문서마다 붙인다 (알림톡보다 먼저)
-    const ex = await bulkApplyExtras(items, inputBase, allowMarks, btn, markAreas);
-    if (ex.fail) warn += (warn ? '\n' : '') + '기입 항목 · 직접 추가 설정을 ' + ex.fail + '건에 적용하지 못했습니다.';
+    const ex = await bulkApplyExtras(items, inputBase, allowMarks, btn, markAreas, afterNote);
+    if (ex.fail) warn += (warn ? '\n' : '') + '기입 항목 · 직접 추가 · 서명 후 안내 설정을 ' + ex.fail + '건에 적용하지 못했습니다.';
 
     showBulkResult(data, title, !!code);
     if (!warn || confirm('⚠️ ' + warn + '\n\n[확인] 그래도 알림톡 보내기\n[취소] 보내지 않기 (서명 링크는 결과 창에서 직접 전달)')) {
@@ -5588,10 +5631,15 @@ async function bulkSend() {
 }
 
 // 대량발송 문서마다 기입 항목 · 직접 추가 허용을 붙인다 (동시에 6건씩)
-async function bulkApplyExtras(items, inputBase, allowMarks, btn, markAreas) {
-  if (!items.length || (!inputBase.length && !allowMarks)) return { fail: 0 };
+async function bulkApplyExtras(items, inputBase, allowMarks, btn, markAreas, afterNote) {
+  const hasNote = !!(afterNote && (afterNote.note || afterNote.link));
+  if (!items.length || (!inputBase.length && !allowMarks && !hasNote)) return { fail: 0 };
   let next = 0, done = 0, fail = 0;
   const one = async it => {
+    if (hasNote) {
+      const { data: r, error } = await sb.rpc('esign_set_after_note', { p_document_id: it.document_id, p_note: afterNote.note, p_link: afterNote.link });
+      if (error || !r?.ok) throw new Error(r?.error || error?.message);
+    }
     if (inputBase.length) {
       const { data: r, error } = await sb.rpc('esign_set_doc_inputs', {
         p_document_id: it.document_id, p_fields: inputBase.map(x => ({ ...x, sign_token: it.sign_token })) });
@@ -11076,7 +11124,10 @@ const SL = {
     mk_area_only: '요청자가 정한 <b>점선 영역 안에만</b> 추가할 수 있습니다.',
     mk_outside: '점선으로 표시된 영역 안을 눌러 주세요.',
     mk_outside_fix: '영역 밖에 놓인 항목이 있습니다. 점선 영역 안으로 옮겨 주세요.',
-    mk_tap_area: '점선 영역 안에서 넣을 곳을 누르세요'
+    mk_tap_area: '점선 영역 안에서 넣을 곳을 누르세요',
+    an_title: '요청자가 남긴 안내',
+    an_open: '참고 링크 열기',
+    an_warn: '요청자가 남긴 외부 링크입니다. 주소를 확인한 뒤 여세요.'
   },
   en: {
     hdr: 'E-Signature', loading: 'Loading the document...',
@@ -11260,7 +11311,10 @@ const SL = {
     mk_area_only: 'You can add items <b>only inside the dashed areas</b> set by the requester.',
     mk_outside: 'Please tap inside a dashed area.',
     mk_outside_fix: 'Some items are outside the allowed area. Please move them into a dashed area.',
-    mk_tap_area: 'Tap where to place it inside a dashed area'
+    mk_tap_area: 'Tap where to place it inside a dashed area',
+    an_title: 'Note from the requester',
+    an_open: 'Open reference link',
+    an_warn: 'This is an external link left by the requester. Check the address before opening it.'
   },
   zh: {
     hdr: '电子签名', loading: '正在加载文件...',
@@ -11443,7 +11497,10 @@ const SL = {
     mk_area_only: '只能在请求方指定的<b>虚线区域内</b>添加。',
     mk_outside: '请点击虚线区域内的位置。',
     mk_outside_fix: '有项目在区域之外。请移到虚线区域内。',
-    mk_tap_area: '请在虚线区域内点击放置位置'
+    mk_tap_area: '请在虚线区域内点击放置位置',
+    an_title: '请求方留下的说明',
+    an_open: '打开参考链接',
+    an_warn: '这是请求方留下的外部链接。请确认网址后再打开。'
   },
   ja: {
     hdr: '電子署名', loading: '文書を読み込んでいます...',
@@ -11626,7 +11683,10 @@ const SL = {
     mk_area_only: '依頼者が指定した<b>点線エリアの中だけ</b>に追加できます。',
     mk_outside: '点線エリアの中を押してください。',
     mk_outside_fix: 'エリアの外にある項目があります。点線エリアの中に移動してください。',
-    mk_tap_area: '点線エリアの中で入れる場所を押してください'
+    mk_tap_area: '点線エリアの中で入れる場所を押してください',
+    an_title: '依頼者からのご案内',
+    an_open: '参考リンクを開く',
+    an_warn: '依頼者が残した外部リンクです。アドレスを確認してから開いてください。'
   },
   vi: {
     hdr: 'Chữ ký điện tử', loading: 'Đang tải tài liệu...',
@@ -11809,7 +11869,10 @@ const SL = {
     mk_area_only: 'Bạn chỉ có thể thêm <b>bên trong vùng nét đứt</b> do người yêu cầu chỉ định.',
     mk_outside: 'Vui lòng chạm vào bên trong vùng nét đứt.',
     mk_outside_fix: 'Có mục nằm ngoài vùng cho phép. Vui lòng di chuyển vào vùng nét đứt.',
-    mk_tap_area: 'Chạm vào vị trí cần đặt bên trong vùng nét đứt'
+    mk_tap_area: 'Chạm vào vị trí cần đặt bên trong vùng nét đứt',
+    an_title: 'Lời nhắn từ người yêu cầu',
+    an_open: 'Mở liên kết tham khảo',
+    an_warn: 'Đây là liên kết bên ngoài do người yêu cầu để lại. Hãy kiểm tra địa chỉ trước khi mở.'
   }
 };
 
@@ -11931,6 +11994,7 @@ async function openSignByToken(token) {
     applySignLang();
   }
   renderSignInputsBox();
+  renderAfterNoteBox();
   await renderSignerAcct();          // 간편 가입한 서명자면 내 정보로 기입 항목을 먼저 채운다
   await loadSignMarks(token);
   renderSignMarksBox();
@@ -13210,6 +13274,7 @@ function resetCreate() {
   initSigners();
   clearLabels('lblCreate');
   const ac = document.getElementById('docAccessCode'); if (ac) ac.value = '';
+  clearAfterNote('Create');
   document.getElementById('filePreview').style.display = 'none';
   document.getElementById('btnToStep2').disabled = true;
   document.getElementById('uploadZone').style.display = '';
@@ -13935,6 +14000,9 @@ async function createDocument() {
     }
   }
   // 보내기 전에 이름 · 번호 · 서명 기한을 한 번 더 확인 — 번호가 틀리면 다른 사람에게 알림톡이 간다
+  const an = readAfterNote('Create');
+  if (an.err) { showToast(an.err); document.getElementById(an.focus)?.focus(); return; }
+  state.afterNoteCreate = an;
   if (!await confirmRecipients(signers, deadlineSentence('create'))) return;
   const name = signers.map(s => s.name).join(', ');
   const phone = signers[0].phone;
@@ -14065,6 +14133,15 @@ function fieldRatio(f) {
 // 문서를 만든 직후 기입 항목 · 서명자 언어를 붙인다. 알림톡을 보내도 되면 true
 async function attachDocExtras(data, inputFields) {
   const created = data.signers || [];
+  const an = state.afterNoteCreate;
+  if (an && (an.note || an.link)) {
+    try {
+      const { data: r, error } = await sb.rpc('esign_set_after_note', { p_document_id: data.document_id, p_note: an.note, p_link: an.link });
+      if (error || !r?.ok) throw new Error(r?.error || error?.message);
+    } catch (e) {
+      showToast('서명 후 안내를 저장하지 못했습니다. 문서 메뉴 「서명 후 안내」에서 다시 넣어 주세요. (' + (e.message || '오류') + ')');
+    }
+  }
   // 입력한 서명자 순서 → 서버가 만든 서명자(sign_token). 이름 · 번호로 맞추고, 못 찾으면 같은 순번
   const tokenOf = idx => {
     const s = state.signers[idx];
@@ -14117,6 +14194,90 @@ async function attachDocExtras(data, inputFields) {
   return confirm('기입 항목을 저장하지 못했습니다. (' + err + ')\n\n' +
     '[확인] 기입 항목 없이 서명만 받는 문서로 그대로 보내기\n' +
     '[취소] 보내지 않기');
+}
+
+// ===== 서명 후 안내 (문구 200자 + 참고 링크) =====
+// 서명을 마친 서명자에게만 서명 완료 화면 · 다시 연 서명 링크에 보인다.
+function anCount(k) {
+  const ta = document.getElementById('an' + k + 'Note'), c = document.getElementById('an' + k + 'Count');
+  if (!ta || !c) return;
+  const n = ta.value.length;
+  c.textContent = n + ' / 200'; c.classList.toggle('over', n > 200);
+}
+// 주소: 앞뒤 공백 제거, 「forms.gle/…」처럼 http 가 빠졌으면 https:// 를 붙인다. http · https 만 받는다
+function normAfterLink(v) {
+  v = String(v || '').trim();
+  if (!v) return { link: '' };
+  if (!/^[a-z][a-z0-9+.-]*:/i.test(v)) v = 'https://' + v.replace(/^\/+/, '');
+  let u = null;
+  try { u = new URL(v); } catch (e) {}
+  if (!u || !/^https?:$/.test(u.protocol) || !u.hostname.includes('.') || /[\s<>"]/.test(v) || v.length > 500) return { err: true };
+  return { link: v };
+}
+function readAfterNote(k) {
+  const note = (document.getElementById('an' + k + 'Note')?.value || '').replace(/\r/g, '').trim();
+  if (note.length > 200) return { err: '서명 후 안내 문구는 200자까지 쓸 수 있습니다. (지금 ' + note.length + '자)', focus: 'an' + k + 'Note' };
+  const l = normAfterLink(document.getElementById('an' + k + 'Link')?.value);
+  if (l.err) return { err: '참고 링크 주소를 확인해 주세요. http:// 또는 https:// 로 시작하는 주소만 넣을 수 있습니다.', focus: 'an' + k + 'Link' };
+  const el = document.getElementById('an' + k + 'Link'); if (el && l.link) el.value = l.link;
+  return { note, link: l.link };
+}
+function clearAfterNote(k) {
+  const a = document.getElementById('an' + k + 'Note'), b = document.getElementById('an' + k + 'Link');
+  if (a) a.value = ''; if (b) b.value = '';
+  anCount(k);
+}
+// 문서 메뉴: 보낸 뒤에 고치기
+async function openAfterNote(docId) {
+  const { data, error } = await sb.rpc('esign_get_after_note', { p_document_id: docId });
+  if (error || !data?.ok) { showToast('서명 후 안내를 불러오지 못했습니다. ' + (data?.error || error?.message || '')); return; }
+  let ov = document.getElementById('anModal');
+  if (!ov) { ov = document.createElement('div'); ov.id = 'anModal'; ov.className = 'modal-overlay'; document.body.appendChild(ov); }
+  ov.innerHTML = '<div class="modal" style="max-width:520px;"><div class="modal-header"><h3>📌 서명 후 안내</h3></div><div class="modal-body">' +
+    '<p class="bulk-hint" style="margin:0 0 12px;">「' + esc(data.title || '') + '」 — 서명을 <b>마친 서명자에게만</b> 서명 완료 화면과 서명 링크에 보입니다. ' +
+      '이미 서명한 사람도 서명 링크를 다시 열면 바뀐 내용이 보입니다. 둘 다 비우고 저장하면 지웁니다.</p>' +
+    '<div class="an-form" style="margin:0;"><div class="form-group" style="margin-bottom:10px;"><label>안내 문구 <span class="an-count" id="anEditCount">0 / 200</span></label>' +
+      '<textarea id="anEditNote" rows="3" maxlength="200" placeholder="최대 200자" oninput="anCount(\'Edit\')">' + esc(data.note || '') + '</textarea></div>' +
+    '<div class="form-group" style="margin-bottom:0;"><label>참고 링크</label>' +
+      '<input type="url" id="anEditLink" maxlength="500" placeholder="https://..." value="' + esc(data.link || '') + '"></div></div>' +
+    '</div><div class="modal-footer"><button class="btn-secondary" onclick="document.getElementById(\'anModal\').classList.remove(\'active\')">닫기</button>' +
+    '<button class="btn-primary" style="width:auto;padding:11px 20px;" id="anEditSave">저장</button></div></div>';
+  ov.classList.add('active');
+  anCount('Edit');
+  ov.querySelector('#anEditSave').onclick = async () => {
+    const an = readAfterNote('Edit');
+    if (an.err) { showToast(an.err); document.getElementById(an.focus)?.focus(); return; }
+    const btn = ov.querySelector('#anEditSave'); btn.disabled = true;
+    try {
+      const { data: r, error: e2 } = await sb.rpc('esign_set_after_note', { p_document_id: docId, p_note: an.note, p_link: an.link });
+      if (e2 || !r?.ok) { showToast('저장하지 못했습니다. ' + ({ NOTE_TOO_LONG: '문구는 200자까지입니다.', BAD_LINK: '링크 주소를 확인해 주세요.' }[r?.error] || r?.error || e2?.message || '')); return; }
+      ov.classList.remove('active');
+      showToast(an.note || an.link ? '서명 후 안내를 저장했습니다.' : '서명 후 안내를 지웠습니다.', true);
+    } finally { btn.disabled = false; }
+  };
+}
+// 서명자: 서명을 마친 뒤 (요청자가 남긴 문구는 번역하지 않고 그대로 보인다)
+async function loadAfterNote() {
+  try {
+    const { data, error } = await sb.rpc('esign_after_note', { p_token: state.signToken });
+    return (!error && data?.ok && (data.note || data.link)) ? data : null;
+  } catch (e) { return null; }
+}
+function afterNoteHtml(a) {
+  let link = '', host = '';
+  const l = normAfterLink(a.link);
+  if (l.link) { try { host = new URL(l.link).hostname; link = l.link; } catch (e) {} }
+  return '<div class="an-h">📌 ' + st('an_title') + '</div>' +
+    (a.note ? '<div class="an-t">' + esc(a.note) + '</div>' : '') +
+    (link ? '<a class="an-link" href="' + esc(link) + '" target="_blank" rel="noopener noreferrer nofollow">🔗 ' + st('an_open') + ' <small>' + esc(host) + '</small></a>' +
+            '<p class="an-w">' + st('an_warn') + '</p>' : '');
+}
+async function renderAfterNoteBox() {
+  const box = document.getElementById('afterNoteBox');
+  if (!box) return;
+  const a = state.signData?.signer?.status === 'signed' ? await loadAfterNote() : null;
+  box.style.display = a ? '' : 'none';
+  box.innerHTML = a ? afterNoteHtml(a) : '';
 }
 
 // ===== 문서 재요청 =====
@@ -14565,9 +14726,14 @@ function showSignComplete(result) {
         st('audit_ip') + ': ' + esc(result.ip || st('recorded')) + '<br>' +
         st('audit_device') + ': ' + esc(result.device ? result.device.os + ' / ' + result.device.browser : st('recorded')) +
         '</p></div>' +
+      '<div id="afterNoteDone"></div>' +
       '<p class="ip-notice">' + st('done_legal') + '</p>' +
       (result.all_completed ? '' : undoBoxHtml()) +
     '</div>';
+  loadAfterNote().then(a => {
+    const el = document.getElementById('afterNoteDone');
+    if (a && el) { el.className = 'after-note'; el.innerHTML = afterNoteHtml(a); }
+  });
   hidePromoBar();
   // 인투오피스 안내는 한국어 화면에서만 (외국인 서명자에게 한국어 광고를 보이지 않는다)
   if (state.signPromo && state.signLang === 'ko') c.insertAdjacentHTML('beforeend', promoCardHtml());
