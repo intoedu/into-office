@@ -354,6 +354,19 @@ input,select,textarea { font-family:inherit; }
 .sig-field .resize-handle { position:absolute; bottom:-4px; right:-4px; width:12px; height:12px; background:var(--cyan); border-radius:50%; cursor:nwse-resize; }
 .sig-field .remove-field { position:absolute; top:-8px; right:-8px; width:18px; height:18px; background:var(--danger); color:#fff; border-radius:50%; font-size:10px; display:flex; align-items:center; justify-content:center; cursor:pointer; opacity:0; transition:opacity .2s; }
 .sig-field:hover .remove-field { opacity:1; }
+/* 문서 재요청 */
+.rr-banner { background:#fff7ed; border:1.5px solid #fdba74; border-radius:var(--radius-lg); padding:16px 18px; margin-bottom:16px; color:#7c2d12; }
+.rr-banner h4 { font-size:15px; font-weight:800; margin-bottom:6px; }
+.rr-banner h4 small { font-weight:500; font-size:12px; color:#9a3412; margin-left:6px; }
+.rr-banner .rr-note { background:#fff; border:1px solid #fed7aa; border-radius:8px; padding:10px 12px; font-size:14.5px; font-weight:700; line-height:1.6; white-space:pre-wrap; color:#431407; }
+.rr-banner p { font-size:12.5px; margin-top:8px; line-height:1.6; }
+.rr-signers { display:grid; gap:6px; margin:6px 0 12px; }
+.rr-signer { display:flex; align-items:center; gap:8px; padding:9px 12px; border:1.5px solid var(--border); border-radius:8px; font-size:13.5px; cursor:pointer; }
+.rr-signer:has(input:checked) { border-color:#f97316; background:#fff7ed; }
+.rr-signer input { width:17px; height:17px; accent-color:#f97316; }
+.rr-signer .st { margin-left:auto; font-size:12px; color:var(--text-muted); }
+.rr-phrases { display:flex; flex-wrap:wrap; gap:6px; margin:6px 0; }
+.rr-phrases button { padding:6px 10px; border:1px dashed #fdba74; border-radius:999px; background:#fff; font-size:12.5px; cursor:pointer; font-family:inherit; color:#9a3412; }
 /* 서명 되돌리기 */
 .undo-box { margin-top:14px; text-align:center; }
 .undo-box .btn-undo { padding:11px 20px; border:1.5px solid #f59e0b; background:#fffbeb; color:#92400e; border-radius:10px; font-size:14px; font-weight:700; cursor:pointer; font-family:inherit; }
@@ -2361,6 +2374,7 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
         </div>
         <div class="signer-progress" id="signerProgress"></div>
       </div>
+      <div class="rr-banner" id="rrBanner" style="display:none;"></div>
       <div id="doneMsgBox" style="display:none;background:linear-gradient(135deg,#ecfdf5,#f0f9ff);border:1.5px solid #a7f3d0;border-radius:var(--radius-lg);padding:24px;text-align:center;margin-bottom:20px;color:var(--navy);"></div>
       <div class="mk-box" id="signMarksBox" style="display:none;"></div>
       <div class="mk-bar" id="signMarksBar" style="display:none;"></div>
@@ -3235,6 +3249,7 @@ function openDocMenu(ev, id) {
   const done = d.status === 'complete';
   const canRemind = ['waiting','progress'].includes(d.status);
   const canExtend = ['waiting','progress','expired'].includes(d.status);
+  const canRerequest = ['waiting','progress','complete','expired'].includes(d.status);
   const it = (act, ico, label, on, danger) =>
     '<button class="rm-item' + (danger ? ' danger' : '') + '" ' +
     (on ? 'onclick="rmAct(\'' + id + '\',\'' + act + '\')"' : 'disabled') +
@@ -3250,6 +3265,7 @@ function openDocMenu(ev, id) {
     '<div class="rm-sep"></div><div class="rm-label">발송</div>' +
     it('remind','🔔','서명 리마인드', canRemind) +
     it('extend','⏰','서명 기한 연장', canExtend) +
+    it('rerequest','↻','재요청하기 (고칠 곳 알려 주기)', canRerequest) +
     it('send','🎉','완료 문서 전달', done) +
     '<div class="rm-sep"></div><div class="rm-label">다운로드</div>' +
     it('signed','📄','서명본 내려받기', done) +
@@ -3269,6 +3285,7 @@ function rmAct(id, act) {
     labels:  () => openLabelEditor(id),
     remind:  () => openRemind(id),
     extend:  () => openExtend([id], null),
+    rerequest: () => openRerequest(id),
     send:    () => openSendDone(id),
     signed:  () => downloadSignedDoc(id),
     cert:    () => downloadCertificate(id),
@@ -3795,7 +3812,7 @@ async function routeByProfile() {
 // ============================================================
 const SB_FN_ADMIN = SB_URL + '/functions/v1/esign-admin';
 const APP_URL = shareBase();
-const BUILD = '2026-11-02.1';   // 배포 확인용. 화면 하단과 콘솔에 표시된다.
+const BUILD = '2026-11-09.1';   // 배포 확인용. 화면 하단과 콘솔에 표시된다.
 
 
 // ============================================================
@@ -10729,7 +10746,9 @@ const SL = {
     undo_err_DOC_COMPLETE: '모든 서명이 끝난 문서는 되돌릴 수 없습니다.',
     undo_err_DEADLINE_PASSED: '서명 기한이 지나 되돌릴 수 없습니다.',
     undo_err_default: '서명을 되돌리지 못했습니다.',
-    final_confirm: '이 서명으로 문서가 최종 완료되며, 완료 후에는 되돌릴 수 없습니다.\n\n빠뜨린 내용은 없나요?\n[확인] 서명 완료   [취소] 돌아가서 고치기'
+    final_confirm: '이 서명으로 문서가 최종 완료되며, 완료 후에는 되돌릴 수 없습니다.\n\n빠뜨린 내용은 없나요?\n[확인] 서명 완료   [취소] 돌아가서 고치기',
+    rr_title: '요청자가 다시 요청했습니다',
+    rr_hint: '아래 내용을 확인해 고친 뒤 다시 서명해 주세요. 전에 입력한 내용과 추가한 항목은 그대로 남아 있습니다.'
   },
   en: {
     hdr: 'E-Signature', loading: 'Loading the document...',
@@ -10830,7 +10849,9 @@ const SL = {
     undo_err_DOC_COMPLETE: 'A document signed by everyone cannot be undone.',
     undo_err_DEADLINE_PASSED: 'The signing deadline has passed, so it cannot be undone.',
     undo_err_default: 'Could not undo your signature.',
-    final_confirm: 'Your signature will complete this document, and it cannot be undone afterwards.\n\nHave you checked everything?\n[OK] Finish signing   [Cancel] Go back and edit'
+    final_confirm: 'Your signature will complete this document, and it cannot be undone afterwards.\n\nHave you checked everything?\n[OK] Finish signing   [Cancel] Go back and edit',
+    rr_title: 'The requester has asked you again',
+    rr_hint: 'Please check the note below, make the changes and sign again. Your previous entries and added items are kept.'
   },
   zh: {
     hdr: '电子签名', loading: '正在加载文件...',
@@ -10930,7 +10951,9 @@ const SL = {
     undo_err_DOC_COMPLETE: '所有人已签名完成的文件无法撤回。',
     undo_err_DEADLINE_PASSED: '已过签名期限，无法撤回。',
     undo_err_default: '无法撤回签名。',
-    final_confirm: '您的签名将使本文件最终完成，完成后无法撤回。\n\n确认没有遗漏吗？\n[确定] 完成签名   [取消] 返回修改'
+    final_confirm: '您的签名将使本文件最终完成，完成后无法撤回。\n\n确认没有遗漏吗？\n[确定] 完成签名   [取消] 返回修改',
+    rr_title: '请求方再次请求',
+    rr_hint: '请确认以下内容，修改后重新签名。之前填写和添加的内容均已保留。'
   },
   ja: {
     hdr: '電子署名', loading: '文書を読み込んでいます...',
@@ -11030,7 +11053,9 @@ const SL = {
     undo_err_DOC_COMPLETE: '全員の署名が完了した文書は取り消せません。',
     undo_err_DEADLINE_PASSED: '署名期限が過ぎたため取り消せません。',
     undo_err_default: '署名を取り消せませんでした。',
-    final_confirm: 'この署名で文書が最終的に完了し、完了後は取り消せません。\n\n記入漏れはありませんか？\n[OK] 署名を完了   [キャンセル] 戻って修正'
+    final_confirm: 'この署名で文書が最終的に完了し、完了後は取り消せません。\n\n記入漏れはありませんか？\n[OK] 署名を完了   [キャンセル] 戻って修正',
+    rr_title: '依頼者から再依頼がありました',
+    rr_hint: '下記の内容を確認して修正し、もう一度署名してください。以前の入力内容と追加項目はそのまま残っています。'
   },
   vi: {
     hdr: 'Chữ ký điện tử', loading: 'Đang tải tài liệu...',
@@ -11130,7 +11155,9 @@ const SL = {
     undo_err_DOC_COMPLETE: 'Không thể hoàn tác tài liệu mà mọi người đã ký xong.',
     undo_err_DEADLINE_PASSED: 'Đã quá hạn ký nên không thể hoàn tác.',
     undo_err_default: 'Không thể hoàn tác chữ ký.',
-    final_confirm: 'Chữ ký của bạn sẽ hoàn tất tài liệu này và không thể hoàn tác sau đó.\n\nBạn đã kiểm tra kỹ chưa?\n[OK] Hoàn tất ký   [Hủy] Quay lại sửa'
+    final_confirm: 'Chữ ký của bạn sẽ hoàn tất tài liệu này và không thể hoàn tác sau đó.\n\nBạn đã kiểm tra kỹ chưa?\n[OK] Hoàn tất ký   [Hủy] Quay lại sửa',
+    rr_title: 'Người yêu cầu đã yêu cầu lại',
+    rr_hint: 'Vui lòng xem nội dung bên dưới, sửa lại rồi ký lại. Nội dung đã nhập và các mục đã thêm trước đó vẫn được giữ nguyên.'
   }
 };
 
@@ -11258,6 +11285,7 @@ async function openSignByToken(token) {
   document.getElementById('signDocTitle').textContent = d.title;
   document.getElementById('signRequester').textContent = d.requester_name;
   loadSignPromo(token);
+  loadRerequestBanner(token);
   document.getElementById('signDeadline').textContent = fmtSignDate(d.deadline);
 
   // 서명 진행 현황
@@ -13127,6 +13155,119 @@ async function attachDocExtras(data, inputFields) {
   return confirm('기입 항목을 저장하지 못했습니다. (' + err + ')\n\n' +
     '[확인] 기입 항목 없이 서명만 받는 문서로 그대로 보내기\n' +
     '[취소] 보내지 않기');
+}
+
+// ===== 문서 재요청 =====
+// 서명자를 골라 「어디를 다시 해 달라」는 내용과 함께 다시 서명을 받는다.
+// 이미 서명한 사람은 서명만 되돌리고(입력 · 추가한 내용은 그대로), 재요청 내용은 서명자 화면 맨 위에 보인다.
+const RR_PHRASES = ['서명을 다시 해 주세요.', '기입한 내용을 고쳐 주세요.', '빠진 서명란에 서명해 주세요.', '연락처를 다시 확인해 주세요.'];
+function openRerequest(docId) {
+  const d = state.documents.find(x => x.id === docId);
+  if (!d) return;
+  const cur = d.deadline_at ? new Date(d.deadline_at) : null;
+  const valid = !cur || cur > new Date();
+  state.rrReq = { docId, keepOk: valid, k: valid ? 'keep' : '1d' };
+  let ov = document.getElementById('rrModal');
+  if (!ov) {
+    ov = document.createElement('div');
+    ov.id = 'rrModal'; ov.className = 'modal-overlay';
+    ov.onclick = e => { if (e.target === ov) ov.classList.remove('active'); };
+    document.body.appendChild(ov);
+  }
+  const signers = (d.signers || []).slice().sort((a, b) => (a.order_index || 0) - (b.order_index || 0));
+  ov.innerHTML =
+    '<div class="modal" style="max-width:500px;"><div class="modal-header"><h3>↻ 재요청하기</h3></div><div class="modal-body">' +
+      '<p style="font-size:13.5px;line-height:1.7;margin-bottom:6px;"><b>' + esc(d.title) + '</b></p>' +
+      (d.status === 'complete' ? '<div class="dl-confirm" style="background:#fff7ed;border-color:#fdba74;color:#7c2d12;margin:0 0 10px;">완료된 문서입니다. 재요청하면 <b>완료가 풀리고</b>, 고른 분이 다시 서명해야 문서가 다시 완료됩니다.</div>' : '') +
+      '<label style="font-size:13px;font-weight:700;">누구에게 다시 받을까요?</label>' +
+      '<div class="rr-signers">' + signers.map(s =>
+        '<label class="rr-signer"><input type="checkbox" value="' + esc(s.sign_token) + '"' + (signers.length === 1 ? ' checked' : '') + '>' +
+        esc(s.name) + ' <span style="color:var(--text-muted);">' + esc(fmtPhone(s.phone || '')) + '</span>' +
+        '<span class="st">' + (s.status === 'signed' ? '서명 완료 → 서명을 되돌림' : s.status === 'viewed' ? '열람함' : '미열람') + '</span></label>').join('') + '</div>' +
+      '<label style="font-size:13px;font-weight:700;">어디를 다시 해 달라고 할까요? <span class="sec-tag">서명자 화면 맨 위에 보입니다</span></label>' +
+      '<div class="rr-phrases">' + RR_PHRASES.map(t => '<button type="button" onclick="rrAddPhrase(this)">' + esc(t) + '</button>').join('') + '</div>' +
+      '<textarea id="rrNote" rows="3" maxlength="300" placeholder="예) 3쪽 비상 연락처를 다시 적어 주세요. 2쪽 서명란에 서명이 빠졌습니다." ' +
+        'style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;outline:none;"></textarea>' +
+      '<label style="font-size:13px;font-weight:700;display:block;margin-top:10px;">서명 기한</label>' +
+      '<div class="dl-chips" id="rrDl"></div><div class="dl-confirm" id="rrDlPrev"></div>' +
+      '<p class="bulk-hint" style="margin-top:8px;">고른 분께 <b>리마인드 알림톡</b>이 다시 갑니다. 전에 입력한 기입 항목 · 추가한 내용은 그대로 남아 고친 뒤 다시 서명하면 됩니다.</p>' +
+    '</div><div class="modal-footer">' +
+      '<button class="btn-secondary" onclick="document.getElementById(\'rrModal\').classList.remove(\'active\')">취소</button>' +
+      '<button class="btn-primary" id="rrGo" style="width:auto;padding:11px 20px;background:#f97316;" onclick="submitRerequest()">재요청 보내기</button>' +
+    '</div></div>';
+  ov.classList.add('active');
+  renderRrDeadline();
+}
+function rrAddPhrase(b) {
+  const ta = document.getElementById('rrNote');
+  ta.value = (ta.value.trim() ? ta.value.trim() + ' ' : '') + b.textContent;
+  ta.focus();
+}
+function renderRrDeadline() {
+  const r = state.rrReq, box = document.getElementById('rrDl');
+  if (!r || !box) return;
+  const d = state.documents.find(x => x.id === r.docId);
+  const opts = (r.keepOk ? [{ k: 'keep', label: '기한 그대로' }] : []).concat(DL_OPTS.map(o => ({ k: o.k, label: '지금부터 ' + o.label })));
+  box.innerHTML = opts.map(o => '<button type="button" class="dl-chip' + (r.k === o.k ? ' on' : '') +
+    '" onclick="state.rrReq.k=\'' + o.k + '\';renderRrDeadline()">' + o.label + '</button>').join('');
+  const until = r.k === 'keep' ? (d?.deadline_at ? new Date(d.deadline_at) : null) : new Date(Date.now() + dlOpt(r.k).min * 60000);
+  document.getElementById('rrDlPrev').innerHTML = until ? '⏰ <b>' + fmtDeadlineKo(until) + '까지</b> 다시 서명할 수 있습니다.'
+    : (r.keepOk ? '⏰ 서명 기한 없음' : '⏰ 기한이 지났습니다. 새 기한을 골라 주세요.');
+}
+async function submitRerequest() {
+  const r = state.rrReq;
+  const tokens = [...document.querySelectorAll('#rrModal .rr-signer input:checked')].map(i => i.value);
+  const note = document.getElementById('rrNote').value.trim();
+  if (!tokens.length) { showToast('다시 받을 서명자를 골라 주세요.'); return; }
+  if (!note) { showToast('어디를 다시 해 달라는지 적어 주세요. 서명자 화면 맨 위에 보입니다.'); document.getElementById('rrNote').focus(); return; }
+  const btn = document.getElementById('rrGo');
+  btn.disabled = true; btn.textContent = '보내는 중...';
+  try {
+    const { data, error } = await sb.rpc('esign_rerequest', {
+      p_document_id: r.docId, p_sign_tokens: tokens, p_note: note,
+      p_minutes: r.k === 'keep' ? null : dlOpt(r.k).min });
+    if (error) throw new Error(/esign_rerequest|function/i.test(error.message)
+      ? '재요청 기능의 서버 준비가 아직 끝나지 않았습니다. (SQL 적용 필요)' : error.message);
+    if (!data?.ok) throw new Error({ NOTE_REQUIRED: '재요청 내용을 적어 주세요.', NO_SIGNERS: '서명자를 찾지 못했습니다.',
+      NEED_NEW_DEADLINE: '기한이 지났습니다. 새 기한을 골라 주세요.', DOC_CLOSED: '취소 · 삭제된 문서는 재요청할 수 없습니다.',
+      FORBIDDEN: '이 문서를 재요청할 권한이 없습니다.' }[data?.error] || data?.error);
+    document.getElementById('rrModal').classList.remove('active');
+    // 고른 사람에게만 리마인드 알림톡 (한 번에 5명까지)
+    const { data: sess } = await sb.auth.getSession();
+    let sent = 0, fail = '';
+    for (let i = 0; i < tokens.length; i += 5) {
+      try {
+        const res = await fetch(SB_FN_NOTIFY, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (sess?.session?.access_token || '') },
+          body: JSON.stringify({ kind: 'remind_one', document_id: r.docId, sign_tokens: tokens.slice(i, i + 5) })
+        });
+        const o = await res.json().catch(() => ({}));
+        if (o.ok && o.sent) sent += o.sent - (o.result?.failedMessageList || []).length;
+        else fail = o.result?.errorMessage || o.error || '알림톡 발송 실패';
+      } catch (e) { fail = e.message; }
+    }
+    showToast(sent ? data.count + '명에게 재요청했습니다. 알림톡 ' + sent + '건을 보냈습니다.'
+      : '재요청했습니다. 알림톡은 보내지 못했습니다 (' + fail + ') — 서명 링크를 직접 전달해 주세요.', !!sent);
+    await loadDocuments();
+  } catch (e) {
+    showToast(e.message || '재요청하지 못했습니다.');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '재요청 보내기'; }
+  }
+}
+// 서명자 화면: 재요청 내용 (서명하기 전까지만)
+async function loadRerequestBanner(token) {
+  const box = document.getElementById('rrBanner');
+  if (!box) return;
+  box.style.display = 'none';
+  try {
+    const { data, error } = await sb.rpc('esign_rerequest_info', { p_token: token });
+    if (error || !data?.ok || !data.note) return;
+    box.innerHTML = '<h4>🔁 ' + st('rr_title') + (data.at ? '<small>' + fmtSignDate(data.at) + '</small>' : '') + '</h4>' +
+      '<div class="rr-note">' + esc(data.note) + '</div><p>' + st('rr_hint') + '</p>';
+    box.style.display = '';
+  } catch (e) { /* 기능이 없는 서버 */ }
 }
 
 // ===== 서명 기한 연장 =====
