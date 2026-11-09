@@ -354,6 +354,31 @@ input,select,textarea { font-family:inherit; }
 .sig-field .resize-handle { position:absolute; bottom:-4px; right:-4px; width:12px; height:12px; background:var(--cyan); border-radius:50%; cursor:nwse-resize; }
 .sig-field .remove-field { position:absolute; top:-8px; right:-8px; width:18px; height:18px; background:var(--danger); color:#fff; border-radius:50%; font-size:10px; display:flex; align-items:center; justify-content:center; cursor:pointer; opacity:0; transition:opacity .2s; }
 .sig-field:hover .remove-field { opacity:1; }
+/* 대량발송 갑 · 을 */
+.pa-box { border:1.5px solid #bae6fd; background:#f0f9ff; border-radius:12px; padding:14px 16px; margin-bottom:14px; }
+.pa-toggle { display:flex; gap:8px; align-items:flex-start; cursor:pointer; font-size:14px; }
+.pa-toggle input { width:18px; height:18px; margin-top:2px; accent-color:var(--cyan); }
+.pa-toggle span { display:block; font-size:12.5px; color:var(--text-secondary); font-weight:400; margin-top:2px; }
+.pa-row { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-top:12px; }
+.pa-row .pa-label { font-size:13px; font-weight:700; color:var(--navy); min-width:42px; }
+.pa-who { display:inline-flex; gap:6px; align-items:center; padding:7px 12px; border:1.5px solid var(--border); border-radius:999px; background:#fff; font-size:13px; cursor:pointer; }
+.pa-who:has(input:checked) { border-color:var(--cyan); background:#ecfeff; font-weight:700; }
+.pa-row input[type=text], .pa-row input[type=tel] { padding:8px 10px; border:1.5px solid var(--border); border-radius:8px; font-size:14px; font-family:inherit; min-width:0; }
+.pa-sig { display:flex; align-items:center; gap:10px; margin-top:12px; flex-wrap:wrap; }
+.pa-sig .pa-prev { width:180px; height:64px; border:1.5px dashed #93c5fd; border-radius:8px; background:#fff; display:flex; align-items:center; justify-content:center; font-size:12px; color:var(--text-muted); }
+.pa-sig .pa-prev img { max-width:100%; max-height:100%; object-fit:contain; }
+.pa-hint { font-size:12.5px; color:var(--text-secondary); margin-top:10px; line-height:1.6; }
+.pa-hint b { color:var(--navy); }
+.pa-tabs { display:flex; gap:6px; margin-bottom:10px; flex-wrap:wrap; }
+.pa-tabs button { padding:8px 12px; border:1.5px solid var(--border); border-radius:8px; background:#fff; font-size:13px; font-weight:600; cursor:pointer; font-family:inherit; }
+.pa-tabs button.on { border-color:var(--cyan); background:var(--cyan); color:#fff; }
+.pa-pad { border:1.5px solid var(--border); border-radius:8px; background:#fafbfc; }
+.pa-pad canvas { display:block; width:100%; height:180px; touch-action:none; }
+.pa-fonts { display:grid; grid-template-columns:repeat(auto-fill,minmax(130px,1fr)); gap:8px; margin-top:10px; }
+.pa-fonts div, .pa-vault div { border:1.5px solid var(--border); border-radius:8px; height:64px; display:flex; align-items:center; justify-content:center; cursor:pointer; background:#fff; }
+.pa-fonts div.on, .pa-vault div.on { border-color:var(--cyan); box-shadow:0 0 0 3px rgba(4,183,221,.15); }
+.pa-fonts img, .pa-vault img { max-width:92%; max-height:56px; }
+.pa-vault { display:grid; grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); gap:8px; }
 /* 문서 재요청 */
 .rr-banner { background:#fff7ed; border:1.5px solid #fdba74; border-radius:var(--radius-lg); padding:16px 18px; margin-bottom:16px; color:#7c2d12; }
 .rr-banner h4 { font-size:15px; font-weight:800; margin-bottom:6px; }
@@ -1958,7 +1983,9 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
       <div id="bulkWizard" style="display:none;">
         <!-- 1) 명단 -->
         <div class="bulk-step">
-          <h4><span class="bulk-num">1</span> 서명자 명단</h4>
+          <h4><span class="bulk-num">1</span> 서명자 — 갑 · 을</h4>
+          <div class="pa-box" id="paBox"></div>
+          <h5 style="font-size:13.5px;margin:4px 0 8px;" id="bulkListTitle">을 — 명단 (한 줄마다 문서 1개)</h5>
           <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
             <button class="btn-mini" onclick="bulkDownloadTemplate()">⬇ 양식 내려받기 (CSV)</button>
             <button class="btn-mini primary" onclick="document.getElementById('bulkFileInput').click()">📄 명단 파일 올리기</button>
@@ -3812,7 +3839,7 @@ async function routeByProfile() {
 // ============================================================
 const SB_FN_ADMIN = SB_URL + '/functions/v1/esign-admin';
 const APP_URL = shareBase();
-const BUILD = '2026-11-09.1';   // 배포 확인용. 화면 하단과 콘솔에 표시된다.
+const BUILD = '2026-11-09.2';   // 배포 확인용. 화면 하단과 콘솔에 표시된다.
 
 
 // ============================================================
@@ -5028,6 +5055,9 @@ function bulkReset(show) {
   state.bulkPdfData = null;
   state.bulkFieldsSaved = null;
   state.bulkReqMode = 'sign';
+  state.bulkA = { who: 'me', name: '', phone: '', sig: null };
+  state.bulkPair = true;
+  renderBulkPartyA();
   state.bulkAllowMarks = false;
   if (state.feBulk) { state.fields = []; setReqMode('sign'); renderMarkPerms(); }
   const w = document.getElementById('bulkWizard');
@@ -5191,16 +5221,160 @@ async function bulkPdfSelect(e) {
   }
 }
 
+// ----- 갑 · 을 2인 문서 -----
+// 갑: 모든 문서에 같은 사람 — 보내기 전에 한 번 서명하면 모든 문서에 들어간다 (알림톡은 을에게만)
+// 을: 명단의 각 사람 — 한 줄마다 문서 1개
+state.bulkPair = true;
+state.bulkA = { who: 'me', name: '', phone: '', sig: null };
+function bulkPartyAName() {
+  const a = state.bulkA;
+  return a.who === 'me' ? (state.profile?.name || state.user || '') : a.name.trim();
+}
+function renderBulkPartyA() {
+  const box = document.getElementById('paBox');
+  if (!box) return;
+  const a = state.bulkA, on = state.bulkPair;
+  const t = document.getElementById('bulkListTitle');
+  if (t) t.textContent = on ? '을 — 명단 (한 줄마다 [갑 + 을] 문서 1개)' : '서명자 명단 (한 줄마다 1인 문서 1개)';
+  let sigPrev = '아직 서명 전';
+  if (a.sig) sigPrev = '<img alt="갑 서명" src="' + (a.sig.method === 'typed'
+      ? (() => { const tt = parseTypedSig(a.sig.data, bulkPartyAName()); return typedSigToPng(tt.name, 180, 64, tt.font, tt.text); })()
+      : a.sig.data) + '">';
+  box.innerHTML =
+    '<label class="pa-toggle"><input type="checkbox"' + (on ? ' checked' : '') + ' onchange="bulkSetPair(this.checked)">' +
+      '<div><b>갑 + 을 2인 문서로 보내기</b><span>갑은 모든 문서에 같은 사람, 을은 명단의 각 사람입니다. 끄면 명단의 사람만 서명하는 1인 문서가 됩니다.</span></div></label>' +
+    (on ?
+      '<div class="pa-row"><span class="pa-label">갑</span>' +
+        '<label class="pa-who"><input type="radio" name="paWho"' + (a.who === 'me' ? ' checked' : '') + ' onchange="state.bulkA.who=\'me\';renderBulkPartyA()"> 보내는 사람 본인' +
+          (state.profile?.name ? ' (' + esc(state.profile.name) + ')' : '') + '</label>' +
+        '<label class="pa-who"><input type="radio" name="paWho"' + (a.who === 'other' ? ' checked' : '') + ' onchange="state.bulkA.who=\'other\';renderBulkPartyA()"> 따로 지정</label>' +
+        (a.who === 'other'
+          ? '<input type="text" maxlength="20" placeholder="갑 이름 (예: 원장 홍길동)" value="' + esc(a.name) + '" oninput="state.bulkA.name=this.value">' +
+            '<input ' + PHONE_ATTRS.replace('010-0000-0000', '갑 연락처 (선택)') + ' value="' + esc(fmtPhone(a.phone)) + '" oninput="state.bulkA.phone=phoneInput(this)">'
+          : '') +
+      '</div>' +
+      '<div class="pa-sig"><span class="pa-label" style="font-size:13px;font-weight:700;color:var(--navy);">갑 서명</span>' +
+        '<div class="pa-prev">' + sigPrev + '</div>' +
+        '<button type="button" class="btn-mini primary" onclick="openPartyASign()">✍️ ' + (a.sig ? '다시 서명하기' : '갑 서명하기') + '</button></div>' +
+      '<p class="pa-hint">보내기 전에 <b>한 번만 서명</b>하면 <b>모든 문서에 같은 서명</b>이 들어갑니다. 알림톡은 <b>을에게만</b> 가고, 을이 서명하면 문서가 바로 완료됩니다. ' +
+        '3단계에서 위쪽 선택 칸으로 <b>갑 서명란 · 을 서명란</b>을 따로 놓으세요.</p>'
+      : '');
+}
+function bulkSetPair(on) {
+  const flds = state.feBulk ? state.fields : (state.bulkFieldsSaved || []);
+  if (!on && flds.some(f => f.signerIdx === 0 && state.bulkPair)) {
+    const n = flds.filter(f => f.signerIdx === 0).length;
+    if (!confirm('놓아 둔 갑 서명란 · 날짜란 ' + n + '개를 지우고 1인 문서로 바꿀까요?')) { renderBulkPartyA(); return; }
+  }
+  // 갑 · 을 순번 바꾸기: 2인(갑 0, 을 1) ↔ 1인(서명자 0)
+  const keep = [];
+  flds.forEach(f => {
+    if (on && !state.bulkPair) { f.signerIdx = 1; keep.push(f); }
+    else if (!on && state.bulkPair) { if (f.signerIdx === 1) { f.signerIdx = 0; keep.push(f); } else document.getElementById(f.id)?.remove(); }
+    else keep.push(f);
+  });
+  if (state.feBulk) state.fields = keep; else state.bulkFieldsSaved = keep;
+  state.bulkPair = on;
+  renderBulkPartyA();
+  if (state.feBulk) { moveFieldTools(true); refreshBulkFieldLabels(); }
+}
+// 편집기에 놓인 상자 글자(갑 · 을)를 다시 쓴다
+function refreshBulkFieldLabels() {
+  state.fields.forEach(f => {
+    f.label = bulkSignerName(f.signerIdx) + ' ' + (f.type === 'date' ? '날짜' : '서명');
+    const el = document.getElementById(f.id);
+    if (el) { el.remove(); renderField(f); }
+  });
+}
+const bulkSignerName = idx => state.bulkPair ? (idx === 0 ? '갑' : '을') : '서명자';
+
+// 갑 서명 창: 직접 그리기 · 이름 필기체 · 보관함
+function openPartyASign() {
+  let ov = document.getElementById('paSigModal');
+  if (!ov) {
+    ov = document.createElement('div');
+    ov.id = 'paSigModal'; ov.className = 'modal-overlay';
+    document.body.appendChild(ov);
+  }
+  state.paTab = state.paTab || 'draw';
+  state.paFont = state.paFont || 'sign-ko';
+  const nm = bulkPartyAName();
+  ov.innerHTML =
+    '<div class="modal" style="max-width:520px;"><div class="modal-header"><h3>✍️ 갑 서명 — ' + esc(nm || '이름을 먼저 정해 주세요') + '</h3></div><div class="modal-body">' +
+      '<div class="pa-tabs">' + [['draw', '✍️ 직접 그리기'], ['typed', '📝 이름 필기체'], ['vault', '📁 보관함 사인 · 도장']].map(([k, l]) =>
+        '<button type="button" class="' + (state.paTab === k ? 'on' : '') + '" onclick="state.paTab=\'' + k + '\';openPartyASign()">' + l + '</button>').join('') + '</div>' +
+      (state.paTab === 'draw' ? '<div class="pa-pad"><canvas id="paCanvas"></canvas></div><p class="pa-hint">아래 칸에 서명을 그려 주세요. <a href="javascript:void(0)" onclick="state.paPad&&state.paPad.clear()">지우기</a></p>'
+       : state.paTab === 'typed' ? '<p class="pa-hint" style="margin-top:0;">갑 이름 <b>' + esc(nm) + '</b> 으로 만든 서명 중 하나를 고르세요.</p><div class="pa-fonts">' +
+           TYPED_FONTS.map(f => '<div class="' + (state.paFont === f.key ? 'on' : '') + '" onclick="state.paFont=\'' + f.key + '\';openPartyASign()"><img alt="" src="' +
+             typedSigToPng(nm || '홍길동', 130, 56, f.key, f.latin ? romanizeName(nm || '홍길동') : null) + '"></div>').join('') + '</div>'
+       : '<div class="pa-vault" id="paVault"><div class="empty-sm" style="grid-column:1/-1;">불러오는 중...</div></div>') +
+    '</div><div class="modal-footer">' +
+      '<button class="btn-secondary" onclick="document.getElementById(\'paSigModal\').classList.remove(\'active\')">취소</button>' +
+      '<button class="btn-primary" style="width:auto;padding:11px 20px;" onclick="savePartyASign()">이 서명으로 정하기</button>' +
+    '</div></div>';
+  ov.classList.add('active');
+  if (state.paTab === 'draw') setTimeout(() => {
+    const c = document.getElementById('paCanvas');
+    if (!c) return;
+    const r = window.devicePixelRatio || 1;
+    c.width = c.offsetWidth * r; c.height = c.offsetHeight * r;
+    c.getContext('2d').scale(r, r);
+    state.paPad = new SignaturePad(c, { backgroundColor: 'rgba(0,0,0,0)', penColor: '#0e2d4d', minWidth: 1.5, maxWidth: 3 });
+  }, 30);
+  if (state.paTab === 'vault') loadPartyAVault();
+  if (state.paTab === 'typed') TYPED_FONTS.forEach(f => loadTypedFont({ font: f.key }).then?.(() => {}));
+}
+async function loadPartyAVault() {
+  const grid = document.getElementById('paVault');
+  try {
+    const { data } = await sb.rpc('esign_list_signatures');
+    const items = data?.ok ? (data.items || []) : [];
+    state.paVaultItems = items;
+    grid.innerHTML = items.length ? items.map((it, i) =>
+      '<div class="' + (state.paVaultPick === i ? 'on' : '') + '" onclick="state.paVaultPick=' + i + ';this.parentElement.querySelectorAll(\'div\').forEach(x=>x.classList.remove(\'on\'));this.classList.add(\'on\')">' +
+      '<img alt="" src="' + it.image_data + '"></div>').join('')
+      : '<div class="empty-sm" style="grid-column:1/-1;">저장한 사인 · 도장이 없습니다. 「사인 · 도장」 메뉴에서 미리 만들 수 있습니다.</div>';
+  } catch (e) { grid.innerHTML = '<div class="empty-sm">불러오지 못했습니다.</div>'; }
+}
+function savePartyASign() {
+  const nm = bulkPartyAName();
+  if (!nm) { showToast('갑 이름을 먼저 정해 주세요.'); return; }
+  let sig = null;
+  if (state.paTab === 'draw') {
+    if (!state.paPad || state.paPad.isEmpty()) { showToast('서명을 그려 주세요.'); return; }
+    sig = { method: 'draw', data: state.paPad.toDataURL('image/png') };
+  } else if (state.paTab === 'typed') {
+    const f = typedStyle(state.paFont);
+    sig = { method: 'typed', data: 'TYPED:' + nm + '||font=' + state.paFont + (f?.latin ? '||text=' + romanizeName(nm) : '') };
+  } else {
+    const it = (state.paVaultItems || [])[state.paVaultPick];
+    if (!it) { showToast('보관함에서 사인 · 도장을 골라 주세요.'); return; }
+    sig = { method: 'upload', data: it.image_data };
+  }
+  state.bulkA.sig = sig;
+  document.getElementById('paSigModal').classList.remove('active');
+  renderBulkPartyA();
+}
+
 // ----- 서명란 배치: 일반 발송의 편집 도구를 옮겨 와 그대로 쓴다 -----
 function moveFieldTools(toBulk) {
   const t = document.getElementById('fieldTools');
   const slot = document.getElementById(toBulk ? 'bulkToolsSlot' : 'createToolsSlot');
   if (t && slot && t.parentElement !== slot) slot.appendChild(t);
   const sel = document.getElementById('fieldSignerSelect');
-  if (sel) sel.style.display = toBulk ? 'none' : '';
+  if (sel) {
+    // 대량발송 2인 문서: 갑 · 을을 골라 놓는다 / 1인 문서: 고를 사람이 없다
+    sel.style.display = toBulk && !state.bulkPair ? 'none' : '';
+    if (toBulk && state.bulkPair) {
+      sel.innerHTML = '<option value="0" style="color:' + SIGNER_COLORS[0] + '">갑 (' + esc(bulkPartyAName() || '모든 문서 같은 사람') + ')</option>' +
+        '<option value="1" style="color:' + SIGNER_COLORS[1] + '">을 (명단의 각 사람)</option>';
+      sel.value = '1';
+    } else if (!toBulk) populateFieldSignerSelect();
+  }
   const hint = document.getElementById('fieldToolsHint');
   if (hint) hint.textContent = toBulk
-    ? '서명란 · 날짜란 버튼을 누르면 지금 보고 있는 페이지에 놓입니다. 페이지를 넘기며 원하는 만큼 놓을 수 있습니다.'
+    ? (state.bulkPair ? '왼쪽 칸에서 갑 · 을을 고른 뒤 서명란 · 날짜란을 누르면 지금 보고 있는 페이지에 놓입니다. 기입 항목은 을에게만 받습니다.'
+                      : '서명란 · 날짜란 버튼을 누르면 지금 보고 있는 페이지에 놓입니다. 페이지를 넘기며 원하는 만큼 놓을 수 있습니다.')
     : '서명자를 선택한 후 서명란을 추가하세요. 서명자별로 색상이 구분됩니다.';
   const ip = document.getElementById('ipHint');
   if (ip) ip.textContent = (toBulk ? '명단의 서명자마다 받을 정보를' : '위에서 고른 서명자에게 받을 정보를') +
@@ -5219,9 +5393,12 @@ async function bulkEnterEditor(fresh) {
   if (fresh && n) {
     const last = document.querySelector('#bulkPdfPane .pdf-page[data-page="' + n + '"]');
     if (last) {
-      const f = { id: 'field_' + (++state.fieldIdCounter), type: 'signature', page: n, signerIdx: 0, label: '서명자 서명',
-        w: 150, h: 50, x: Math.max(10, last.offsetWidth * 0.62), y: Math.max(10, last.offsetHeight * 0.82) };
-      state.fields.push(f);
+      // 마지막 장에 을(또는 서명자) 서명란, 2인 문서면 왼쪽에 갑 서명란도 미리 놓는다
+      const b = state.bulkPair ? 1 : 0;
+      state.fields.push({ id: 'field_' + (++state.fieldIdCounter), type: 'signature', page: n, signerIdx: b, label: bulkSignerName(b) + ' 서명',
+        w: 150, h: 50, x: Math.max(10, last.offsetWidth * 0.62), y: Math.max(10, last.offsetHeight * 0.82) });
+      if (state.bulkPair) state.fields.push({ id: 'field_' + (++state.fieldIdCounter), type: 'signature', page: n, signerIdx: 0, label: '갑 서명',
+        w: 150, h: 50, x: Math.max(10, last.offsetWidth * 0.12), y: Math.max(10, last.offsetHeight * 0.82) });
     }
   }
   state.fields.forEach(f => renderField(f));
@@ -5259,7 +5436,15 @@ async function bulkSend() {
   const placed = state.fields.filter(f => f.type !== 'input');
   const inputs = state.reqMode === 'fill' ? state.fields.filter(f => f.type === 'input') : [];
   const allowMarks = !!state.bulkAllowMarks;
-  if (!placed.some(f => f.type === 'signature') && !allowMarks) { showToast('서명란을 하나 이상 놓아 주세요.'); return; }
+  const pair = !!state.bulkPair;
+  const aName = bulkPartyAName();
+  if (pair) {
+    if (!aName) { showToast('갑 이름을 정해 주세요. (1단계)'); return; }
+    if (!state.bulkA.sig) { showToast('갑 서명을 먼저 해 주세요. (1단계 「갑 서명하기」)'); document.getElementById('paBox')?.scrollIntoView({ behavior: 'smooth', block: 'center' }); return; }
+    if (!placed.some(f => f.type === 'signature' && f.signerIdx === 1) && !allowMarks) { showToast('을 서명란을 하나 이상 놓아 주세요.'); return; }
+    if (!placed.some(f => f.type === 'signature' && f.signerIdx === 0) &&
+        !confirm('갑 서명란이 없어 갑의 서명이 문서에 보이지 않습니다. 그래도 보낼까요?')) return;
+  } else if (!placed.some(f => f.type === 'signature') && !allowMarks) { showToast('서명란을 하나 이상 놓아 주세요.'); return; }
   if (state.reqMode === 'fill' && !inputs.length) { showToast('기입 항목을 하나 이상 놓거나, 「서명만 요청」을 골라 주세요.'); return; }
   if (inputs.length || allowMarks) {
     const { data: rd, error: re } = await sb.rpc('esign_inputs_ready');
@@ -5268,11 +5453,12 @@ async function bulkSend() {
       return;
     }
   }
-  const fields = placed.map(f => ({ field_type: f.type, ...fieldRatio(f) }));
+  const fields = placed.map(f => ({ field_type: f.type, signer_index: pair ? (f.signerIdx === 0 ? 0 : 1) : 0, ...fieldRatio(f) }));
   const inputBase = inputs.map(f => ({ kind: f.kind, label: f.label, purpose: f.purpose || '', mode: f.mode,
     required: f.required !== false, max_len: f.maxLen || 100, ...fieldRatio(f) }));
 
-  if (!confirm(rows.length + '명에게 「' + title + '」 문서를 발송합니다.\n' +
+  if (!confirm((pair ? '갑: ' + aName + ' (보내기 전 서명 완료) · 을: ' + rows.length + '명 — [갑 + 을] 문서 ' + rows.length + '개\n' : '') +
+      rows.length + '명에게 「' + title + '」 문서를 발송합니다.\n' +
       '서명란 ' + placed.filter(f => f.type === 'signature').length + '개 · 날짜란 ' + placed.filter(f => f.type === 'date').length + '개' +
       (inputs.length ? ' · 기입 항목 ' + inputs.length + '개' : '') + (allowMarks ? ' · 서명자 직접 추가 허용' : '') +
       '\n\n⏰ 서명 기한: ' + fmtDeadlineKo(deadlineFor('bulk')) + '까지 (보내는 시각부터 ' + dlOpt(state.dlChoice.bulk).label + ')' +
@@ -5286,7 +5472,9 @@ async function bulkSend() {
       .upload(filePath, state.bulkPdf, { contentType: 'application/pdf' });
     if (upErr) throw new Error('파일 업로드 실패: ' + upErr.message);
 
-    const { data, error } = await sb.rpc('esign_create_bulk', {
+    const { data, error } = await sb.rpc(pair ? 'esign_create_bulk_pair' : 'esign_create_bulk', {
+      ...(pair ? { p_party_a: { name: aName, phone: (state.bulkA.who === 'me' ? (state.profile?.phone || '') : state.bulkA.phone).replace(/\D/g, ''),
+                                sig_method: state.bulkA.sig.method, sig_data: state.bulkA.sig.data } } : {}),
       p_title: title,
       p_requester_name: '인투오피스',
       p_file_path: filePath,
@@ -5306,7 +5494,9 @@ async function bulkSend() {
         NO_ROWS: '명단이 비어 있습니다.',
         TOO_MANY_ROWS: '최대 500명까지 가능합니다.',
         CODE_TOO_SHORT: '접근 암호는 4자 이상이어야 합니다.',
-        ROW_INCOMPLETE: '이름 또는 연락처가 빠진 항목이 있습니다.'
+        ROW_INCOMPLETE: '이름 또는 연락처가 빠진 항목이 있습니다.',
+        PARTY_A_NAME: '갑 이름을 정해 주세요.',
+        PARTY_A_SIGNATURE: '갑 서명을 먼저 해 주세요.'
       };
       showToast(msgs[data?.error] || ('발송 실패: ' + data?.error));
       return;
@@ -12744,7 +12934,7 @@ function deleteCustomInput(i) {
 
 // 배치한 기입 항목에 보이는 글자
 function inputFieldLabel(f) {
-  const nm = state.feBulk ? '서명자' : (state.signers[f.signerIdx || 0]?.name || SIGNER_LABELS[f.signerIdx || 0]);
+  const nm = state.feBulk ? bulkSignerName(f.signerIdx || 0) : (state.signers[f.signerIdx || 0]?.name || SIGNER_LABELS[f.signerIdx || 0]);
   const icon = f.kind === 'custom' ? '🧩' : (INPUT_KINDS[f.kind]?.icon || '');
   return esc(nm) + ' · ' + icon + ' ' + esc(f.label) + (f.required ? '' : ' (선택)');
 }
@@ -12828,8 +13018,12 @@ function addField(type, w, h, labelSuffix, extra) {
   if (!pg) { showToast('문서 미리보기가 없어 배치할 수 없습니다.'); return; }
 
   // 대량발송은 문서마다 서명자가 한 명이다
-  const signerIdx = state.feBulk ? 0 : parseInt(document.getElementById('fieldSignerSelect')?.value || '0');
-  const signerName = state.feBulk ? '서명자' : (state.signers[signerIdx]?.name || SIGNER_LABELS[signerIdx]);
+  let signerIdx = state.feBulk ? 0 : parseInt(document.getElementById('fieldSignerSelect')?.value || '0');
+  if (state.feBulk && state.bulkPair) {
+    // 기입 항목은 미리 서명한 갑이 채울 수 없으므로 을에게만
+    signerIdx = (type === 'input') ? 1 : parseInt(document.getElementById('fieldSignerSelect')?.value || '1');
+  }
+  const signerName = state.feBulk ? bulkSignerName(signerIdx) : (state.signers[signerIdx]?.name || SIGNER_LABELS[signerIdx]);
   const page = parseInt(pg.dataset.page);
 
   // 같은 페이지의 기존 필드 수만큼 아래로 밀어서 겹침 방지
