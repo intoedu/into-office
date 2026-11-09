@@ -484,6 +484,19 @@ input,select,textarea { font-family:inherit; }
 .mk-perm-item { display:inline-flex; align-items:center; gap:7px; padding:7px 12px; border:1.5px solid var(--border); border-radius:999px; background:var(--card); font-size:13px; cursor:pointer; }
 .mk-perm-item:has(input:checked) { border-color:#7c3aed; background:#f3edff; color:#5b21b6; font-weight:600; }
 .mk-perm-item input { width:16px; height:16px; accent-color:#7c3aed; }
+.mk-perm-item .mk-ac { font-size:11.5px; color:#7c3aed; font-weight:700; }
+.mk-area-tools { display:flex; gap:10px; align-items:flex-start; margin-top:10px; flex-wrap:wrap; }
+.mk-area-tools .btn-tool { border-color:#7c3aed; color:#5b21b6; font-weight:700; white-space:nowrap; }
+.mk-area-tools span { flex:1 1 240px; font-size:12.5px; line-height:1.6; color:var(--text-secondary); }
+.mk-area-tools span b { color:#5b21b6; }
+.sig-field.mark-area[data-signer] { border-width:2px; border-style:dashed; align-items:flex-start; justify-content:flex-start; padding:4px 7px; font-size:11.5px; font-weight:700; z-index:0;
+  background-image:repeating-linear-gradient(45deg, rgba(124,58,237,.07) 0 8px, transparent 8px 16px); }
+.smk-area { position:absolute; border:2px dashed #7c3aed; background:rgba(124,58,237,.06); border-radius:6px; pointer-events:none; z-index:2; }
+.smk-area > span { max-width:calc(100% - 12px); overflow:hidden; text-overflow:ellipsis; position:absolute; top:-10px; left:6px; background:#7c3aed; color:#fff; font-size:10.5px; font-weight:700; padding:1px 7px; border-radius:8px; white-space:nowrap; }
+.smk-area.flash { animation:mkAreaFlash .5s 3; }
+@keyframes mkAreaFlash { 50% { background:rgba(124,58,237,.28); } }
+.mk-area-note { color:#5b21b6 !important; }
+#pdfEditor .sig-field:not(.mark-area), #bulkPdfPane .sig-field:not(.mark-area) { z-index:1; }
 /* 서명자 화면 — 직접 추가 도구 */
 .mk-box { background:var(--card); border:1.5px solid #d8c7fb; border-radius:var(--radius-lg); padding:14px 16px; margin-bottom:8px; }
 /* 도구 줄만 화면 위에 붙어 있게 (안내까지 붙으면 휴대폰에서 문서를 가린다) */
@@ -2355,8 +2368,13 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
         </div>
         <div class="mk-perm" id="mkPerm">
           <div class="ip-title">✚ 서명자 직접 추가 허용 <span class="sec-tag">선택</span>
-            <span>체크한 서명자는 문서 어디에나 <b>체크 · 텍스트 · 서명란</b>을 직접 넣을 수 있습니다. 서명자 화면에 <b>사용 방법이 함께 안내</b>되고, 서명이 끝나면 <b>추가한 내용을 하나씩 확인</b>할 수 있습니다.</span></div>
+            <span>체크한 서명자는 <b>체크 · 텍스트 · 서명란</b>을 직접 넣을 수 있습니다. 서명자 화면에 <b>사용 방법이 함께 안내</b>되고, 서명이 끝나면 <b>추가한 내용을 하나씩 확인</b>할 수 있습니다.</span></div>
           <div class="mk-perm-list" id="mkPermList"></div>
+          <div class="mk-area-tools">
+            <button type="button" class="btn-tool" onclick="addMarkArea()">▭ 직접 추가 영역 놓기</button>
+            <span>위 선택 칸에서 고른 서명자의 <b>영역(점선 상자)</b>이 문서에 생깁니다. 끌어서 옮기고 모서리로 크기를 맞추세요.
+              영역을 놓으면 그 서명자는 <b>영역 안에만</b> 추가할 수 있고, 놓지 않으면 <b>문서 어디에나</b> 추가할 수 있습니다. 여러 개 놓을 수 있습니다.</span>
+          </div>
         </div>
         </div></div>
         <div class="page-nav" id="pageNav" style="display:none;"></div>
@@ -3877,7 +3895,7 @@ async function routeByProfile() {
 // ============================================================
 const SB_FN_ADMIN = SB_URL + '/functions/v1/esign-admin';
 const APP_URL = shareBase();
-const BUILD = '2026-11-09.3';   // 배포 확인용. 화면 하단과 콘솔에 표시된다.
+const BUILD = '2026-11-10.1';   // 배포 확인용. 화면 하단과 콘솔에 표시된다.
 
 
 // ============================================================
@@ -5319,7 +5337,7 @@ function bulkSetPair(on) {
 // 편집기에 놓인 상자 글자(갑 · 을)를 다시 쓴다
 function refreshBulkFieldLabels() {
   state.fields.forEach(f => {
-    f.label = bulkSignerName(f.signerIdx) + ' ' + (f.type === 'date' ? '날짜' : '서명');
+    if (f.type !== 'input') f.label = bulkSignerName(f.signerIdx) + ' ' + (f.type === 'date' ? '날짜' : f.type === 'markarea' ? '직접 추가 영역' : '서명');
     const el = document.getElementById(f.id);
     if (el) { el.remove(); renderField(f); }
   });
@@ -5471,9 +5489,10 @@ async function bulkSend() {
 
   // 서명란 · 날짜란 · 기입 항목 (일반 발송과 같은 편집기)
   if (!state.feBulk) await bulkEnterEditor(false);
-  const placed = state.fields.filter(f => f.type !== 'input');
+  const placed = state.fields.filter(f => f.type !== 'input' && f.type !== 'markarea');
   const inputs = state.reqMode === 'fill' ? state.fields.filter(f => f.type === 'input') : [];
-  const allowMarks = !!state.bulkAllowMarks;
+  const markAreas = markAreasOf(-1).map(fieldRatio);
+  const allowMarks = !!state.bulkAllowMarks || markAreas.length > 0;
   const pair = !!state.bulkPair;
   const aName = bulkPartyAName();
   if (pair) {
@@ -5486,7 +5505,7 @@ async function bulkSend() {
   if (state.reqMode === 'fill' && !inputs.length) { showToast('기입 항목을 하나 이상 놓거나, 「서명만 요청」을 골라 주세요.'); return; }
   if (inputs.length || allowMarks) {
     const { data: rd, error: re } = await sb.rpc('esign_inputs_ready');
-    if (re || !rd?.ok || (allowMarks && !(rd.version >= 2))) {
+    if (re || !rd?.ok || (allowMarks && !(rd.version >= 2)) || (markAreas.length && !(rd.version >= 3))) {
       showToast('기입 항목 · 직접 추가 기능의 서버 준비가 끝나지 않았습니다. 「서명만 요청」으로 보내 주세요.');
       return;
     }
@@ -5498,7 +5517,7 @@ async function bulkSend() {
   if (!confirm((pair ? '갑: ' + aName + ' (보내기 전 서명 완료) · 을: ' + rows.length + '명 — [갑 + 을] 문서 ' + rows.length + '개\n' : '') +
       rows.length + '명에게 「' + title + '」 문서를 발송합니다.\n' +
       '서명란 ' + placed.filter(f => f.type === 'signature').length + '개 · 날짜란 ' + placed.filter(f => f.type === 'date').length + '개' +
-      (inputs.length ? ' · 기입 항목 ' + inputs.length + '개' : '') + (allowMarks ? ' · 서명자 직접 추가 허용' : '') +
+      (inputs.length ? ' · 기입 항목 ' + inputs.length + '개' : '') + (allowMarks ? ' · 서명자 직접 추가 허용' + (markAreas.length ? ' (영역 ' + markAreas.length + '개 안에서만)' : '') : '') +
       '\n\n⏰ 서명 기한: ' + fmtDeadlineKo(deadlineFor('bulk')) + '까지 (보내는 시각부터 ' + dlOpt(state.dlChoice.bulk).label + ')' +
       '\n\n계속하시겠습니까?')) return;
 
@@ -5552,7 +5571,7 @@ async function bulkSend() {
         warn = '서명란 · 날짜란 ' + fields.length + '개 중 ' + (sd.fields || []).length + '개만 저장되었습니다.';
     } catch (e) { /* 확인 실패는 발송을 막지 않는다 */ }
     // 기입 항목 · 직접 추가 허용은 문서마다 붙인다 (알림톡보다 먼저)
-    const ex = await bulkApplyExtras(items, inputBase, allowMarks, btn);
+    const ex = await bulkApplyExtras(items, inputBase, allowMarks, btn, markAreas);
     if (ex.fail) warn += (warn ? '\n' : '') + '기입 항목 · 직접 추가 설정을 ' + ex.fail + '건에 적용하지 못했습니다.';
 
     showBulkResult(data, title, !!code);
@@ -5569,7 +5588,7 @@ async function bulkSend() {
 }
 
 // 대량발송 문서마다 기입 항목 · 직접 추가 허용을 붙인다 (동시에 6건씩)
-async function bulkApplyExtras(items, inputBase, allowMarks, btn) {
+async function bulkApplyExtras(items, inputBase, allowMarks, btn, markAreas) {
   if (!items.length || (!inputBase.length && !allowMarks)) return { fail: 0 };
   let next = 0, done = 0, fail = 0;
   const one = async it => {
@@ -5580,7 +5599,7 @@ async function bulkApplyExtras(items, inputBase, allowMarks, btn) {
     }
     if (allowMarks) {
       const { data: r, error } = await sb.rpc('esign_set_signer_perms', {
-        p_document_id: it.document_id, p_perms: [{ sign_token: it.sign_token, allow_marks: true }] });
+        p_document_id: it.document_id, p_perms: [{ sign_token: it.sign_token, allow_marks: true, ...(markAreas?.length ? { areas: markAreas } : {}) }] });
       if (error || !r?.ok) throw new Error(r?.error || error?.message);
     }
   };
@@ -11052,7 +11071,12 @@ const SL = {
     sp_err_BAD_PHONE: '휴대전화 번호를 확인해 주세요.',
     sp_err_BAD_EMAIL: '이메일 형식을 확인해 주세요.',
     sp_err_BAD_BIRTHDATE: '생년월일을 확인해 주세요.',
-    sp_err_default: '저장하지 못했습니다.'
+    sp_err_default: '저장하지 못했습니다.',
+    mk_area: '추가할 수 있는 영역',
+    mk_area_only: '요청자가 정한 <b>점선 영역 안에만</b> 추가할 수 있습니다.',
+    mk_outside: '점선으로 표시된 영역 안을 눌러 주세요.',
+    mk_outside_fix: '영역 밖에 놓인 항목이 있습니다. 점선 영역 안으로 옮겨 주세요.',
+    mk_tap_area: '점선 영역 안에서 넣을 곳을 누르세요'
   },
   en: {
     hdr: 'E-Signature', loading: 'Loading the document...',
@@ -11231,7 +11255,12 @@ const SL = {
     sp_err_BAD_PHONE: 'Please check the mobile number.',
     sp_err_BAD_EMAIL: 'Please check the email format.',
     sp_err_BAD_BIRTHDATE: 'Please check the date of birth.',
-    sp_err_default: 'Could not save.'
+    sp_err_default: 'Could not save.',
+    mk_area: 'Area you can add to',
+    mk_area_only: 'You can add items <b>only inside the dashed areas</b> set by the requester.',
+    mk_outside: 'Please tap inside a dashed area.',
+    mk_outside_fix: 'Some items are outside the allowed area. Please move them into a dashed area.',
+    mk_tap_area: 'Tap where to place it inside a dashed area'
   },
   zh: {
     hdr: '电子签名', loading: '正在加载文件...',
@@ -11409,7 +11438,12 @@ const SL = {
     sp_err_BAD_PHONE: '请检查手机号码。',
     sp_err_BAD_EMAIL: '请检查邮箱格式。',
     sp_err_BAD_BIRTHDATE: '请检查出生日期。',
-    sp_err_default: '保存失败。'
+    sp_err_default: '保存失败。',
+    mk_area: '可添加区域',
+    mk_area_only: '只能在请求方指定的<b>虚线区域内</b>添加。',
+    mk_outside: '请点击虚线区域内的位置。',
+    mk_outside_fix: '有项目在区域之外。请移到虚线区域内。',
+    mk_tap_area: '请在虚线区域内点击放置位置'
   },
   ja: {
     hdr: '電子署名', loading: '文書を読み込んでいます...',
@@ -11587,7 +11621,12 @@ const SL = {
     sp_err_BAD_PHONE: '携帯電話番号をご確認ください。',
     sp_err_BAD_EMAIL: 'メールアドレスの形式をご確認ください。',
     sp_err_BAD_BIRTHDATE: '生年月日をご確認ください。',
-    sp_err_default: '保存できませんでした。'
+    sp_err_default: '保存できませんでした。',
+    mk_area: '追加できるエリア',
+    mk_area_only: '依頼者が指定した<b>点線エリアの中だけ</b>に追加できます。',
+    mk_outside: '点線エリアの中を押してください。',
+    mk_outside_fix: 'エリアの外にある項目があります。点線エリアの中に移動してください。',
+    mk_tap_area: '点線エリアの中で入れる場所を押してください'
   },
   vi: {
     hdr: 'Chữ ký điện tử', loading: 'Đang tải tài liệu...',
@@ -11765,7 +11804,12 @@ const SL = {
     sp_err_BAD_PHONE: 'Vui lòng kiểm tra số điện thoại.',
     sp_err_BAD_EMAIL: 'Vui lòng kiểm tra định dạng email.',
     sp_err_BAD_BIRTHDATE: 'Vui lòng kiểm tra ngày sinh.',
-    sp_err_default: 'Không thể lưu.'
+    sp_err_default: 'Không thể lưu.',
+    mk_area: 'Vùng được phép thêm',
+    mk_area_only: 'Bạn chỉ có thể thêm <b>bên trong vùng nét đứt</b> do người yêu cầu chỉ định.',
+    mk_outside: 'Vui lòng chạm vào bên trong vùng nét đứt.',
+    mk_outside_fix: 'Có mục nằm ngoài vùng cho phép. Vui lòng di chuyển vào vùng nét đứt.',
+    mk_tap_area: 'Chạm vào vị trí cần đặt bên trong vùng nét đứt'
   }
 };
 
@@ -12549,16 +12593,39 @@ function copyDocInputs() {
 function renderMarkPerms() {
   const box = document.getElementById('mkPermList');
   if (!box) return;
+  const ac = n => n ? ' <span class="mk-ac">▭ 영역 ' + n + '개</span>' : '';
   if (state.feBulk) {   // 대량발송: 명단 전원에게 같은 설정
     box.innerHTML = '<label class="mk-perm-item"><input type="checkbox"' + (state.bulkAllowMarks ? ' checked' : '') +
-      ' onchange="state.bulkAllowMarks=this.checked"> 명단의 서명자 전원 (각자 자기 문서에)</label>';
+      ' onchange="toggleMarkPerm(-1, this.checked)"> ' + (state.bulkPair ? '을' : '명단의 서명자') + ' 전원 (각자 자기 문서에)' + ac(markAreasOf(-1).length) + '</label>';
     return;
   }
   box.innerHTML = state.signers.map((s, i) =>
     '<label class="mk-perm-item"><input type="checkbox"' + (s.allowMarks ? ' checked' : '') +
-    ' onchange="state.signers[' + i + '].allowMarks=this.checked">' +
+    ' onchange="toggleMarkPerm(' + i + ', this.checked)">' +
     '<span class="signer-num" style="background:' + SIGNER_COLORS[i] + ';width:20px;height:20px;font-size:11px;">' + (i + 1) + '</span>' +
-    esc(s.name || SIGNER_LABELS[i]) + '</label>').join('');
+    esc(s.name || SIGNER_LABELS[i]) + ac(markAreasOf(i).length) + '</label>').join('');
+}
+// 직접 추가 영역 — i < 0 이면 대량발송(명단 전원)
+const markAreasOf = i => (state.fields || []).filter(f => f.type === 'markarea' && (i < 0 || (f.signerIdx || 0) === i));
+function addMarkArea() {
+  const n = state.fields.length;
+  addField('markarea', 220, 110, '직접 추가 영역');
+  if (state.fields.length === n) return;
+  const f = state.fields[state.fields.length - 1];
+  if (state.feBulk) state.bulkAllowMarks = true;
+  else if (state.signers[f.signerIdx || 0]) state.signers[f.signerIdx || 0].allowMarks = true;
+  renderMarkPerms();
+  showToast('직접 추가 영역을 놓았습니다. 끌어서 옮기고 모서리로 크기를 맞추세요.', true);
+}
+function toggleMarkPerm(i, on) {
+  const areas = markAreasOf(i);
+  if (!on && areas.length) {
+    if (!confirm('놓아 둔 직접 추가 영역 ' + areas.length + '개도 함께 지울까요?')) { renderMarkPerms(); return; }
+    areas.forEach(f => { document.getElementById(f.id)?.remove(); });
+    state.fields = state.fields.filter(f => !areas.includes(f));
+  }
+  if (i < 0) state.bulkAllowMarks = on; else if (state.signers[i]) state.signers[i].allowMarks = on;
+  renderMarkPerms();
 }
 // 요청자: 확인할 추가 항목이 남은 문서 { document_id: 건수 }
 async function loadMarksPending() {
@@ -12570,11 +12637,12 @@ async function loadMarksPending() {
 
 // 서명자: 허락 여부 · 내 항목 (완료 문서면 전원 항목)
 async function loadSignMarks(token) {
-  state.signMarks = []; state.signMarksAllow = false; state.markTool = null;
+  state.signMarks = []; state.signMarksAllow = false; state.markTool = null; state.signMarksAreas = [];
   try {
     const { data, error } = await sb.rpc('esign_sign_marks', { p_token: token });
     if (error || !data?.ok) return;
     state.signMarks = data.marks || [];
+    state.signMarksAreas = Array.isArray(data.areas) ? data.areas.map(a => ({ page: +a.page || 1, x: +a.x, y: +a.y, w: +a.w, h: +a.h })) : [];
     state.signMarksAllow = !!data.allow && state.signData?.signer?.status !== 'signed' &&
       !['complete', 'cancelled', 'expired'].includes(state.signData?.document?.status);
     state.myMarks = state.signMarks.filter(m => m.mine).map(m => ({ ...m, key: 'k' + Math.random().toString(36).slice(2) }));
@@ -12592,6 +12660,7 @@ function renderSignMarksBox() {
   box.innerHTML =
     '<h4>✚ ' + st('mk_title') + '</h4>' +
     '<p class="mk-desc">' + st('mk_allowed') + '</p>' +
+    (mkAreas().length ? '<p class="mk-desc mk-area-note">▭ ' + st('mk_area_only') + '</p>' : '') +
     // 안내는 서명자가 접거나 펼친 그대로 둔다 (항목을 놓을 때마다 접히면 문서 위치가 밀린다)
     '<details' + (state.mkGuideOpen ? ' open' : '') + ' ontoggle="state.mkGuideOpen=this.open"><summary>' + st('mk_how') + '</summary><ol>' +
       '<li>' + st('mk_step1') + '</li><li>' + st('mk_step2') + '</li><li>' + st('mk_step3') + '</li><li>' + st('mk_step4') + '</li>' +
@@ -12603,7 +12672,7 @@ function renderSignMarksBox() {
         st(k === 'check' ? 'mk_check' : k === 'text' ? 'mk_text' : 'mk_sign') + '</button>').join('') +
       '<span class="mk-count">' + st('mk_count', { n: (state.myMarks || []).length }) + '</span>' +
     '</div>' +
-    '<div class="mk-hint' + (t ? ' on' : '') + '"><span>👆 ' + st('mk_tap') + '</span>' +
+    '<div class="mk-hint' + (t ? ' on' : '') + '"><span>👆 ' + st(mkAreas().length ? 'mk_tap_area' : 'mk_tap') + '</span>' +
       '<button type="button" onclick="setMarkTool(null)">' + st('mk_cancel') + '</button></div>';
   document.getElementById('signPdfEditor')?.classList.toggle('mk-placing', !!t);
 }
@@ -12612,17 +12681,44 @@ function setMarkTool(k) {
   renderSignMarksBox();
 }
 
-// 문서를 누르면 고른 도구로 그 자리에 놓는다
+// 요청자가 정한 직접 추가 영역 (없으면 문서 어디에나)
+const mkAreas = () => state.signMarksAreas || [];
+const MK_TOL = 0.003;
+function mkAreaAt(page, cx, cy) {
+  return mkAreas().find(a => a.page === page && cx >= a.x && cx <= a.x + a.w && cy >= a.y && cy <= a.y + a.h) || null;
+}
+// 항목이 들어 있는 영역 (가운데 기준), 없으면 null
+function mkAreaOf(m) { return mkAreaAt(m.page || 1, m.x + m.w / 2, m.y + m.h / 2); }
+function mkInArea(m) {
+  if (!mkAreas().length) return true;
+  return mkAreas().some(a => a.page === (m.page || 1) && m.x >= a.x - MK_TOL && m.y >= a.y - MK_TOL &&
+    m.x + m.w <= a.x + a.w + MK_TOL && m.y + m.h <= a.y + a.h + MK_TOL);
+}
+function flashMkAreas() {
+  document.querySelectorAll('#signPdfEditor .smk-area').forEach(el => {
+    el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash');
+  });
+}
+
+// 문서를 누르면 고른 도구로 그 자리에 놓는다 (영역이 있으면 영역 안에만)
 function onMarkPlace(e) {
   if (!state.markTool || !state.signMarksAllow) return;
   if (e.target.closest('.smk-item, .si-row')) return;
   const pg = e.target.closest('#signPdfEditor .pdf-page');
   if (!pg) return;
   const r = pg.getBoundingClientRect();
-  const [w, h] = MK_SIZE[state.markTool];
-  const px = Math.max(0, Math.min(r.width - w, e.clientX - r.left - w / 2));
-  const py = Math.max(0, Math.min(r.height - h, e.clientY - r.top - h / 2));
-  const m = { key: 'k' + Math.random().toString(36).slice(2), kind: state.markTool, page: parseInt(pg.dataset.page, 10) || 1,
+  const page = parseInt(pg.dataset.page, 10) || 1;
+  let bx = 0, by = 0, bw = 1, bh = 1;
+  if (mkAreas().length) {
+    const a = mkAreaAt(page, (e.clientX - r.left) / r.width, (e.clientY - r.top) / r.height);
+    if (!a) { showToast(st('mk_outside')); flashMkAreas(); return; }
+    bx = a.x; by = a.y; bw = a.w; bh = a.h;
+  }
+  const [w0, h0] = MK_SIZE[state.markTool];
+  const w = Math.min(w0, bw * r.width), h = Math.min(h0, bh * r.height);
+  const px = Math.max(bx * r.width, Math.min((bx + bw) * r.width - w, e.clientX - r.left - w / 2));
+  const py = Math.max(by * r.height, Math.min((by + bh) * r.height - h, e.clientY - r.top - h / 2));
+  const m = { key: 'k' + Math.random().toString(36).slice(2), kind: state.markTool, page,
     x: px / r.width, y: py / r.height, w: w / r.width, h: h / r.height, value: '' };
   state.myMarks = (state.myMarks || []).concat(m);
   state.markTool = null;
@@ -12633,8 +12729,18 @@ function onMarkPlace(e) {
 document.addEventListener('click', e => { if (e.target.closest && e.target.closest('#signPdfEditor')) onMarkPlace(e); });
 
 function renderMyMarks() {
-  document.querySelectorAll('#signPdfEditor .smk-item').forEach(el => el.remove());
+  document.querySelectorAll('#signPdfEditor .smk-item, #signPdfEditor .smk-area').forEach(el => el.remove());
   const ro = !state.signMarksAllow;
+  if (!ro) mkAreas().forEach(a => {
+    const pg = document.querySelector('#signPdfEditor .pdf-page[data-page="' + a.page + '"]');
+    if (!pg) return;
+    const el = document.createElement('div');
+    el.className = 'smk-area';
+    el.style.cssText = 'left:' + (a.x * pg.offsetWidth) + 'px;top:' + (a.y * pg.offsetHeight) + 'px;' +
+      'width:' + (a.w * pg.offsetWidth) + 'px;height:' + (a.h * pg.offsetHeight) + 'px;';
+    el.innerHTML = '<span>✚ ' + esc(st('mk_area')) + '</span>';
+    pg.appendChild(el);
+  });
   (state.myMarks || []).forEach(m => {
     const pg = document.querySelector('#signPdfEditor .pdf-page[data-page="' + (m.page || 1) + '"]');
     if (!pg) return;
@@ -12662,15 +12768,18 @@ function markPointerDown(e) {
   if (act === 'x') { state.myMarks = state.myMarks.filter(x => x !== m); el.remove(); renderSignMarksBox(); return; }
   const pg = el.parentElement, W = pg.offsetWidth, H = pg.offsetHeight;
   const sx = e.clientX, sy = e.clientY, ox = m.x * W, oy = m.y * H, ow = m.w * W, oh = m.h * H;
+  // 영역이 있으면 그 영역 밖으로 옮기거나 키울 수 없다
+  const ar = mkAreas().length ? mkAreaOf(m) : null;
+  const L = ar ? ar.x * W : 0, T = ar ? ar.y * H : 0, R = ar ? (ar.x + ar.w) * W : W, B = ar ? (ar.y + ar.h) * H : H;
   let moved = false;
   const mv = ev => {
     const dx = ev.clientX - sx, dy = ev.clientY - sy;
     if (Math.abs(dx) + Math.abs(dy) > 4) moved = true;
     if (act === 'rs') {
-      const nw = Math.max(40, Math.min(W - ox, ow + dx)), nh = Math.max(16, Math.min(H - oy, oh + dy));
+      const nw = Math.max(Math.min(40, R - ox), Math.min(R - ox, ow + dx)), nh = Math.max(Math.min(16, B - oy), Math.min(B - oy, oh + dy));
       el.style.width = nw + 'px'; el.style.height = nh + 'px'; m.w = nw / W; m.h = nh / H;
     } else {
-      const nx = Math.max(0, Math.min(W - ow, ox + dx)), ny = Math.max(0, Math.min(H - oh, oy + dy));
+      const nx = Math.max(L, Math.min(R - ow, ox + dx)), ny = Math.max(T, Math.min(B - oh, oy + dy));
       el.style.left = nx + 'px'; el.style.top = ny + 'px'; m.x = nx / W; m.y = ny / H;
     }
   };
@@ -12714,6 +12823,12 @@ function openMarkText(key) {
 }
 function checkSignMarks() {
   if (!state.signMarksAllow) return true;
+  const out = (state.myMarks || []).find(m => !mkInArea(m));
+  if (out) {
+    showToast(st('mk_outside_fix')); flashMkAreas();
+    document.querySelector('#signPdfEditor .smk-item[data-key="' + out.key + '"]')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return false;
+  }
   const empty = (state.myMarks || []).find(m => m.kind === 'text' && !String(m.value || '').trim());
   if (!empty) return true;
   showToast(st('mk_empty'));
@@ -12729,6 +12844,7 @@ async function submitSignMarks() {
   if (error || !data?.ok) {
     const why = data?.error || error?.message || '';
     if (/EMPTY_TEXT/.test(why)) { closeSigModal(); showToast(st('mk_empty')); }
+    else if (/OUTSIDE_AREA/.test(why)) { closeSigModal(); showToast(st('mk_outside_fix')); flashMkAreas(); }
     else showToast(st('mk_save_fail') + why);
     return false;
   }
@@ -13664,7 +13780,7 @@ function addField(type, w, h, labelSuffix, extra) {
   let signerIdx = state.feBulk ? 0 : parseInt(document.getElementById('fieldSignerSelect')?.value || '0');
   if (state.feBulk && state.bulkPair) {
     // 기입 항목은 미리 서명한 갑이 채울 수 없으므로 을에게만
-    signerIdx = (type === 'input') ? 1 : parseInt(document.getElementById('fieldSignerSelect')?.value || '1');
+    signerIdx = (type === 'input' || type === 'markarea') ? 1 : parseInt(document.getElementById('fieldSignerSelect')?.value || '1');
   }
   const signerName = state.feBulk ? bulkSignerName(signerIdx) : (state.signers[signerIdx]?.name || SIGNER_LABELS[signerIdx]);
   const page = parseInt(pg.dataset.page);
@@ -13692,11 +13808,11 @@ function renderField(f, pageEl) {
   }
   const el = document.createElement('div');
   const isInput = f.type === 'input';
-  el.className = 'sig-field' + (isInput ? ' input-field' : '');
+  el.className = 'sig-field' + (isInput ? ' input-field' : '') + (f.type === 'markarea' ? ' mark-area' : '');
   el.id = f.id;
   el.setAttribute('data-signer', f.signerIdx || 0);
   el.style.cssText = `left:${f.x}px;top:${f.y}px;width:${f.w}px;height:${f.h}px;`;
-  el.innerHTML = (isInput ? inputFieldLabel(f) : f.label) + '<div class="resize-handle"></div>' +
+  el.innerHTML = (isInput ? inputFieldLabel(f) : f.type === 'markarea' ? '✚ ' + esc(f.label) : f.label) + '<div class="resize-handle"></div>' +
     (isInput ? `<div class="edit-field" onclick="openInputDef('${f.id}')" title="이름 · 필수 여부 고치기">✎</div>` : '') +
     `<div class="remove-field" onclick="removeField('${f.id}')">✕</div>`;
   el.addEventListener('mousedown', startDrag);
@@ -13781,7 +13897,9 @@ function startResize(e) {
 function removeField(id) {
   const el = document.getElementById(id);
   if (el) el.remove();
+  const wasArea = state.fields.some(f => f.id === id && f.type === 'markarea');
   state.fields = state.fields.filter(f => f.id !== id);
+  if (wasArea) renderMarkPerms();
 }
 
 // ===== CREATE DOCUMENT =====
@@ -13799,7 +13917,8 @@ async function createDocument() {
     showToast('기입 항목을 문서에 하나 이상 배치하거나, 「서명만 요청」을 골라 주세요.');
     return;
   }
-  const wantMarks = state.signers.some(s => s.allowMarks);
+  const wantAreas = state.fields.some(f => f.type === 'markarea');
+  const wantMarks = state.signers.some(s => s.allowMarks) || wantAreas;
   if (inputFields.length || wantMarks) {
     const { data: rd, error: re } = await sb.rpc('esign_inputs_ready');
     if (re || !rd?.ok) {
@@ -13808,6 +13927,10 @@ async function createDocument() {
     }
     if (wantMarks && !(rd.version >= 2)) {
       showToast('「서명자 직접 추가」의 서버 준비가 아직 끝나지 않았습니다. 체크를 풀고 보내 주세요.');
+      return;
+    }
+    if (wantAreas && !(rd.version >= 3)) {
+      showToast('「직접 추가 영역」의 서버 준비가 아직 끝나지 않았습니다. 영역을 지우고 보내 주세요.');
       return;
     }
   }
@@ -13839,7 +13962,7 @@ async function createDocument() {
     }
 
     // 2) 서명란 좌표를 0~1 비율로 변환 (기입 항목은 문서를 만든 뒤 따로 저장한다)
-    const fieldsPayload = state.fields.filter(f => f.type !== 'input').map(f => ({
+    const fieldsPayload = state.fields.filter(f => f.type !== 'input' && f.type !== 'markarea').map(f => ({
       signer_index: f.signerIdx || 0,
       field_type: f.type,
       ...fieldRatio(f)
@@ -13963,8 +14086,10 @@ async function attachDocExtras(data, inputFields) {
     }
   }
 
-  const perms = state.signers.map((s, i) => ({ sign_token: tokenOf(i), allow_marks: !!s.allowMarks }))
-    .filter(x => x.sign_token && x.allow_marks);
+  const perms = state.signers.map((s, i) => {
+    const areas = markAreasOf(i).map(fieldRatio);
+    return { sign_token: tokenOf(i), allow_marks: !!s.allowMarks || areas.length > 0, ...(areas.length ? { areas } : {}) };
+  }).filter(x => x.sign_token && x.allow_marks);
   if (perms.length) {
     let perr = null;
     try {
