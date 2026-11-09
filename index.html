@@ -354,6 +354,36 @@ input,select,textarea { font-family:inherit; }
 .sig-field .resize-handle { position:absolute; bottom:-4px; right:-4px; width:12px; height:12px; background:var(--cyan); border-radius:50%; cursor:nwse-resize; }
 .sig-field .remove-field { position:absolute; top:-8px; right:-8px; width:18px; height:18px; background:var(--danger); color:#fff; border-radius:50%; font-size:10px; display:flex; align-items:center; justify-content:center; cursor:pointer; opacity:0; transition:opacity .2s; }
 .sig-field:hover .remove-field { opacity:1; }
+/* 서명자 간편 가입 · 내 정보 */
+.signer-acct { background:var(--card); border:1.5px solid #c7d2fe; border-radius:var(--radius-lg); padding:14px 16px; margin-bottom:12px; }
+.signer-acct .sa-row { display:flex; gap:10px; align-items:flex-start; justify-content:space-between; flex-wrap:wrap; }
+.signer-acct b { font-size:14.5px; color:#3730a3; }
+.signer-acct p { font-size:12.5px; color:var(--text-secondary); margin-top:3px; line-height:1.6; }
+.signer-acct .sa-btns { display:flex; gap:8px; margin-top:10px; flex-wrap:wrap; }
+.sa-kakao, .sa-google { flex:1 1 140px; padding:11px 14px; border-radius:10px; font-size:14px; font-weight:700; cursor:pointer; font-family:inherit; border:1.5px solid transparent; }
+.sa-kakao { background:#fee500; color:#191600; }
+.sa-google { background:#fff; color:#1f2937; border-color:var(--border); }
+.signer-acct .sa-note { font-size:11.5px; color:var(--text-muted); margin-top:8px; }
+.signer-acct .sa-links { display:flex; gap:6px; }
+.signer-acct .sa-links button { padding:7px 11px; border:1.5px solid var(--border); border-radius:8px; background:#fff; font-size:12.5px; font-weight:600; cursor:pointer; font-family:inherit; }
+.sa-save { display:flex; gap:8px; align-items:center; font-size:13px; margin:2px 0 12px; color:#3730a3; font-weight:600; cursor:pointer; }
+.sa-save input { width:17px; height:17px; accent-color:#4f46e5; }
+.si-row.auto input, .si-row.auto textarea { background:#eef2ff; }
+#spModal .modal { width:560px; max-width:100%; max-height:calc(100dvh - 40px); display:flex; flex-direction:column; }
+#spModal .modal-body { overflow-y:auto; -webkit-overflow-scrolling:touch; padding:16px 18px; }
+#spModal .modal-footer { flex-wrap:wrap; padding:12px 18px; }
+.sp-sec { border:1px solid var(--border); border-radius:10px; padding:10px 12px; margin-bottom:10px; }
+.sp-sec > summary, .sp-sec > h5 { font-size:13.5px; font-weight:800; color:var(--navy); cursor:pointer; }
+.sp-sec > h5 em { color:var(--danger); font-style:normal; font-size:12px; margin-left:4px; }
+.sp-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px 10px; margin-top:8px; }
+.sp-grid label { font-size:12px; color:var(--text-secondary); display:block; }
+.sp-grid input, .sp-grid select, .sp-extra input { width:100%; padding:9px 10px; border:1.5px solid var(--border); border-radius:8px; font-size:15px; font-family:inherit; margin-top:3px; background:#fff; }
+.sp-grid .full { grid-column:1 / -1; }
+.sp-extra { display:grid; grid-template-columns:1fr 1.4fr 30px; gap:6px; align-items:end; margin-top:6px; }
+.sp-extra button { height:38px; border:1.5px solid var(--border); border-radius:8px; background:#fff; cursor:pointer; }
+.sp-agree { display:flex; gap:8px; align-items:flex-start; font-size:12.5px; line-height:1.6; margin-top:8px; cursor:pointer; }
+.sp-agree input { width:17px; height:17px; margin-top:2px; }
+@media (max-width:520px) { .sp-grid { grid-template-columns:1fr; } }
 /* 대량발송 갑 · 을 */
 .pa-box { border:1.5px solid #bae6fd; background:#f0f9ff; border-radius:12px; padding:14px 16px; margin-bottom:14px; }
 .pa-toggle { display:flex; gap:8px; align-items:flex-start; cursor:pointer; font-size:14px; }
@@ -2408,6 +2438,7 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
       <div class="sign-pdf-area">
         <div class="pdf-editor" id="signPdfEditor"></div>
       </div>
+      <div class="signer-acct" id="signerAcct" style="display:none;"></div>
       <div class="sign-inputs" id="signInputsBox" style="display:none;"></div>
       <div class="consent-box" id="consentBox">
         <h4 data-sl="consent_title">⚖️ 전자서명 동의</h4>
@@ -3778,6 +3809,13 @@ async function routeByProfile() {
   state.profile = data.profile;
   state.isAdmin = !!data.is_admin;
 
+  // 서명 화면에서 간편 가입한 서명자 계정: 요청자 가입 화면 대신 내 정보 화면
+  if (data.profile?.account_kind === 'signer' && !state.wantMember) {
+    showPage('landingPage');
+    openSignerProfile({ home: true });
+    return false;
+  }
+
   if (data.needs_signup) {
     const { data: sess } = await sb.auth.getSession();
     const u = sess?.session?.user;
@@ -3839,7 +3877,7 @@ async function routeByProfile() {
 // ============================================================
 const SB_FN_ADMIN = SB_URL + '/functions/v1/esign-admin';
 const APP_URL = shareBase();
-const BUILD = '2026-11-09.2';   // 배포 확인용. 화면 하단과 콘솔에 표시된다.
+const BUILD = '2026-11-09.3';   // 배포 확인용. 화면 하단과 콘솔에 표시된다.
 
 
 // ============================================================
@@ -10938,7 +10976,83 @@ const SL = {
     undo_err_default: '서명을 되돌리지 못했습니다.',
     final_confirm: '이 서명으로 문서가 최종 완료되며, 완료 후에는 되돌릴 수 없습니다.\n\n빠뜨린 내용은 없나요?\n[확인] 서명 완료   [취소] 돌아가서 고치기',
     rr_title: '요청자가 다시 요청했습니다',
-    rr_hint: '아래 내용을 확인해 고친 뒤 다시 서명해 주세요. 전에 입력한 내용과 추가한 항목은 그대로 남아 있습니다.'
+    rr_hint: '아래 내용을 확인해 고친 뒤 다시 서명해 주세요. 전에 입력한 내용과 추가한 항목은 그대로 남아 있습니다.',
+    sa_title: '다음부터 자동으로 채우기',
+    sa_desc: '카카오 · 구글로 간편 가입하면 이름 · 연락처 · 주소 같은 내 정보를 저장해 두고, 다음 서명부터 <b>자동으로 채워 드립니다.</b> 어느 휴대폰 · PC에서든 됩니다.',
+    sa_kakao: '카카오로 시작',
+    sa_google: '구글로 시작',
+    sa_note: '문서를 보내는 요청자 회원가입과는 별개이며 승인 · 결제가 필요 없습니다. 가입하지 않아도 지금 바로 서명할 수 있습니다.',
+    sa_hello: '{name}님',
+    sa_filled: '내 정보로 <b>{n}개</b> 항목을 채웠습니다. 맞는지 확인한 뒤 서명해 주세요.',
+    sa_nofill: '이 문서에는 자동으로 채울 항목이 없습니다.',
+    sa_incomplete: '내 정보를 입력해 두면 다음부터 자동으로 채워집니다. 「내 정보 관리」를 눌러 주세요.',
+    sa_manage: '내 정보 관리',
+    sa_logout: '로그아웃',
+    sa_save: '입력한 내용을 내 정보에 저장 (다음에 자동으로 채움)',
+    sa_login_first: '먼저 카카오 · 구글로 간편 가입해 주세요.',
+    sp_title: '내 정보',
+    sp_basic: '기본 정보',
+    sp_required: '필수',
+    sp_optional: '선택',
+    sp_none: '선택 안 함',
+    sp_first: '가입을 환영합니다! 다음 서명부터 자동으로 채울 내 정보를 입력해 주세요. 기본 정보만 필수이고, 나머지는 필요한 것만 넣으면 됩니다.',
+    sp_home: '서명자 계정입니다. 받은 서명 링크를 열면 이 정보가 기입 항목에 자동으로 채워집니다.',
+    sp_name: '이름',
+    sp_phone: '휴대전화',
+    sp_email: '이메일',
+    sp_birthdate: '생년월일',
+    sp_g_addr: '주소',
+    sp_address: '주소',
+    sp_address_detail: '상세 주소 (동 · 호수)',
+    sp_zipcode: '우편번호',
+    sp_g_personal: '영문 이름 · 성별 · 국적',
+    sp_name_en: '영문 이름',
+    sp_gender: '성별',
+    sp_nationality: '국적',
+    sp_g_work: '직장',
+    sp_company: '직장 · 소속',
+    sp_job_title: '직책',
+    sp_employee_no: '사번',
+    sp_g_school: '학교',
+    sp_school: '학교',
+    sp_grade: '학년',
+    sp_student_no: '학번',
+    sp_g_emergency: '비상 연락처',
+    sp_emergency_name: '비상 연락처 이름',
+    sp_emergency_relation: '관계',
+    sp_emergency_phone: '비상 연락처 번호',
+    sp_g_guardian: '보호자',
+    sp_guardian_name: '보호자 이름',
+    sp_guardian_relation: '관계',
+    sp_guardian_phone: '보호자 연락처',
+    sp_g_car: '차량',
+    sp_car_no: '차량번호',
+    sp_g_bank: '계좌',
+    sp_bank_name: '은행',
+    sp_bank_account: '계좌번호',
+    sp_bank_holder: '예금주',
+    sp_g_etc: '기타',
+    sp_website: '홈페이지 · SNS',
+    sp_memo: '메모',
+    sp_g_extra: '직접 추가한 항목',
+    sp_extra_hint: '문서의 기입 항목 이름과 같게 적어 두면 그 칸에 자동으로 채워집니다. 예) 동호수 · 반 · 회원번호',
+    sp_extra_add: '항목 추가',
+    sp_extra_label: '항목 이름',
+    sp_extra_value: '내용',
+    sp_agree: '[필수] 입력한 정보를 다음 서명 때 자동으로 채우기 위해 내 계정에 저장하는 데 동의합니다. 언제든 「내 정보 지우기」로 지울 수 있습니다. 주민등록번호 · 여권번호는 받지 않습니다.',
+    sp_save: '저장',
+    sp_close: '닫기',
+    sp_clear: '내 정보 지우기',
+    sp_become: '문서를 보내려면 요청자로 가입',
+    sp_saved: '내 정보를 저장했습니다.',
+    sp_cleared: '내 정보를 지웠습니다.',
+    sp_clear_confirm: '저장한 내 정보를 모두 지울까요? 다음부터 자동으로 채워지지 않습니다.',
+    sp_err_REQUIRED_MISSING: '기본 정보(이름 · 휴대전화 · 이메일 · 생년월일)를 모두 입력해 주세요.',
+    sp_err_AGREE_REQUIRED: '저장 동의에 체크해 주세요.',
+    sp_err_BAD_PHONE: '휴대전화 번호를 확인해 주세요.',
+    sp_err_BAD_EMAIL: '이메일 형식을 확인해 주세요.',
+    sp_err_BAD_BIRTHDATE: '생년월일을 확인해 주세요.',
+    sp_err_default: '저장하지 못했습니다.'
   },
   en: {
     hdr: 'E-Signature', loading: 'Loading the document...',
@@ -11041,7 +11155,83 @@ const SL = {
     undo_err_default: 'Could not undo your signature.',
     final_confirm: 'Your signature will complete this document, and it cannot be undone afterwards.\n\nHave you checked everything?\n[OK] Finish signing   [Cancel] Go back and edit',
     rr_title: 'The requester has asked you again',
-    rr_hint: 'Please check the note below, make the changes and sign again. Your previous entries and added items are kept.'
+    rr_hint: 'Please check the note below, make the changes and sign again. Your previous entries and added items are kept.',
+    sa_title: 'Fill in automatically next time',
+    sa_desc: 'Sign up with Kakao or Google to save your details (name, phone, address, etc.). From your next signature they are <b>filled in automatically</b> — on any phone or PC.',
+    sa_kakao: 'Continue with Kakao',
+    sa_google: 'Continue with Google',
+    sa_note: 'This is separate from requester sign-up — no approval or payment needed. You can also sign right now without signing up.',
+    sa_hello: '{name}',
+    sa_filled: '<b>{n}</b> item(s) were filled with your saved details. Please check them before signing.',
+    sa_nofill: 'There is nothing to fill in automatically on this document.',
+    sa_incomplete: 'Save your details and they will be filled in automatically next time. Tap 「My details」.',
+    sa_manage: 'My details',
+    sa_logout: 'Log out',
+    sa_save: 'Save what I entered to my details (fill automatically next time)',
+    sa_login_first: 'Please sign up with Kakao or Google first.',
+    sp_title: 'My details',
+    sp_basic: 'Basic details',
+    sp_required: 'Required',
+    sp_optional: 'Optional',
+    sp_none: 'Not specified',
+    sp_first: 'Welcome! Enter the details to fill in automatically from your next signature. Only the basics are required; add anything else you need.',
+    sp_home: 'This is a signer account. When you open a signing link, these details are filled in automatically.',
+    sp_name: 'Name',
+    sp_phone: 'Mobile',
+    sp_email: 'Email',
+    sp_birthdate: 'Date of birth',
+    sp_g_addr: 'Address',
+    sp_address: 'Address',
+    sp_address_detail: 'Address line 2 (apt · unit)',
+    sp_zipcode: 'Postal code',
+    sp_g_personal: 'English name · gender · nationality',
+    sp_name_en: 'English name',
+    sp_gender: 'Gender',
+    sp_nationality: 'Nationality',
+    sp_g_work: 'Work',
+    sp_company: 'Company · organization',
+    sp_job_title: 'Job title',
+    sp_employee_no: 'Employee no.',
+    sp_g_school: 'School',
+    sp_school: 'School',
+    sp_grade: 'Grade',
+    sp_student_no: 'Student no.',
+    sp_g_emergency: 'Emergency contact',
+    sp_emergency_name: 'Emergency contact name',
+    sp_emergency_relation: 'Relationship',
+    sp_emergency_phone: 'Emergency contact number',
+    sp_g_guardian: 'Guardian',
+    sp_guardian_name: 'Guardian name',
+    sp_guardian_relation: 'Relationship',
+    sp_guardian_phone: 'Guardian phone',
+    sp_g_car: 'Vehicle',
+    sp_car_no: 'Vehicle no.',
+    sp_g_bank: 'Bank account',
+    sp_bank_name: 'Bank',
+    sp_bank_account: 'Account no.',
+    sp_bank_holder: 'Account holder',
+    sp_g_etc: 'Other',
+    sp_website: 'Website · SNS',
+    sp_memo: 'Memo',
+    sp_g_extra: 'My own items',
+    sp_extra_hint: 'Use the same name as the document field and it will be filled in automatically. e.g. Unit no. · Class · Member no.',
+    sp_extra_add: 'Add item',
+    sp_extra_label: 'Item name',
+    sp_extra_value: 'Value',
+    sp_agree: '[Required] I agree to save these details to my account so they can be filled in automatically when I sign. I can delete them anytime with 「Delete my details」. Resident or passport numbers are not collected.',
+    sp_save: 'Save',
+    sp_close: 'Close',
+    sp_clear: 'Delete my details',
+    sp_become: 'Sign up as a requester to send documents',
+    sp_saved: 'Your details have been saved.',
+    sp_cleared: 'Your details have been deleted.',
+    sp_clear_confirm: 'Delete all saved details? They will no longer be filled in automatically.',
+    sp_err_REQUIRED_MISSING: 'Please enter all basic details (name, mobile, email, date of birth).',
+    sp_err_AGREE_REQUIRED: 'Please check the consent box.',
+    sp_err_BAD_PHONE: 'Please check the mobile number.',
+    sp_err_BAD_EMAIL: 'Please check the email format.',
+    sp_err_BAD_BIRTHDATE: 'Please check the date of birth.',
+    sp_err_default: 'Could not save.'
   },
   zh: {
     hdr: '电子签名', loading: '正在加载文件...',
@@ -11143,7 +11333,83 @@ const SL = {
     undo_err_default: '无法撤回签名。',
     final_confirm: '您的签名将使本文件最终完成，完成后无法撤回。\n\n确认没有遗漏吗？\n[确定] 完成签名   [取消] 返回修改',
     rr_title: '请求方再次请求',
-    rr_hint: '请确认以下内容，修改后重新签名。之前填写和添加的内容均已保留。'
+    rr_hint: '请确认以下内容，修改后重新签名。之前填写和添加的内容均已保留。',
+    sa_title: '下次自动填写',
+    sa_desc: '使用Kakao或Google快速注册后，可保存姓名、电话、地址等信息，从下次签名起<b>自动填写</b>。任何手机或电脑均可使用。',
+    sa_kakao: '使用Kakao开始',
+    sa_google: '使用Google开始',
+    sa_note: '与发送文件的请求方注册无关，无需审批或付款。不注册也可以立即签名。',
+    sa_hello: '{name}',
+    sa_filled: '已用您保存的信息填写了<b>{n}</b>项。请确认后再签名。',
+    sa_nofill: '本文件没有可自动填写的项目。',
+    sa_incomplete: '保存个人信息后，下次将自动填写。请点击「我的信息」。',
+    sa_manage: '我的信息',
+    sa_logout: '退出登录',
+    sa_save: '将填写的内容保存到我的信息（下次自动填写）',
+    sa_login_first: '请先使用Kakao或Google快速注册。',
+    sp_title: '我的信息',
+    sp_basic: '基本信息',
+    sp_required: '必填',
+    sp_optional: '选填',
+    sp_none: '不选择',
+    sp_first: '欢迎注册！请填写下次签名时要自动填写的信息。只有基本信息为必填，其他按需填写即可。',
+    sp_home: '这是签名人账户。打开签名链接时，这些信息将自动填写。',
+    sp_name: '姓名',
+    sp_phone: '手机',
+    sp_email: '电子邮箱',
+    sp_birthdate: '出生日期',
+    sp_g_addr: '地址',
+    sp_address: '地址',
+    sp_address_detail: '详细地址（楼栋·房号）',
+    sp_zipcode: '邮编',
+    sp_g_personal: '英文姓名 · 性别 · 国籍',
+    sp_name_en: '英文姓名',
+    sp_gender: '性别',
+    sp_nationality: '国籍',
+    sp_g_work: '工作',
+    sp_company: '公司 · 单位',
+    sp_job_title: '职位',
+    sp_employee_no: '工号',
+    sp_g_school: '学校',
+    sp_school: '学校',
+    sp_grade: '年级',
+    sp_student_no: '学号',
+    sp_g_emergency: '紧急联系人',
+    sp_emergency_name: '紧急联系人姓名',
+    sp_emergency_relation: '关系',
+    sp_emergency_phone: '紧急联系人电话',
+    sp_g_guardian: '监护人',
+    sp_guardian_name: '监护人姓名',
+    sp_guardian_relation: '关系',
+    sp_guardian_phone: '监护人电话',
+    sp_g_car: '车辆',
+    sp_car_no: '车牌号',
+    sp_g_bank: '银行账户',
+    sp_bank_name: '银行',
+    sp_bank_account: '账号',
+    sp_bank_holder: '户名',
+    sp_g_etc: '其他',
+    sp_website: '网站 · 社交账号',
+    sp_memo: '备注',
+    sp_g_extra: '自定义项目',
+    sp_extra_hint: '名称与文件中的填写项目相同时将自动填写。例：房号 · 班级 · 会员号',
+    sp_extra_add: '添加项目',
+    sp_extra_label: '项目名称',
+    sp_extra_value: '内容',
+    sp_agree: '【必填】我同意将填写的信息保存到我的账户，以便签名时自动填写。可随时通过「删除我的信息」删除。不收集身份证号·护照号。',
+    sp_save: '保存',
+    sp_close: '关闭',
+    sp_clear: '删除我的信息',
+    sp_become: '如需发送文件，请注册为请求方',
+    sp_saved: '已保存我的信息。',
+    sp_cleared: '已删除我的信息。',
+    sp_clear_confirm: '要删除所有已保存的信息吗？之后将不再自动填写。',
+    sp_err_REQUIRED_MISSING: '请填写全部基本信息（姓名、手机、邮箱、出生日期）。',
+    sp_err_AGREE_REQUIRED: '请勾选同意保存。',
+    sp_err_BAD_PHONE: '请检查手机号码。',
+    sp_err_BAD_EMAIL: '请检查邮箱格式。',
+    sp_err_BAD_BIRTHDATE: '请检查出生日期。',
+    sp_err_default: '保存失败。'
   },
   ja: {
     hdr: '電子署名', loading: '文書を読み込んでいます...',
@@ -11245,7 +11511,83 @@ const SL = {
     undo_err_default: '署名を取り消せませんでした。',
     final_confirm: 'この署名で文書が最終的に完了し、完了後は取り消せません。\n\n記入漏れはありませんか？\n[OK] 署名を完了   [キャンセル] 戻って修正',
     rr_title: '依頼者から再依頼がありました',
-    rr_hint: '下記の内容を確認して修正し、もう一度署名してください。以前の入力内容と追加項目はそのまま残っています。'
+    rr_hint: '下記の内容を確認して修正し、もう一度署名してください。以前の入力内容と追加項目はそのまま残っています。',
+    sa_title: '次回から自動入力',
+    sa_desc: 'Kakao・Googleで簡単登録すると、氏名・電話番号・住所などを保存し、次の署名から<b>自動で入力</b>します。どのスマホ・PCでも使えます。',
+    sa_kakao: 'Kakaoで始める',
+    sa_google: 'Googleで始める',
+    sa_note: '文書を送る依頼者の会員登録とは別で、承認・支払いは不要です。登録しなくても今すぐ署名できます。',
+    sa_hello: '{name}様',
+    sa_filled: '保存した情報で<b>{n}件</b>を入力しました。確認してから署名してください。',
+    sa_nofill: 'この文書には自動入力できる項目がありません。',
+    sa_incomplete: 'マイ情報を保存すると次回から自動入力されます。「マイ情報」を押してください。',
+    sa_manage: 'マイ情報',
+    sa_logout: 'ログアウト',
+    sa_save: '入力した内容をマイ情報に保存（次回自動入力）',
+    sa_login_first: '先にKakao・Googleで簡単登録してください。',
+    sp_title: 'マイ情報',
+    sp_basic: '基本情報',
+    sp_required: '必須',
+    sp_optional: '任意',
+    sp_none: '選択しない',
+    sp_first: 'ご登録ありがとうございます！次の署名から自動入力する情報を入力してください。基本情報のみ必須で、ほかは必要なものだけで構いません。',
+    sp_home: '署名者アカウントです。署名リンクを開くと、この情報が自動で入力されます。',
+    sp_name: '氏名',
+    sp_phone: '携帯電話',
+    sp_email: 'メールアドレス',
+    sp_birthdate: '生年月日',
+    sp_g_addr: '住所',
+    sp_address: '住所',
+    sp_address_detail: '建物名・部屋番号',
+    sp_zipcode: '郵便番号',
+    sp_g_personal: '英字氏名・性別・国籍',
+    sp_name_en: '英字氏名',
+    sp_gender: '性別',
+    sp_nationality: '国籍',
+    sp_g_work: '勤務先',
+    sp_company: '勤務先・所属',
+    sp_job_title: '役職',
+    sp_employee_no: '社員番号',
+    sp_g_school: '学校',
+    sp_school: '学校',
+    sp_grade: '学年',
+    sp_student_no: '学籍番号',
+    sp_g_emergency: '緊急連絡先',
+    sp_emergency_name: '緊急連絡先の氏名',
+    sp_emergency_relation: '続柄',
+    sp_emergency_phone: '緊急連絡先の番号',
+    sp_g_guardian: '保護者',
+    sp_guardian_name: '保護者氏名',
+    sp_guardian_relation: '続柄',
+    sp_guardian_phone: '保護者の連絡先',
+    sp_g_car: '車両',
+    sp_car_no: '車両番号',
+    sp_g_bank: '口座',
+    sp_bank_name: '銀行',
+    sp_bank_account: '口座番号',
+    sp_bank_holder: '口座名義',
+    sp_g_etc: 'その他',
+    sp_website: 'ホームページ・SNS',
+    sp_memo: 'メモ',
+    sp_g_extra: '自分で追加した項目',
+    sp_extra_hint: '文書の記入項目と同じ名前にすると自動で入力されます。例）部屋番号・クラス・会員番号',
+    sp_extra_add: '項目を追加',
+    sp_extra_label: '項目名',
+    sp_extra_value: '内容',
+    sp_agree: '【必須】入力した情報を、署名時に自動入力するためアカウントに保存することに同意します。「マイ情報を削除」でいつでも削除できます。住民登録番号・パスポート番号は収集しません。',
+    sp_save: '保存',
+    sp_close: '閉じる',
+    sp_clear: 'マイ情報を削除',
+    sp_become: '文書を送るには依頼者として登録',
+    sp_saved: 'マイ情報を保存しました。',
+    sp_cleared: 'マイ情報を削除しました。',
+    sp_clear_confirm: '保存したマイ情報をすべて削除しますか？次回から自動入力されません。',
+    sp_err_REQUIRED_MISSING: '基本情報（氏名・携帯電話・メール・生年月日）をすべて入力してください。',
+    sp_err_AGREE_REQUIRED: '保存への同意にチェックしてください。',
+    sp_err_BAD_PHONE: '携帯電話番号をご確認ください。',
+    sp_err_BAD_EMAIL: 'メールアドレスの形式をご確認ください。',
+    sp_err_BAD_BIRTHDATE: '生年月日をご確認ください。',
+    sp_err_default: '保存できませんでした。'
   },
   vi: {
     hdr: 'Chữ ký điện tử', loading: 'Đang tải tài liệu...',
@@ -11347,7 +11689,83 @@ const SL = {
     undo_err_default: 'Không thể hoàn tác chữ ký.',
     final_confirm: 'Chữ ký của bạn sẽ hoàn tất tài liệu này và không thể hoàn tác sau đó.\n\nBạn đã kiểm tra kỹ chưa?\n[OK] Hoàn tất ký   [Hủy] Quay lại sửa',
     rr_title: 'Người yêu cầu đã yêu cầu lại',
-    rr_hint: 'Vui lòng xem nội dung bên dưới, sửa lại rồi ký lại. Nội dung đã nhập và các mục đã thêm trước đó vẫn được giữ nguyên.'
+    rr_hint: 'Vui lòng xem nội dung bên dưới, sửa lại rồi ký lại. Nội dung đã nhập và các mục đã thêm trước đó vẫn được giữ nguyên.',
+    sa_title: 'Tự động điền lần sau',
+    sa_desc: 'Đăng ký nhanh bằng Kakao hoặc Google để lưu họ tên, số điện thoại, địa chỉ… Từ lần ký sau, thông tin sẽ được <b>điền tự động</b> trên mọi điện thoại · máy tính.',
+    sa_kakao: 'Bắt đầu với Kakao',
+    sa_google: 'Bắt đầu với Google',
+    sa_note: 'Tách biệt với đăng ký người gửi tài liệu, không cần duyệt hay thanh toán. Bạn vẫn có thể ký ngay mà không cần đăng ký.',
+    sa_hello: '{name}',
+    sa_filled: 'Đã điền <b>{n}</b> mục bằng thông tin đã lưu. Vui lòng kiểm tra trước khi ký.',
+    sa_nofill: 'Tài liệu này không có mục nào để điền tự động.',
+    sa_incomplete: 'Lưu thông tin để lần sau được điền tự động. Hãy nhấn 「Thông tin của tôi」.',
+    sa_manage: 'Thông tin của tôi',
+    sa_logout: 'Đăng xuất',
+    sa_save: 'Lưu nội dung đã nhập vào thông tin của tôi (tự động điền lần sau)',
+    sa_login_first: 'Vui lòng đăng ký nhanh bằng Kakao hoặc Google trước.',
+    sp_title: 'Thông tin của tôi',
+    sp_basic: 'Thông tin cơ bản',
+    sp_required: 'Bắt buộc',
+    sp_optional: 'Tùy chọn',
+    sp_none: 'Không chọn',
+    sp_first: 'Chào mừng bạn! Hãy nhập thông tin sẽ được điền tự động từ lần ký sau. Chỉ thông tin cơ bản là bắt buộc, phần còn lại nhập khi cần.',
+    sp_home: 'Đây là tài khoản người ký. Khi mở liên kết ký, thông tin này sẽ được điền tự động.',
+    sp_name: 'Họ tên',
+    sp_phone: 'Điện thoại di động',
+    sp_email: 'Email',
+    sp_birthdate: 'Ngày sinh',
+    sp_g_addr: 'Địa chỉ',
+    sp_address: 'Địa chỉ',
+    sp_address_detail: 'Địa chỉ chi tiết (tòa · phòng)',
+    sp_zipcode: 'Mã bưu chính',
+    sp_g_personal: 'Tên tiếng Anh · giới tính · quốc tịch',
+    sp_name_en: 'Tên tiếng Anh',
+    sp_gender: 'Giới tính',
+    sp_nationality: 'Quốc tịch',
+    sp_g_work: 'Công việc',
+    sp_company: 'Công ty · tổ chức',
+    sp_job_title: 'Chức vụ',
+    sp_employee_no: 'Mã nhân viên',
+    sp_g_school: 'Trường học',
+    sp_school: 'Trường',
+    sp_grade: 'Lớp/Năm học',
+    sp_student_no: 'Mã số sinh viên',
+    sp_g_emergency: 'Liên hệ khẩn cấp',
+    sp_emergency_name: 'Tên người liên hệ khẩn cấp',
+    sp_emergency_relation: 'Quan hệ',
+    sp_emergency_phone: 'Số liên hệ khẩn cấp',
+    sp_g_guardian: 'Người giám hộ',
+    sp_guardian_name: 'Tên người giám hộ',
+    sp_guardian_relation: 'Quan hệ',
+    sp_guardian_phone: 'Số điện thoại người giám hộ',
+    sp_g_car: 'Xe',
+    sp_car_no: 'Biển số xe',
+    sp_g_bank: 'Tài khoản ngân hàng',
+    sp_bank_name: 'Ngân hàng',
+    sp_bank_account: 'Số tài khoản',
+    sp_bank_holder: 'Chủ tài khoản',
+    sp_g_etc: 'Khác',
+    sp_website: 'Trang web · mạng xã hội',
+    sp_memo: 'Ghi chú',
+    sp_g_extra: 'Mục tự thêm',
+    sp_extra_hint: 'Đặt tên giống mục cần điền trong tài liệu để được điền tự động. Ví dụ: số phòng · lớp · mã hội viên',
+    sp_extra_add: 'Thêm mục',
+    sp_extra_label: 'Tên mục',
+    sp_extra_value: 'Nội dung',
+    sp_agree: '[Bắt buộc] Tôi đồng ý lưu thông tin vào tài khoản để tự động điền khi ký. Có thể xóa bất cứ lúc nào bằng 「Xóa thông tin của tôi」. Không thu thập số định danh cá nhân · số hộ chiếu.',
+    sp_save: 'Lưu',
+    sp_close: 'Đóng',
+    sp_clear: 'Xóa thông tin của tôi',
+    sp_become: 'Đăng ký làm người gửi để gửi tài liệu',
+    sp_saved: 'Đã lưu thông tin của bạn.',
+    sp_cleared: 'Đã xóa thông tin của bạn.',
+    sp_clear_confirm: 'Xóa toàn bộ thông tin đã lưu? Lần sau sẽ không được điền tự động.',
+    sp_err_REQUIRED_MISSING: 'Vui lòng nhập đủ thông tin cơ bản (họ tên, điện thoại, email, ngày sinh).',
+    sp_err_AGREE_REQUIRED: 'Vui lòng đánh dấu đồng ý lưu.',
+    sp_err_BAD_PHONE: 'Vui lòng kiểm tra số điện thoại.',
+    sp_err_BAD_EMAIL: 'Vui lòng kiểm tra định dạng email.',
+    sp_err_BAD_BIRTHDATE: 'Vui lòng kiểm tra ngày sinh.',
+    sp_err_default: 'Không thể lưu.'
   }
 };
 
@@ -11469,6 +11887,7 @@ async function openSignByToken(token) {
     applySignLang();
   }
   renderSignInputsBox();
+  await renderSignerAcct();          // 간편 가입한 서명자면 내 정보로 기입 항목을 먼저 채운다
   await loadSignMarks(token);
   renderSignMarksBox();
 
@@ -11666,6 +12085,228 @@ function renderSignFields(fields, editorId, signedByMe) {
   });
 }
 
+// ===== 서명자 간편 가입 · 내 정보 자동 기입 =====
+// 카카오 · 구글로 가입한 서명자는 내 정보(기본 정보 필수 + 선택 정보)를 계정에 저장해 두고,
+// 다음 문서부터 기입 항목을 자동으로 채운다. 요청자(유료 회원) 가입과는 따로다.
+const SP_REQ = ['name', 'phone', 'email', 'birthdate'];
+const SP_GROUPS = [
+  { k: 'g_addr', keys: ['address', 'address_detail', 'zipcode'] },
+  { k: 'g_personal', keys: ['name_en', 'gender', 'nationality'] },
+  { k: 'g_work', keys: ['company', 'job_title', 'employee_no'] },
+  { k: 'g_school', keys: ['school', 'grade', 'student_no'] },
+  { k: 'g_emergency', keys: ['emergency_name', 'emergency_relation', 'emergency_phone'] },
+  { k: 'g_guardian', keys: ['guardian_name', 'guardian_relation', 'guardian_phone'] },
+  { k: 'g_car', keys: ['car_no'] },
+  { k: 'g_bank', keys: ['bank_name', 'bank_account', 'bank_holder'] },
+  { k: 'g_etc', keys: ['website', 'memo'] }
+];
+// 기입 항목 이름 → 내 정보 키 (구체적인 것부터)
+const SA_LABEL_KEYS = [
+  [/(비상|긴급).*(연락처|전화|번호)/, 'emergency_phone'], [/(비상|긴급).*(관계)/, 'emergency_relation'], [/(비상|긴급).*(이름|성명|연락인)/, 'emergency_name'],
+  [/보호자.*(연락처|전화|번호)/, 'guardian_phone'], [/보호자.*관계/, 'guardian_relation'], [/보호자/, 'guardian_name'],
+  [/(영문|english|여권).*(이름|성명|name)|english ?name/i, 'name_en'],
+  [/^(이름|성명|성함|name|full ?name)$/i, 'name'],
+  [/(휴대|핸드폰|연락처|전화|phone|mobile|tel)/i, 'phone'], [/(이메일|메일|e-?mail)/i, 'email'],
+  [/(생년월일|생일|출생|birth)/i, 'birthdate'],
+  [/(상세.*주소|동.?호수)/, 'address_detail'], [/(우편번호|zip)/i, 'zipcode'], [/(주소|address)/i, 'address'],
+  [/(성별|gender)/i, 'gender'], [/(국적|nationality)/i, 'nationality'],
+  [/(직책|직위|직급|job ?title)/i, 'job_title'], [/사번/, 'employee_no'], [/(직장|회사|소속|company)/i, 'company'],
+  [/학년/, 'grade'], [/학번/, 'student_no'], [/(학교|school)/i, 'school'],
+  [/(차량|차번호|car)/i, 'car_no'], [/예금주/, 'bank_holder'], [/계좌/, 'bank_account'], [/은행/, 'bank_name']
+];
+const SA_KIND_KEY = { phone: 'phone', email: 'email', name: 'name', address: 'address' };
+const saNorm = t => String(t || '').replace(/\s+/g, '').toLowerCase();
+function saKeyFor(f) {
+  const lbl = String(f.label || '');
+  for (const [re, k] of SA_LABEL_KEYS) if (re.test(lbl)) return k;
+  return SA_KIND_KEY[f.kind] || null;
+}
+function saProfileValue(prof, f) {
+  if (!prof) return '';
+  const ex = (prof.extra || []).find(x => saNorm(x.label) === saNorm(f.label));
+  if (ex) return ex.value;
+  const k = saKeyFor(f), info = prof.info || {};
+  if (!k) return '';
+  if (k === 'address') return [info.address, info.address_detail].filter(Boolean).join(' ');
+  if (SP_REQ.includes(k)) return prof[k] || '';
+  return info[k] || '';
+}
+async function loadSignerAcct() {
+  try {
+    const { data: sess } = await sb.auth.getSession();
+    if (!sess?.session) return null;
+    const { data } = await sb.rpc('esign_signer_profile_get');
+    return data?.ok ? data : null;
+  } catch (e) { return null; }
+}
+// 비어 있는 내 기입 칸만 내 정보로 채운다 (형식에 맞는 값만). 채운 수를 돌려준다
+function autoFillFromProfile() {
+  const prof = state.signerAcct?.profile;
+  state.autoFilled = new Set();
+  if (!prof || !state.signerAcct.complete) return 0;
+  myInputs().forEach(f => {
+    if (signInputVal(f).trim()) return;
+    const v = String(saProfileValue(prof, f) || '').trim();
+    if (!v || signInputError(f, v)) return;
+    state.signInputVals[f.id] = v;
+    state.autoFilled.add(f.id);
+  });
+  return state.autoFilled.size;
+}
+async function renderSignerAcct() {
+  const box = document.getElementById('signerAcct');
+  if (!box) return;
+  if (state.signData?.signer?.status === 'signed') { box.style.display = 'none'; return; }
+  const a = state.signerAcct = await loadSignerAcct();
+  box.style.display = '';
+  if (!a) {
+    box.innerHTML = '<div class="sa-row"><div><b>🔑 ' + st('sa_title') + '</b><p>' + st('sa_desc') + '</p></div></div>' +
+      '<div class="sa-btns"><button type="button" class="sa-kakao" onclick="signerOAuth(\'kakao\')">' + st('sa_kakao') + '</button>' +
+      '<button type="button" class="sa-google" onclick="signerOAuth(\'google\')">' + st('sa_google') + '</button></div>' +
+      '<p class="sa-note">' + st('sa_note') + '</p>';
+    return;
+  }
+  const n = autoFillFromProfile();
+  const nm = a.profile?.name || a.account_name || '';
+  box.innerHTML = '<div class="sa-row"><div><b>👤 ' + st('sa_hello', { name: esc(nm) }) + '</b><p>' +
+      (!a.complete ? st('sa_incomplete') : n ? st('sa_filled', { n }) : st('sa_nofill')) + '</p></div>' +
+    '<div class="sa-links"><button type="button" onclick="openSignerProfile()">' + st('sa_manage') + '</button>' +
+    '<button type="button" onclick="signerLogout()">' + st('sa_logout') + '</button></div></div>';
+  renderSignInputsBox();
+  myInputs().forEach(f => {
+    const ov = document.getElementById('sio_' + f.id), v = signInputVal(f);
+    if (ov && v) { ov.textContent = inputDisplay(f, v); ov.classList.add('filled'); }
+  });
+}
+function signerOAuth(provider) {
+  try { localStorage.setItem('io_signer_return', JSON.stringify({ token: state.signToken, at: Date.now() })); } catch (e) {}
+  return signInWithProvider(provider);
+}
+function takeSignerReturn() {
+  let r = null;
+  try { r = JSON.parse(localStorage.getItem('io_signer_return') || 'null'); localStorage.removeItem('io_signer_return'); } catch (e) {}
+  return (r?.token && Date.now() - (r.at || 0) < 30 * 60000) ? r.token : null;
+}
+async function finishSignerLogin(token) {
+  const { data: sess } = await sb.auth.getSession();
+  if (sess?.session) { try { await sb.rpc('esign_signer_register'); } catch (e) {} }
+  history.replaceState(null, '', location.pathname + '?s=' + encodeURIComponent(token));
+  await openSignByToken(token);
+  // 처음 가입한 서명자: 다음부터 자동으로 채울 내 정보를 바로 입력하게
+  if (sess?.session && state.signerAcct && !state.signerAcct.complete) openSignerProfile({ first: true });
+}
+async function signerLogout() {
+  await sb.auth.signOut();
+  state.signerAcct = null; state.autoFilled = new Set();
+  renderSignerAcct();
+}
+// 나중에 바로 내 정보에 덧붙인다 (기본 정보 · 정해진 선택 정보 · 그 밖은 「직접 추가」)
+function saveInputsToProfile(mine, vals) {
+  const p = { info: {}, extra: [] };
+  mine.forEach(f => {
+    const v = String(vals[f.id] || '').trim();
+    if (!v) return;
+    const k = saKeyFor(f);
+    // 서버가 형식을 다시 검사한다 — 형식이 다른 값은 기본 정보를 덮지 않고 「직접 추가」로 남긴다
+    const okFmt = k === 'phone' || /phone$/.test(k || '') ? /^0[0-9]{8,10}$/.test(v.replace(/\D/g, ''))
+                : k === 'email' ? /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v)
+                : k === 'birthdate' ? /^\d{4}-\d{2}-\d{2}$/.test(v) : true;
+    const val = (k === 'phone' || /phone$/.test(k || '')) ? v.replace(/\D/g, '') : v;
+    if (k && okFmt && SP_REQ.includes(k)) p[k] = val;
+    else if (k && okFmt) p.info[k] = val;
+    else p.extra.push({ label: f.label, value: v });
+  });
+  sb.rpc('esign_signer_profile_save', { p, p_mode: 'merge' }).then(() => {}).catch(() => {});
+}
+
+// 내 정보 화면 (서명 화면 · 서명자 계정 첫 화면 공용)
+async function openSignerProfile(opt = {}) {
+  let a = state.signerAcct || await loadSignerAcct();
+  if (!a) { showToast(st('sa_login_first')); return; }
+  state.signerAcct = a;
+  const pr = a.profile || {}, info = pr.info || {};
+  let ov = document.getElementById('spModal');
+  if (!ov) {
+    ov = document.createElement('div');
+    ov.id = 'spModal'; ov.className = 'modal-overlay';
+    document.body.appendChild(ov);
+  }
+  const inp = (key, val, type) => {
+    if (key === 'gender') return '<select data-k="gender"><option value="">' + st('sp_none') + '</option>' +
+      ['남', '여'].map(g => '<option' + (val === g ? ' selected' : '') + '>' + g + '</option>').join('') + '</select>';
+    if (/phone$/.test(key)) return '<input data-k="' + key + '" ' + PHONE_ATTRS + ' value="' + esc(fmtPhone(val || '')) + '" oninput="phoneInput(this)">';
+    return '<input data-k="' + key + '" type="' + (type || 'text') + '" maxlength="200" value="' + esc(val || '') + '">';
+  };
+  const field = (key, val, cls) => '<div class="' + (cls || '') + '"><label>' + st('sp_' + key) + '</label>' +
+    inp(key, val, key === 'birthdate' ? 'date' : key === 'email' ? 'email' : 'text') + '</div>';
+  ov.innerHTML =
+    '<div class="modal"><div class="modal-header"><h3>👤 ' + st('sp_title') + '</h3></div><div class="modal-body">' +
+      (opt.first ? '<div class="dl-confirm" style="margin:0 0 10px;">' + st('sp_first') + '</div>' : '') +
+      (opt.home ? '<div class="dl-confirm" style="margin:0 0 10px;">' + st('sp_home') + '</div>' : '') +
+      '<div class="sp-sec"><h5>' + st('sp_basic') + '<em>' + st('sp_required') + '</em></h5><div class="sp-grid">' +
+        field('name', pr.name || a.account_name) + field('phone', pr.phone) + field('email', pr.email || a.account_email) + field('birthdate', pr.birthdate) +
+      '</div></div>' +
+      SP_GROUPS.map(g => {
+        const has = g.keys.some(k => info[k]);
+        return '<details class="sp-sec"' + (has ? ' open' : '') + '><summary>＋ ' + st('sp_' + g.k) + ' <span style="font-weight:400;color:var(--text-muted);font-size:12px;">' + st('sp_optional') + '</span></summary>' +
+          '<div class="sp-grid">' + g.keys.map(k => field(k, info[k], k === 'address' || k === 'memo' ? 'full' : '')).join('') + '</div></details>';
+      }).join('') +
+      '<details class="sp-sec"' + ((pr.extra || []).length ? ' open' : '') + '><summary>＋ ' + st('sp_g_extra') + '</summary>' +
+        '<p class="pa-hint" style="margin-top:6px;">' + st('sp_extra_hint') + '</p><div id="spExtra">' +
+        ((pr.extra || []).length ? pr.extra : [{ label: '', value: '' }]).map(spExtraRow).join('') + '</div>' +
+        '<button type="button" class="btn-mini" style="margin-top:8px;" onclick="document.getElementById(\'spExtra\').insertAdjacentHTML(\'beforeend\', spExtraRow({}))">＋ ' + st('sp_extra_add') + '</button></details>' +
+      '<label class="sp-agree"><input type="checkbox" id="spAgree"' + (pr.agreed_at ? ' checked' : '') + '><span>' + st('sp_agree') + '</span></label>' +
+    '</div><div class="modal-footer">' +
+      (pr.agreed_at ? '<button class="btn-secondary" style="color:var(--danger);" onclick="clearSignerProfile()">' + st('sp_clear') + '</button>' : '') +
+      (opt.home ? '<button class="btn-secondary" onclick="becomeMember()">' + st('sp_become') + '</button>' +
+                  '<button class="btn-secondary" onclick="doLogout()">' + st('sa_logout') + '</button>'
+                : '<button class="btn-secondary" onclick="document.getElementById(\'spModal\').classList.remove(\'active\')">' + st('sp_close') + '</button>') +
+      '<button class="btn-primary" style="width:auto;padding:11px 20px;" id="spSave" onclick="saveSignerProfile(' + (opt.home ? 'true' : 'false') + ')">' + st('sp_save') + '</button>' +
+    '</div></div>';
+  ov.classList.add('active');
+}
+function spExtraRow(e) {
+  return '<div class="sp-extra"><input placeholder="' + esc(st('sp_extra_label')) + '" maxlength="30" value="' + esc(e.label || '') + '">' +
+    '<input placeholder="' + esc(st('sp_extra_value')) + '" maxlength="200" value="' + esc(e.value || '') + '">' +
+    '<button type="button" onclick="this.parentElement.remove()">✕</button></div>';
+}
+async function saveSignerProfile(home) {
+  const ov = document.getElementById('spModal');
+  const val = k => (ov.querySelector('[data-k="' + k + '"]')?.value || '').trim();
+  const p = { name: val('name'), phone: val('phone').replace(/\D/g, ''), email: val('email'), birthdate: val('birthdate'), info: {}, extra: [],
+              agree: !!document.getElementById('spAgree')?.checked };
+  SP_GROUPS.forEach(g => g.keys.forEach(k => { const v = val(k); if (v) p.info[k] = /phone$/.test(k) ? v.replace(/\D/g, '') : v; }));
+  ov.querySelectorAll('.sp-extra').forEach(r => { const [l, v] = r.querySelectorAll('input'); if (l.value.trim() && v.value.trim()) p.extra.push({ label: l.value.trim(), value: v.value.trim() }); });
+  if (!p.name || !p.phone || !p.email || !p.birthdate) { showToast(st('sp_err_REQUIRED_MISSING')); return; }
+  if (!p.agree) { showToast(st('sp_err_AGREE_REQUIRED')); return; }
+  const btn = document.getElementById('spSave');
+  btn.disabled = true;
+  try {
+    const { data, error } = await sb.rpc('esign_signer_profile_save', { p, p_mode: 'replace' });
+    if (error || !data?.ok) { showToast(st('sp_err_' + (data?.error || '')) !== 'sp_err_' + (data?.error || '') ? st('sp_err_' + data.error) : st('sp_err_default')); return; }
+    ov.classList.remove('active');
+    showToast(st('sp_saved'), true);
+    state.signerAcct = null;
+    if (!home && state.signToken && document.getElementById('signPage')?.classList.contains('active')) await renderSignerAcct();
+  } finally { btn.disabled = false; }
+}
+async function clearSignerProfile() {
+  if (!confirm(st('sp_clear_confirm'))) return;
+  const { data } = await sb.rpc('esign_signer_profile_clear');
+  if (!data?.ok) { showToast(st('sp_err_default')); return; }
+  document.getElementById('spModal').classList.remove('active');
+  showToast(st('sp_cleared'), true);
+  state.signerAcct = null;
+  if (document.getElementById('signPage')?.classList.contains('active')) renderSignerAcct();
+}
+// 서명자 계정으로 직접 문서를 보내고 싶을 때: 요청자 가입으로
+async function becomeMember() {
+  await sb.rpc('esign_signer_become_member');
+  state.wantMember = true;
+  document.getElementById('spModal')?.classList.remove('active');
+  routeByProfile();
+}
+
 // ===== 서명자 기입 항목 =====
 // 서명 전에는 내 항목만, 문서가 완료되면 전원 항목(완료본 합성용)이 온다. 기능이 없는 서버면 빈 목록.
 async function loadSignInputs(token) {
@@ -11737,8 +12378,9 @@ function renderSignInputsBox() {
   box.style.display = '';
   box.innerHTML =
     '<h4>📝 ' + st('in_title') + '</h4><p class="si-desc">' + st('in_desc') + '</p>' +
+    (state.signerAcct?.complete ? '<label class="sa-save"><input type="checkbox" id="saSave" checked> ' + st('sa_save') + '</label>' : '') +
     mine.map(f =>
-      '<div class="si-row" id="sirow_' + f.id + '">' +
+      '<div class="si-row' + (state.autoFilled?.has(f.id) ? ' auto' : '') + '" id="sirow_' + f.id + '">' +
         '<label for="si_' + f.id + '">' + esc(inputLabel(f)) +
           (f.required ? ' <em>*</em>' : ' <small>' + st('in_optional') + '</small>') + '</label>' +
         (f.purpose ? '<div class="si-purpose">' + esc(f.purpose) + '</div>' : '') +
@@ -11815,6 +12457,7 @@ async function submitSignInputs() {
     return false;
   }
   mine.forEach(f => { f.value = vals[f.id]; });
+  if (state.signerAcct?.complete && document.getElementById('saSave')?.checked) saveInputsToProfile(mine, vals);
   return true;
 }
 
@@ -13927,6 +14570,10 @@ async function handleRoute() {
     openLegal(legal);
     return;
   }
+
+  // 서명 화면에서 카카오 · 구글로 간편 가입하고 돌아온 경우 — 그 서명 화면으로 되돌린다
+  const sret = takeSignerReturn();
+  if (sret) { await finishSignerLogin(sret); return; }
 
   const qToken = qs.get('s');
   if (qToken) { await openSignByToken(qToken); return; }
