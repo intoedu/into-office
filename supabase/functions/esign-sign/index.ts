@@ -1,5 +1,5 @@
 // INTO SIGN - 서명자 전용 에지 함수
-// 역할: 서명자의 실제 공인 IP를 캐처하여 감사 추적에 기록
+// 역할: 서명자의 실제 공인 IP를 캡처하여 감사 추적에 기록
 // 인증: sign_token 자체가 인증 수단 (로그인 불필요)
 
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";

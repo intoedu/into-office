@@ -88,6 +88,31 @@ export function remainText(deadline: string | null | undefined, lang: Lang = "ko
   return t ? fill(t.hours, { n: hours }) : `${hours}시간`;
 }
 
+// ---------- 해외 번호 ----------
+// 서명자 번호가 「+국가번호 번호」(예: +1 4155551234)면 솔라피에 국가번호(country)와 번호(to)를 나눠 보낸다.
+// 국가번호는 앞자리가 겹치지 않으므로(E.164) 1·7 은 1자리, 아래 목록은 2자리, 나머지는 3자리.
+// +82 는 국내 번호(010…)로 바꿔 보낸다. 국내 번호는 지금과 똑같이 보낸다 (country 를 넣지 않는다).
+const CC_2 = new Set(["20","27","30","31","32","33","34","36","39","40","41","43","44","45","46","47","48","49","51","52","53","54","55","56","57","58",
+  "60","61","62","63","64","65","66","81","82","84","86","90","91","92","93","94","95","98"]);
+const ccOf = (d: string) => /^[17]/.test(d) ? d[0] : CC_2.has(d.slice(0, 2)) ? d.slice(0, 2) : d.slice(0, 3);
+
+export function splitPhone(p: string): { country: string; to: string } | null {
+  const raw = (p ?? "").trim();
+  const d = digits(raw);
+  if (raw.startsWith("+")) {
+    if (d.length > 15) return null;
+    const cc = ccOf(d);
+    let nat = d.slice(cc.length);
+    if (cc === "82") {
+      nat = "0" + nat.replace(/^0/, "");
+      return /^01[016789][0-9]{7,8}$/.test(nat) ? { country: "82", to: nat } : null;
+    }
+    nat = nat.replace(/^0/, "");   // 국내 통화용 앞자리 0 (예: +44 07…) 은 국제 발신에서 빠진다
+    return nat.length >= 6 ? { country: cc, to: nat } : null;
+  }
+  return d.length >= 10 ? { country: "82", to: d } : null;
+}
+
 // 휴대폰 끝 4자리만 남긴다 (010-1234-5678 → 5678)
 export function phoneTail(p: string): string {
   const d = digits(p);
@@ -149,7 +174,7 @@ export async function collectDocRows(admin: SupabaseClient, kind: Kind, ids: str
     const allSigners = (lang: Lang) => (kind === "request" || kind === "done")
       ? (listCache[lang] ??= signerLines(info.targets ?? [], lang)) : "";
     for (const t of info.targets ?? []) {
-      if (digits(t.phone).length < 10) continue;
+      if (!splitPhone(t.phone)) continue;
       // 그 언어 템플릿이 등록돼 있을 때만 외국어로 (아니면 한국어 문구 · 한국어 템플릿)
       const tpl = templateFor(kind, asLang(langs[t.sign_token]));
       const lang = tpl.lang;
@@ -212,11 +237,18 @@ async function sendGroup(admin: SupabaseClient, kind: Kind, templateId: string, 
     return { ok: true, sent: 0, skipped: rows.length };
   }
 
-  const messages = rows.map((r) => ({
-    to: digits(r.phone),
-    from: digits(env("SOLAPI_SENDER")),
-    kakaoOptions: { pfId: env("SOLAPI_PFID"), templateId, variables: r.vars, disableSms: false },
-  }));
+  // 해외 번호는 country 를 붙이고, 실패 시 문자 대체 발송은 끈다
+  // (해외 장문 문자는 지원되지 않고 비용이 다르다 — 서명 링크는 요청자가 따로 전달)
+  const messages = rows.map((r) => {
+    const sp = splitPhone(r.phone) ?? { country: "82", to: digits(r.phone) };
+    const intl = sp.country !== "82";
+    return {
+      to: sp.to,
+      from: digits(env("SOLAPI_SENDER")),
+      ...(intl ? { country: sp.country } : {}),
+      kakaoOptions: { pfId: env("SOLAPI_PFID"), templateId, variables: r.vars, disableSms: intl },
+    };
+  });
 
   let result: unknown = null;
   let failed = false;
