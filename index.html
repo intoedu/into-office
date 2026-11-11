@@ -496,6 +496,10 @@ input,select,textarea { font-family:inherit; }
 .smk-area.flash { animation:mkAreaFlash .5s 3; }
 @keyframes mkAreaFlash { 50% { background:rgba(124,58,237,.28); } }
 .mk-area-note { color:#5b21b6 !important; }
+#bootPage .boot-wrap { min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px; color:var(--text-muted); font-size:13px; letter-spacing:2px; font-weight:700; }
+.boot-spin { width:34px; height:34px; border:3px solid #d6eef6; border-top-color:var(--cyan); border-radius:50%; animation:convSpin .9s linear infinite; }
+.draft-bar { display:flex; gap:10px; align-items:center; justify-content:space-between; flex-wrap:wrap; padding:10px 14px; margin:0 0 14px; border-radius:10px; background:#ecfdf5; border:1px solid #a7f3d0; color:#065f46; font-size:13px; line-height:1.6; }
+.draft-bar button { border:1.5px solid #6ee7b7; background:#fff; color:#065f46; border-radius:8px; padding:6px 12px; font-size:12.5px; font-weight:700; cursor:pointer; font-family:inherit; }
 .conv-box { display:flex; gap:14px; align-items:center; padding:18px; border:1.5px dashed var(--cyan); border-radius:var(--radius-lg); background:#f0fbfe; }
 .conv-box b { display:block; font-size:14.5px; color:var(--navy); }
 .conv-box span { font-size:12.5px; color:var(--text-secondary); }
@@ -1241,7 +1245,9 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
 <body>
 
 <!-- ===== LANDING PAGE (비로그인 공개 영역) ===== -->
-<div id="landingPage" class="page active">
+<!-- 처음 여는 동안 (로그인 확인 전) — 소개 페이지가 잠깐 보였다 사라지지 않게 -->
+<div id="bootPage" class="page active"><div class="boot-wrap"><div class="boot-spin"></div><p>INTO OFFICE</p></div></div>
+<div id="landingPage" class="page">
 
   <nav class="lp-nav">
     <div class="lp-nav-inner">
@@ -4025,7 +4031,7 @@ async function routeByProfile() {
 // ============================================================
 const SB_FN_ADMIN = SB_URL + '/functions/v1/esign-admin';
 const APP_URL = shareBase();
-const BUILD = '2026-11-11.2';   // 배포 확인용. 화면 하단과 콘솔에 표시된다.
+const BUILD = '2026-11-11.3';   // 배포 확인용. 화면 하단과 콘솔에 표시된다.
 
 
 // ============================================================
@@ -4656,6 +4662,8 @@ async function doMemAction() {
 // 탭 전환
 // ============================================================
 function switchView(v) {
+  // 새로고침해도 같은 탭으로 돌아오게 주소에 남긴다 (문서 목록은 비워 둔다)
+  try { history.replaceState(null, '', location.pathname + location.search + (v === 'docs' ? '' : '#view=' + v)); } catch (e) {}
   // 공지 · 문의는 한 탭(board) 안의 두 화면이다
   if (v === 'notices' || v === 'requests') { const sub = v; v = 'board'; state.boardSub = sub; }
   document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.view === v));
@@ -11018,6 +11026,7 @@ async function doLogin() {
 }
 
 async function doLogout() {
+  clearCreateDraft();   // 같은 기기를 다른 사람이 쓸 수 있으니 작성 중 내용은 지운다
   await sb.auth.signOut();
   state.user = null; state.session = null; state.documents = [];
   showPage('loginPage');
@@ -11025,6 +11034,7 @@ async function doLogout() {
 
 async function goDash() {
   showPage('dashPage');
+  try { if (location.hash) history.replaceState(null, '', location.pathname + location.search); } catch (e) {}
   await loadDocuments();
 }
 
@@ -11058,9 +11068,18 @@ async function loadDocuments() {
   renderDocList();
 }
 
-function goCreate() {
+function goCreate(opt = {}) {
   resetCreate();
   showPage('createPage');
+  try { history.replaceState(null, '', location.pathname + '#create'); } catch (e) {}
+  if (opt.fresh) return;
+  // 작성하던 내용이 있으면 되살린다 (새로고침이면 바로, 버튼으로 들어왔으면 물어본다)
+  loadCreateDraft().then(d => {
+    if (!d) return;
+    if (opt.restore === 'auto' || confirm('작성하던 서명 요청이 있습니다.\n「' + (d.title || d.fileName || '제목 없음') + '」 · ' + fmtDraftAt(d.at) + ' 저장\n\n' +
+        '[확인] 이어서 작성\n[취소] 새로 작성 (작성하던 내용은 지워집니다)')) restoreCreateDraft(d);
+    else clearCreateDraft();
+  });
 }
 
 // 서명자용: 토큰으로 서명 페이지 로딩 (로그인 불필요)
@@ -13479,6 +13498,8 @@ setInterval(() => { updateDeadlinePreview('create'); updateDeadlinePreview('bulk
 document.addEventListener('change', e => { if (e.target?.id === 'schedAt' || e.target?.id === 'schedToggle') updateDeadlinePreview('create'); });
 
 function goStep(n) {
+  state.createStep = n;
+  scheduleDraftSave();
   ['createStep1','createStep2','createStep3'].forEach((id,i) => {
     document.getElementById(id).style.display = (i+1===n)?'':'none';
   });
@@ -13506,7 +13527,15 @@ function goStep(n) {
     populateFieldSignerSelect();
     renderMarkPerms();
     renderPdf().then(() => {
-      state.fields.forEach(f => renderField(f));
+      state.fields.forEach(f => {
+        // 되살린 서명란: 저장해 둔 비율 → 지금 화면 크기의 위치
+        if (f._r) {
+          const pg = document.querySelector('#pdfEditor .pdf-page[data-page="' + (f.page || 1) + '"]');
+          if (pg) { f.x = f._r.x * pg.offsetWidth; f.y = f._r.y * pg.offsetHeight; f.w = f._r.w * pg.offsetWidth; f.h = f._r.h * pg.offsetHeight; }
+          delete f._r;
+        }
+        renderField(f);
+      });
     });
   }
 }
@@ -14206,11 +14235,130 @@ function handleFileSelect(e) {
     // Legal: compute SHA-256 hash
     computeHash(state.currentPdfData).then(hash => {
       state.currentPdfHash = hash;
+      scheduleDraftSave();
       console.log('[INTO OFFICE] 문서 SHA-256:', hash);
     });
   };
   reader.readAsArrayBuffer(file);
 }
+
+// ===== 서명 요청 작성 중 자동 저장 (이 브라우저에만) =====
+// 새로고침 · 실수로 닫기에도 파일 · 서명자 · 서명란 · 설정이 남는다. 접근 암호는 저장하지 않는다.
+// 보내면 · 로그아웃하면 지운다. 24시간이 지난 것은 쓰지 않는다.
+const DRAFT_DB = 'into-office', DRAFT_STORE = 'drafts';
+function draftDb() {
+  return new Promise((res, rej) => {
+    try {
+      const rq = indexedDB.open(DRAFT_DB, 1);
+      rq.onupgradeneeded = () => rq.result.createObjectStore(DRAFT_STORE);
+      rq.onsuccess = () => res(rq.result); rq.onerror = () => rej(rq.error);
+    } catch (e) { rej(e); }
+  });
+}
+async function draftOp(mode, fn) {
+  const db = await draftDb();
+  return new Promise((res, rej) => {
+    const tx = db.transaction(DRAFT_STORE, mode), st = tx.objectStore(DRAFT_STORE);
+    const rq = fn(st);
+    tx.oncomplete = () => { res(rq?.result); db.close(); };
+    tx.onerror = tx.onabort = () => { rej(tx.error); db.close(); };
+  });
+}
+const draftKey = () => 'create:' + (state.session?.user?.id || 'anon');
+const fmtDraftAt = t => new Date(t).toLocaleString('ko-KR', { month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+function createDraftMeta() {
+  const pageOf = f => document.querySelector('#pdfEditor .pdf-page[data-page="' + (f.page || 1) + '"]');
+  const fields = (state.fields || []).map(f => {
+    const pg = pageOf(f);
+    const r = (pg && pg.offsetWidth) ? { x: f.x / pg.offsetWidth, y: f.y / pg.offsetHeight, w: f.w / pg.offsetWidth, h: f.h / pg.offsetHeight } : (f._r || null);
+    return { ...f, _r: r };
+  });
+  return {
+    v: 1, at: Date.now(), step: state.createStep || 1,
+    fileName: state.uploadedFile?.name || '', fileMime: state.uploadedFile?.type || '', fileType: state.uploadedFileType || '',
+    fileHash: state.currentPdfHash || '', convertedFrom: state.convertedFrom || null,
+    signers: state.signers, title: document.getElementById('docTitle')?.value || '',
+    reqMode: state.reqMode || 'sign', fields, fieldIdCounter: state.fieldIdCounter || 0,
+    dl: state.dlChoice?.create || '1w',
+    sched: { on: !!document.getElementById('schedToggle')?.checked, at: document.getElementById('schedAt')?.value || '' },
+    labels: getLabels('lblCreate'),
+    afterNote: { note: document.getElementById('anCreateNote')?.value || '', link: document.getElementById('anCreateLink')?.value || '' }
+  };
+}
+let draftTimer = null, draftLastJson = '', draftFileHash = '';
+function scheduleDraftSave() {
+  clearTimeout(draftTimer);
+  draftTimer = setTimeout(saveCreateDraft, 600);
+}
+async function saveCreateDraft() {
+  if (!document.getElementById('createPage')?.classList.contains('active') || !state.session) return;
+  const meta = createDraftMeta();
+  const empty = !meta.fileName && !meta.title.trim() && !(meta.signers || []).some(x => (x.name || '').trim() || (x.phone || '').trim());
+  if (empty) return;
+  const json = JSON.stringify({ ...meta, at: 0 });
+  const fileChanged = meta.fileHash !== draftFileHash;
+  if (json === draftLastJson && !fileChanged) return;
+  try {
+    const rec = { meta };
+    if (fileChanged && state.uploadedFile) rec.file = await state.uploadedFile.arrayBuffer();
+    await draftOp('readwrite', st => {
+      const k = draftKey();
+      if (rec.file || !state.uploadedFile) st.put({ meta, file: rec.file || null }, k);
+      else {   // 파일은 그대로 두고 설정만 바꾼다
+        const g = st.get(k);
+        g.onsuccess = () => st.put({ meta, file: g.result?.file || null }, k);
+      }
+    });
+    draftLastJson = json; draftFileHash = meta.fileHash;
+  } catch (e) { console.warn('작성 중 저장 실패', e); }
+}
+async function loadCreateDraft() {
+  if (!state.session) return null;
+  try {
+    const rec = await draftOp('readonly', st => st.get(draftKey()));
+    if (!rec?.meta || Date.now() - rec.meta.at > 24 * 3600000) return null;
+    return { ...rec.meta, file: rec.file };
+  } catch (e) { return null; }
+}
+function clearCreateDraft() {
+  draftLastJson = ''; draftFileHash = '';
+  try { draftOp('readwrite', st => st.delete(draftKey())).catch(() => {}); } catch (e) {}
+}
+async function restoreCreateDraft(d) {
+  if (d.file && d.fileName) {
+    const f = new File([d.file], d.fileName, { type: d.fileMime || '' });
+    handleFileSelect({ target: { files: [f] } });
+    state.convertedFrom = d.convertedFrom || null;
+    for (let i = 0; i < 60 && !state.currentPdfData; i++) await new Promise(r => setTimeout(r, 50));
+  }
+  state.signers = (d.signers && d.signers.length >= 2) ? d.signers : state.signers;
+  const t = document.getElementById('docTitle'); if (t) t.value = d.title || '';
+  if (d.reqMode === 'fill') setReqMode('fill');
+  state.fields = (d.fields || []).map(f => ({ ...f }));
+  state.fieldIdCounter = d.fieldIdCounter || state.fields.length;
+  state.dlChoice.create = d.dl || '1w';
+  renderDeadlineChips('create');
+  if (d.sched?.on) {
+    const st = document.getElementById('schedToggle'), at = document.getElementById('schedAt');
+    if (st && at) { st.checked = true; document.getElementById('schedBody')?.classList.add('on'); at.value = d.sched.at || ''; }
+  }
+  if (d.labels?.length) setLabelsDraft('lblCreate', d.labels);
+  const an = document.getElementById('anCreateNote'), al = document.getElementById('anCreateLink');
+  if (an) { an.value = d.afterNote?.note || ''; anCount('Create'); }
+  if (al) al.value = d.afterNote?.link || '';
+  draftFileHash = d.fileHash || '';
+  const step = state.currentPdfData ? Math.min(3, d.step || 1) : 1;
+  goStep(step === 3 && state.signers.some(s => !String(s.name || '').trim() || !phoneOk(s.phone)) ? 2 : step);
+  // 맨 위 안내
+  const card = document.querySelector('#createPage .create-container');
+  document.getElementById('draftBar')?.remove();
+  if (card) card.insertAdjacentHTML('afterbegin', '<div class="draft-bar" id="draftBar"><span>💾 작성하던 내용을 되살렸습니다 (' + fmtDraftAt(d.at) + ' 저장). 접근 암호는 다시 넣어 주세요.</span>' +
+    '<button type="button" onclick="if(confirm(\'작성하던 내용을 지우고 새로 작성할까요?\')){clearCreateDraft();goCreate({fresh:true});}">새로 작성</button></div>');
+}
+// 입력할 때마다 · 서명란을 옮길 때마다 저장 (잠깐 쉬었다가)
+['input', 'change', 'mouseup', 'touchend'].forEach(ev =>
+  document.addEventListener(ev, e => { if (e.target?.closest?.('#createPage') && e.target.id !== 'docAccessCode') scheduleDraftSave(); }, true));
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') saveCreateDraft(); });
 
 // 한글 · Word 를 PDF 로 바꿔 일반 PDF 처럼 쓴다
 async function convertAndUse(file) {
@@ -14770,6 +14918,7 @@ async function createDocument() {
     }
 
     state.lastCreated = data;
+    clearCreateDraft();   // 보냈으니 작성 중 내용은 지운다
     const createLabels = getLabels('lblCreate');
     if (createLabels.length) await setDocLabels([data.document_id], createLabels);
     // 기입 항목 · 서명자 언어는 알림톡보다 먼저 저장한다 (첫 알림부터 외국어 · 기입 항목이 적용되도록)
@@ -15531,7 +15680,10 @@ function init() {
   sb.auth.onAuthStateChange((event) => {
     if (event === 'PASSWORD_RECOVERY') showPage('resetPage');
   });
-  handleRoute();
+  // 길 찾기가 실패하거나 오래 걸리면 로딩 화면에 갇히지 않게 소개 페이지로
+  const bootFallback = () => { if (document.getElementById('bootPage')?.classList.contains('active')) showPage('landingPage'); };
+  handleRoute().catch(e => { console.error('route', e); bootFallback(); });
+  setTimeout(bootFallback, 10000);
   window.addEventListener('hashchange', handleRoute);
   window.addEventListener('popstate', handleRoute);
 }
@@ -15598,9 +15750,12 @@ async function handleRoute() {
     await handlePayReturn();
     const ok = await routeByProfile();
     if (!ok) return;
-    if (hash === '#create') { goCreate(); }
+    if (hash === '#create') { goCreate({ restore: 'auto' }); }
     else {
-      showPage('dashPage'); await loadDocuments();
+      const view = (hash.match(/^#view=([a-z]+)$/) || [])[1];
+      showPage('dashPage');
+      if (view && document.querySelector('.tab[data-view="' + view + '"]')) switchView(view);
+      await loadDocuments();
       if (state.openPlanAfterLogin) { state.openPlanAfterLogin = false; switchView('plan'); }
     }
   } else if (qInvite) {
