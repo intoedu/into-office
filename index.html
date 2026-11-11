@@ -496,6 +496,12 @@ input,select,textarea { font-family:inherit; }
 .smk-area.flash { animation:mkAreaFlash .5s 3; }
 @keyframes mkAreaFlash { 50% { background:rgba(124,58,237,.28); } }
 .mk-area-note { color:#5b21b6 !important; }
+.conv-box { display:flex; gap:14px; align-items:center; padding:18px; border:1.5px dashed var(--cyan); border-radius:var(--radius-lg); background:#f0fbfe; }
+.conv-box b { display:block; font-size:14.5px; color:var(--navy); }
+.conv-box span { font-size:12.5px; color:var(--text-secondary); }
+.conv-spin { flex:0 0 28px; width:28px; height:28px; border:3px solid #bae6fd; border-top-color:var(--cyan); border-radius:50%; animation:convSpin .9s linear infinite; }
+@keyframes convSpin { to { transform:rotate(360deg); } }
+.conv-done { margin-top:10px; padding:11px 13px; border-radius:10px; background:#ecfdf5; border:1px solid #a7f3d0; font-size:12.5px; line-height:1.7; color:#065f46; }
 .sign-preview-bar { position:sticky; top:8px; z-index:60; display:flex; gap:10px; align-items:center; justify-content:space-between; flex-wrap:wrap;
   background:#0e2d4d; color:#fff; border-radius:12px; padding:10px 14px; margin:0 0 12px; box-shadow:0 6px 18px rgba(14,45,77,.25); }
 .sign-preview-bar .t { font-size:13px; line-height:1.55; flex:1 1 220px; }
@@ -2117,7 +2123,7 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
             <p style="font-size:13px;color:var(--text-secondary);margin-top:6px;" id="bulkPdfName">클릭하여 PDF 문서를 선택하세요</p>
             <p class="file-types-hint">PDF (최대 20MB)</p>
           </div>
-          <input type="file" id="bulkPdfInput" accept=".pdf" style="display:none" onchange="bulkPdfSelect(event)">
+          <input type="file" id="bulkPdfInput" accept=".pdf,.hwp,.hwpx,.docx" style="display:none" onchange="bulkPdfSelect(event)">
         </div>
 
         <!-- 3) 서명란 -->
@@ -2349,7 +2355,7 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
         <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17,8 12,3 7,8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
           <p>클릭하거나 파일을 드래그하세요</p>
-          <p class="upload-hint">PDF (최대 10MB) | HWP, HWPX, DOCX, XLSX, PPTX, JPG, PNG (최대 5MB)</p>
+          <p class="upload-hint">PDF (최대 10MB) · <b>한글(HWP · HWPX) · Word(DOCX)</b> (최대 20MB — PDF로 바꿔 서명란을 놓습니다) | XLSX, PPTX, JPG, PNG (최대 5MB)</p>
         </div>
         <input type="file" id="fileInput" accept=".pdf,.hwp,.hwpx,.docx,.xlsx,.pptx,.jpg,.jpeg,.png" style="display:none" onchange="handleFileSelect(event)">
         <div id="filePreview" style="display:none"></div>
@@ -4019,7 +4025,7 @@ async function routeByProfile() {
 // ============================================================
 const SB_FN_ADMIN = SB_URL + '/functions/v1/esign-admin';
 const APP_URL = shareBase();
-const BUILD = '2026-11-11.1';   // 배포 확인용. 화면 하단과 콘솔에 표시된다.
+const BUILD = '2026-11-11.2';   // 배포 확인용. 화면 하단과 콘솔에 표시된다.
 
 
 // ============================================================
@@ -5387,9 +5393,26 @@ async function bulkParseFile(e) {
 
 // ----- 문서 & 서명란 -----
 async function bulkPdfSelect(e) {
-  const file = e.target.files?.[0];
+  let file = e.target.files?.[0];
   if (!file) return;
-  if (file.size > 20 * 1024 * 1024) { showToast('20MB 이하의 PDF만 올릴 수 있습니다.'); return; }
+  if (file.size > 20 * 1024 * 1024) { showToast('20MB 이하의 파일만 올릴 수 있습니다.'); return; }
+  // 한글 · Word → PDF
+  if (CONV_EXTS.includes(file.name.split('.').pop().toLowerCase())) {
+    const nm = document.getElementById('bulkPdfName');
+    const kind = convKind(file.name);
+    try {
+      nm.textContent = kind + ' 문서를 PDF로 바꾸는 중…';
+      const out = await officeToPdf(file, (i, n) => { nm.textContent = kind + ' 문서를 PDF로 바꾸는 중… ' + i + ' / ' + n; });
+      file = new File([out.bytes], file.name.replace(/\.[^.]+$/, '') + '.pdf', { type: 'application/pdf' });
+      showToast(kind + ' 문서를 PDF ' + out.pages + '쪽으로 바꿨습니다. 아래 미리보기에서 모양을 확인해 주세요.', true);
+    } catch (err) {
+      console.error('문서 변환 오류:', err);
+      nm.textContent = '';
+      e.target.value = '';
+      alert(convErrMsg(err));
+      return;
+    }
+  }
   state.bulkPdf = file;
   state.bulkPdfData = await file.arrayBuffer();
   document.getElementById('bulkPdfName').textContent = file.name + ' (' + Math.round(file.size / 1024) + 'KB)';
@@ -14015,10 +14038,138 @@ function handleSigImageUpload(e) {
   reader.readAsDataURL(file);
 }
 
+
+// ===== 한글(HWP · HWPX) · Word(DOCX) → PDF (브라우저 안에서 바꾼다 — 문서가 서버 밖으로 나가지 않는다) =====
+// 바꾼 PDF 를 서명 문서로 쓴다 → 서명란 · 기입 항목을 놓고, 서명본도 PDF 로 만들어진다.
+// 한글: @rhwp/core (MIT, Rust+WASM) 가 쪽마다 그린다.  Word: docx-preview 가 화면에 그린 뒤 html2canvas 로 옮긴다.
+// 쪽을 그림으로 옮기므로 PDF 안의 글자는 선택 · 검색되지 않는다 (서명 · 보관에는 지장 없다).
+const CONV_EXTS = ['hwp', 'hwpx', 'docx'];
+const CONV_LIB = {
+  rhwp: 'https://cdn.jsdelivr.net/npm/@rhwp/core@0.8.7/',
+  jszip: 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js',
+  docx: 'https://cdn.jsdelivr.net/npm/docx-preview@0.4.1/dist/docx-preview.min.js',
+  h2c: 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js'
+};
+const CONV_MAX_PAGES = 80;
+function loadScriptOnce(src) {
+  window._loadedScripts = window._loadedScripts || {};
+  return window._loadedScripts[src] ??= new Promise((res, rej) => {
+    const el = document.createElement('script');
+    el.src = src; el.async = true;
+    el.onload = () => res(); el.onerror = () => { delete window._loadedScripts[src]; rej(new Error('LIB_LOAD_FAILED')); };
+    document.head.appendChild(el);
+  });
+}
+const convTick = () => new Promise(r => setTimeout(r, 0));
+// 쪽 그림 → PDF (쪽마다 JPEG 로 넣어 용량을 줄인다)
+async function convPdfNew() { return PDFLib.PDFDocument.create(); }
+async function convAddPage(pdf, canvas, wPt, hPt) {
+  const blob = await new Promise(r => canvas.toBlob(r, 'image/jpeg', 0.9));
+  const img = await pdf.embedJpg(await blob.arrayBuffer());
+  pdf.addPage([wPt, hPt]).drawImage(img, { x: 0, y: 0, width: wPt, height: hPt });
+  canvas.width = canvas.height = 0;   // 메모리 바로 돌려주기 (휴대폰)
+}
+// 한글
+async function hwpToPdf(buf, progress) {
+  if (!globalThis.measureTextWidth) {   // 글자 폭 재기 (rhwp 가 조판에 쓴다)
+    let ctx = null, last = '';
+    globalThis.measureTextWidth = (font, text) => {
+      if (!ctx) ctx = document.createElement('canvas').getContext('2d');
+      if (font !== last) { ctx.font = font; last = font; }
+      return ctx.measureText(text).width;
+    };
+  }
+  const m = await import(CONV_LIB.rhwp + 'rhwp.js');
+  if (!window._rhwpReady) { await m.default({ module_or_path: CONV_LIB.rhwp + 'rhwp_bg.wasm' }); window._rhwpReady = true; }
+  const doc = new m.HwpDocument(new Uint8Array(buf));
+  try {
+    const n = doc.pageCount();
+    if (!n) throw new Error('EMPTY_DOC');
+    if (n > CONV_MAX_PAGES) throw new Error('TOO_MANY_PAGES');
+    const pdf = await convPdfNew(), SC = 2;
+    for (let i = 0; i < n; i++) {
+      progress(i + 1, n);
+      const c = document.createElement('canvas');
+      doc.renderPageToCanvas(i, c, SC);
+      await convAddPage(pdf, c, c.width / SC * 0.75, c.height / SC * 0.75);   // 96dpi 화소 → pt
+      await convTick();
+    }
+    return { bytes: await pdf.save(), pages: n };
+  } finally { try { doc.free(); } catch (e) {} }
+}
+// Word — 쪽 높이를 넘는 구역은 빈 줄에서 잘라 여러 쪽으로 나눈다
+function convCutRow(ctx, w, from, to) {
+  for (let y = to; y > from; y -= 2) {
+    const d = ctx.getImageData(0, y, w, 1).data;
+    let white = true;
+    for (let x = 0; x < d.length; x += 16) { if (d[x] < 240 || d[x + 1] < 240 || d[x + 2] < 240) { white = false; break; } }
+    if (white) return y;
+  }
+  return to;
+}
+async function docxToPdf(buf, progress) {
+  await loadScriptOnce(CONV_LIB.jszip);
+  await Promise.all([loadScriptOnce(CONV_LIB.docx), loadScriptOnce(CONV_LIB.h2c)]);
+  const host = document.createElement('div');
+  host.style.cssText = 'position:fixed;left:-30000px;top:0;width:1200px;background:#fff;';
+  document.body.appendChild(host);
+  try {
+    await window.docx.renderAsync(buf, host, null, {
+      className: 'docx', inWrapper: false, ignoreWidth: false, ignoreHeight: false, ignoreFonts: false, breakPages: true,
+      ignoreLastRenderedPageBreak: false, experimental: true, renderHeaders: true, renderFooters: true,
+      renderFootnotes: true, renderEndnotes: true, useBase64URL: true, renderComments: false, renderChanges: false
+    });
+    try { await document.fonts?.ready; } catch (e) {}
+    const secs = [...host.querySelectorAll('section.docx')];
+    if (!secs.length) throw new Error('EMPTY_DOC');
+    const pdf = await convPdfNew(), SC = 2;
+    let made = 0;
+    for (let i = 0; i < secs.length; i++) {
+      progress(i + 1, secs.length);
+      const sec = secs[i];
+      const pw = sec.offsetWidth;
+      const ph = parseFloat(getComputedStyle(sec).minHeight) || pw * 1.4142;
+      const big = await window.html2canvas(sec, { scale: SC, backgroundColor: '#ffffff', logging: false, useCORS: true });
+      const ctx = big.getContext('2d', { willReadFrequently: true });
+      const pageH = Math.round(ph * SC);
+      let y = 0;
+      while (y < big.height - 4) {
+        let end = y + pageH >= big.height * 0.999 ? big.height : convCutRow(ctx, big.width, y + pageH * 0.85, Math.min(big.height, y + pageH) - 1);
+        if (end <= y) end = Math.min(big.height, y + pageH);
+        const c = document.createElement('canvas');
+        c.width = big.width; c.height = pageH;
+        const cx = c.getContext('2d');
+        cx.fillStyle = '#fff'; cx.fillRect(0, 0, c.width, c.height);
+        cx.drawImage(big, 0, y, big.width, end - y, 0, 0, big.width, end - y);
+        await convAddPage(pdf, c, pw * 0.75, ph * 0.75);
+        if (++made > CONV_MAX_PAGES) throw new Error('TOO_MANY_PAGES');
+        y = end;
+        await convTick();
+      }
+      big.width = big.height = 0;
+    }
+    return { bytes: await pdf.save(), pages: made };
+  } finally { host.remove(); }
+}
+async function officeToPdf(file, progress) {
+  const ext = file.name.split('.').pop().toLowerCase();
+  const buf = await file.arrayBuffer();
+  return ext === 'docx' ? docxToPdf(buf, progress) : hwpToPdf(buf, progress);
+}
+const CONV_ERR = {
+  LIB_LOAD_FAILED: '변환 도구를 불러오지 못했습니다. 인터넷 연결을 확인해 주세요.',
+  TOO_MANY_PAGES: CONV_MAX_PAGES + '쪽이 넘는 문서는 자동으로 바꿀 수 없습니다.',
+  EMPTY_DOC: '문서에 내용이 없습니다.'
+};
+const convErrMsg = e => (CONV_ERR[e?.message] || '이 문서는 자동으로 바꾸지 못했습니다.') + ' 한글 · Word 에서 「PDF로 저장」한 뒤 올려 주세요.';
+const convKind = name => /\.docx$/i.test(name) ? 'Word' : '한글';
+
 function handleFileSelect(e) {
   const file = e.target.files[0];
   if (!file) return;
   const ext = file.name.split('.').pop().toLowerCase();
+  if (CONV_EXTS.includes(ext)) { convertAndUse(file); return; }
+  state.convertedFrom = null;
   const pdfExts = ['pdf'];
   const otherExts = ['hwp','hwpx','docx','xlsx','pptx','jpg','jpeg','png'];
   const allExts = [...pdfExts, ...otherExts];
@@ -14043,12 +14194,14 @@ function handleFileSelect(e) {
     document.getElementById('filePreview').innerHTML = `
       <div class="file-preview">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>
-        <div class="file-info"><div class="file-name">${file.name}</div><div class="file-size">${sizeStr}</div></div>
+        <div class="file-info"><div class="file-name">${esc(file.name)}</div><div class="file-size">${sizeStr}</div></div>
         <button class="btn-remove" onclick="removeFile()">✕</button>
-      </div>`;
+      </div>` + (state.convertedFrom ? '<div class="conv-done">✅ <b>' + esc(state.convertedFrom.kind) + ' 문서 「' + esc(state.convertedFrom.name) + '」를 PDF ' +
+        state.convertedFrom.pages + '쪽으로 바꿨습니다.</b> 이 PDF 가 서명 문서가 됩니다. 다음 단계 미리보기에서 <b>원본과 모양 · 쪽 나눔이 같은지</b> 꼭 확인해 주세요. ' +
+        '다르면 한글 · Word 에서 「PDF로 저장」한 파일을 올려 주세요.</div>' : '');
     document.getElementById('btnToStep2').disabled = false;
     if (!document.getElementById('docTitle').value) {
-      document.getElementById('docTitle').value = file.name.replace('.pdf','');
+      document.getElementById('docTitle').value = file.name.replace(/\.pdf$/i, '');
     }
     // Legal: compute SHA-256 hash
     computeHash(state.currentPdfData).then(hash => {
@@ -14059,8 +14212,35 @@ function handleFileSelect(e) {
   reader.readAsArrayBuffer(file);
 }
 
+// 한글 · Word 를 PDF 로 바꿔 일반 PDF 처럼 쓴다
+async function convertAndUse(file) {
+  if (file.size > 20 * 1024 * 1024) { showToast('한글 · Word 파일은 20MB 이하여야 합니다.'); return; }
+  const fp = document.getElementById('filePreview');
+  document.getElementById('uploadZone').style.display = 'none';
+  document.getElementById('btnToStep2').disabled = true;
+  fp.style.display = '';
+  const kind = convKind(file.name);
+  const show = t => { fp.innerHTML = '<div class="conv-box"><div class="conv-spin"></div><div><b>' + esc(kind) + ' 문서를 PDF로 바꾸는 중…</b><span>' + esc(t) + '</span></div></div>'; };
+  show('변환 도구를 준비하는 중 (처음 한 번은 몇 초 걸립니다)');
+  try {
+    const out = await officeToPdf(file, (i, n) => show(i + ' / ' + n + (kind === '한글' ? '쪽' : '구역')));
+    const base = file.name.replace(/\.[^.]+$/, '');
+    const pdfFile = new File([out.bytes], base + '.pdf', { type: 'application/pdf' });
+    state.convertedFrom = { name: file.name, kind, pages: out.pages };
+    handleFileSelect({ target: { files: [pdfFile] } });
+    state.convertedFrom = { name: file.name, kind, pages: out.pages };
+  } catch (err) {
+    console.error('문서 변환 오류:', err);
+    fp.style.display = 'none'; fp.innerHTML = '';
+    document.getElementById('uploadZone').style.display = '';
+    document.getElementById('fileInput').value = '';
+    alert(convErrMsg(err));
+  }
+}
+
 function removeFile() {
   state.currentPdfData = null;
+  state.convertedFrom = null;
   document.getElementById('filePreview').style.display = 'none';
   document.getElementById('uploadZone').style.display = '';
   document.getElementById('btnToStep2').disabled = true;
