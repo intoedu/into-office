@@ -1046,9 +1046,32 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
 .signer-entry > * { min-width:0; }
 .signer-entry input, .signer-entry select.signer-lang { width:100%; }
 .ph-wrap { display:flex; gap:4px; min-width:0; }
-.ph-wrap .cc-pick { flex:0 0 74px; width:74px; padding:9px 4px; border:1.5px solid var(--border); border-radius:6px; font-size:12px; background:var(--card); color:var(--text); }
+.cc-btn { flex:0 0 auto; display:inline-flex; align-items:center; gap:4px; padding:0 8px; min-width:88px; border:1.5px solid var(--border); border-radius:6px; background:var(--card); color:var(--text); cursor:pointer; font-family:inherit; font-size:13px; white-space:nowrap; }
+.cc-btn:hover, .cc-btn:focus { border-color:var(--cyan); outline:none; }
+.cc-iso { display:inline-block; min-width:24px; padding:1px 4px; border-radius:4px; background:#e8eef5; color:#0e2d4d; font-size:10.5px; font-weight:800; text-align:center; letter-spacing:.3px; }
+.cc-no { font-weight:700; }
+.cc-car { color:var(--text-muted); font-size:10px; margin-left:auto; }
+.cc-back { display:none; position:fixed; inset:0; z-index:2990; }
+.cc-back.open { display:block; }
+.cc-pop { display:none; position:fixed; z-index:3000; width:340px; height:420px; background:var(--card); border:1px solid var(--border); border-radius:12px; box-shadow:0 14px 40px rgba(14,45,77,.22); flex-direction:column; overflow:hidden; }
+.cc-pop.open { display:flex; }
+.cc-pop.sheet { left:0 !important; right:0; bottom:0; top:auto !important; width:auto; height:min(78vh, 560px); border-radius:16px 16px 0 0; padding-bottom:env(safe-area-inset-bottom); }
+.cc-pop.sheet + .cc-back, .cc-back.open { background:rgba(14,45,77,.25); }
+.ccp-head { display:flex; gap:6px; padding:10px; border-bottom:1px solid var(--border); flex:0 0 auto; }
+.ccp-head input { flex:1 1 auto; min-width:0; padding:10px 12px; border:1.5px solid var(--border); border-radius:8px; font-size:16px; font-family:inherit; outline:none; }
+.ccp-head input:focus { border-color:var(--cyan); }
+.ccp-x { flex:0 0 40px; border:0; background:var(--bg); border-radius:8px; cursor:pointer; font-size:15px; }
+.ccp-list { flex:1 1 auto; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:4px 0; }
+.ccp-sec { font-size:11.5px; font-weight:800; color:var(--text-muted); padding:10px 14px 4px; }
+.ccp-item { display:flex; align-items:center; gap:10px; width:100%; padding:9px 14px; border:0; background:none; cursor:pointer; text-align:left; font-family:inherit; font-size:14px; color:var(--text); }
+.ccp-item.on { background:#eef7fb; }
+.ccp-nm { flex:1 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.ccp-nm small { color:var(--text-muted); font-size:12px; margin-left:4px; }
+.ccp-no { font-weight:700; color:var(--navy); font-size:13px; white-space:nowrap; }
+.ccp-empty { padding:28px 16px; text-align:center; color:var(--text-secondary); font-size:13.5px; line-height:1.7; }
+.ccp-foot { flex:0 0 auto; padding:8px 14px; border-top:1px solid var(--border); font-size:11.5px; color:var(--text-muted); }
 .ph-wrap input { flex:1 1 auto; min-width:0; }
-#bulkTable .ph-wrap .cc-pick { flex-basis:64px; width:64px; padding:6px 2px; }
+#bulkTable .ph-wrap .cc-btn { min-width:76px; padding:0 5px; font-size:12px; }
 .signer-entry select.signer-lang { padding:9px 6px; border:1.5px solid var(--border); border-radius:6px; font-size:12.5px; background:var(--card); color:var(--text); }
 /* 휴대폰: 1줄 번호 · 이름 · 삭제 / 2줄 전화번호 · 언어 — 입력 칸이 화면 밖으로 밀려나지 않게 */
 @media (max-width:640px) {
@@ -1060,8 +1083,8 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
   .signer-entry > :nth-child(3) { grid-column:2 / span 2; grid-row:2; }
   .signer-entry > :nth-child(4) { grid-column:3; grid-row:1; }
   .signer-entry > :nth-child(5) { grid-column:1; grid-row:2; justify-self:center; }
-  .signer-entry input, .signer-entry select.signer-lang, .signer-entry .cc-pick { font-size:16px; padding:10px; }   /* 16px 미만이면 iOS 가 확대한다 */
-  .signer-entry .ph-wrap .cc-pick { flex-basis:92px; width:92px; padding:10px 4px; }
+  .signer-entry input, .signer-entry select.signer-lang { font-size:16px; padding:10px; }   /* 16px 미만이면 iOS 가 확대한다 */
+  .signer-entry .ph-wrap .cc-btn { min-width:96px; font-size:14px; }
   .step-indicator { gap:6px; }
   .step { font-size:12px; gap:5px; white-space:nowrap; }
   .step-num { width:24px; height:24px; flex:0 0 24px; }
@@ -2345,7 +2368,7 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
         <div id="signerList"></div>
         <button class="btn-add-signer" id="btnAddSigner" onclick="addSigner()">+ 서명자 추가</button>
         <p class="fld-msg hint" style="margin:8px 2px 0;">🌐 외국인 서명자는 서명자마다 있는 <b>언어</b> 칸에서 고르세요. 서명 화면이 그 언어로 열리고, 외국어 알림톡이 준비된 언어는 알림톡도 그 언어로 갑니다 (준비 전에는 한국어로 발송). 고르지 않아도 서명 화면은 휴대폰 언어에 맞춰 자동 표시됩니다.</p>
-        <p class="fld-msg hint" style="margin:6px 2px 0;">📱 <b>해외 번호</b>는 번호 칸 앞에서 <b>국가</b>를 고른 뒤 번호를 넣으세요 (예: 🇺🇸 +1 → 4155551234). 해외 번호 알림톡은 <b>그 번호로 카카오톡에 가입한 사람</b>에게만 도착하고, 받지 못해도 <b>문자로 대신 가지 않습니다</b>. 보낸 뒤 나오는 창의 <b>서명자별 링크</b>를 복사해 직접 전달할 수 있습니다.</p>
+        <p class="fld-msg hint" style="margin:6px 2px 0;">📱 <b>해외 번호</b>는 번호 칸 앞의 <b>국가 버튼</b>을 눌러 나라를 <b>검색</b>해 고른 뒤 번호를 넣으세요 (예: 「태국」 · 「66」 검색 → +66 812345678). 해외 번호 알림톡은 <b>그 번호로 카카오톡에 가입한 사람</b>에게만 도착하고, 받지 못해도 <b>문자로 대신 가지 않습니다</b>. 보낸 뒤 나오는 창의 <b>서명자별 링크</b>를 복사해 직접 전달할 수 있습니다.</p>
         <label class="save-signers">
           <input type="checkbox" id="saveSignersToggle">
           이번에 입력한 서명자를 주소록에 저장 <span>(이미 저장된 분은 건너뜁니다)</span>
@@ -3996,7 +4019,7 @@ async function routeByProfile() {
 // ============================================================
 const SB_FN_ADMIN = SB_URL + '/functions/v1/esign-admin';
 const APP_URL = shareBase();
-const BUILD = '2026-11-10.4';   // 배포 확인용. 화면 하단과 콘솔에 표시된다.
+const BUILD = '2026-11-11.1';   // 배포 확인용. 화면 하단과 콘솔에 표시된다.
 
 
 // ============================================================
@@ -13476,40 +13499,370 @@ function ccOf(d) {
   if (/^[17]/.test(d)) return d[0];
   return CC_2.has(d.slice(0, 2)) ? d.slice(0, 2) : d.slice(0, 3);
 }
-// 알림톡 · 서명자 목록에서 고르는 국가 (같은 국가번호는 앞의 것이 선택돼 보인다)
-const CC_LIST = [['kr','🇰🇷','82','한국'],['us','🇺🇸','1','미국 · 캐나다'],['jp','🇯🇵','81','일본'],['cn','🇨🇳','86','중국'],['vn','🇻🇳','84','베트남'],
-  ['ph','🇵🇭','63','필리핀'],['th','🇹🇭','66','태국'],['id','🇮🇩','62','인도네시아'],['my','🇲🇾','60','말레이시아'],['sg','🇸🇬','65','싱가포르'],
-  ['hk','🇭🇰','852','홍콩'],['tw','🇹🇼','886','대만'],['mo','🇲🇴','853','마카오'],['mn','🇲🇳','976','몽골'],['uz','🇺🇿','998','우즈베키스탄'],
-  ['kz','🇰🇿','7','카자흐스탄 · 러시아'],['in','🇮🇳','91','인도'],['np','🇳🇵','977','네팔'],['bd','🇧🇩','880','방글라데시'],['lk','🇱🇰','94','스리랑카'],
-  ['kh','🇰🇭','855','캄보디아'],['mm','🇲🇲','95','미얀마'],['la','🇱🇦','856','라오스'],['au','🇦🇺','61','호주'],['nz','🇳🇿','64','뉴질랜드'],
-  ['gb','🇬🇧','44','영국'],['de','🇩🇪','49','독일'],['fr','🇫🇷','33','프랑스'],['ae','🇦🇪','971','아랍에미리트']];
+// ===== 국가 고르기 (검색) =====
+// ISO|국가번호|북미 지역번호|한국어|영어|별칭  — 국기 그림은 Windows 에서 글자로 보여 ISO 코드로 표시한다
+const CC_DATA = `KR|82||대한민국|South Korea|한국,Korea
+US|1||미국|United States|USA,America,미합중국
+CA|1||캐나다|Canada|
+JP|81||일본|Japan|
+CN|86||중국|China|중화인민공화국
+TW|886||대만|Taiwan|타이완
+HK|852||홍콩|Hong Kong|
+MO|853||마카오|Macau|Macao
+MN|976||몽골|Mongolia|
+VN|84||베트남|Vietnam|Viet Nam,월남
+TH|66||태국|Thailand|타이
+PH|63||필리핀|Philippines|
+ID|62||인도네시아|Indonesia|
+MY|60||말레이시아|Malaysia|
+SG|65||싱가포르|Singapore|싱가폴
+BN|673||브루나이|Brunei|
+KH|855||캄보디아|Cambodia|
+LA|856||라오스|Laos|
+MM|95||미얀마|Myanmar|버마,Burma
+TL|670||동티모르|Timor-Leste|East Timor
+IN|91||인도|India|
+PK|92||파키스탄|Pakistan|
+BD|880||방글라데시|Bangladesh|
+LK|94||스리랑카|Sri Lanka|
+NP|977||네팔|Nepal|
+BT|975||부탄|Bhutan|
+MV|960||몰디브|Maldives|
+AF|93||아프가니스탄|Afghanistan|
+KZ|7||카자흐스탄|Kazakhstan|
+UZ|998||우즈베키스탄|Uzbekistan|
+KG|996||키르기스스탄|Kyrgyzstan|키르기즈
+TJ|992||타지키스탄|Tajikistan|
+TM|993||투르크메니스탄|Turkmenistan|
+AZ|994||아제르바이잔|Azerbaijan|
+GE|995||조지아|Georgia|그루지야
+AM|374||아르메니아|Armenia|
+IR|98||이란|Iran|
+IQ|964||이라크|Iraq|
+SA|966||사우디아라비아|Saudi Arabia|사우디
+AE|971||아랍에미리트|United Arab Emirates|UAE,두바이,Dubai
+QA|974||카타르|Qatar|
+KW|965||쿠웨이트|Kuwait|
+BH|973||바레인|Bahrain|
+OM|968||오만|Oman|
+YE|967||예멘|Yemen|
+JO|962||요르단|Jordan|
+LB|961||레바논|Lebanon|
+SY|963||시리아|Syria|
+IL|972||이스라엘|Israel|
+PS|970||팔레스타인|Palestine|
+TR|90||튀르키예|Turkey|터키,Türkiye
+CY|357||키프로스|Cyprus|사이프러스
+RU|7||러시아|Russia|
+GB|44||영국|United Kingdom|UK,England,잉글랜드,Britain
+IE|353||아일랜드|Ireland|
+FR|33||프랑스|France|
+DE|49||독일|Germany|
+IT|39||이탈리아|Italy|
+ES|34||스페인|Spain|
+PT|351||포르투갈|Portugal|
+NL|31||네덜란드|Netherlands|홀란드,Holland
+BE|32||벨기에|Belgium|
+LU|352||룩셈부르크|Luxembourg|
+CH|41||스위스|Switzerland|
+AT|43||오스트리아|Austria|
+LI|423||리히텐슈타인|Liechtenstein|
+MC|377||모나코|Monaco|
+AD|376||안도라|Andorra|
+SM|378||산마리노|San Marino|
+MT|356||몰타|Malta|
+DK|45||덴마크|Denmark|
+SE|46||스웨덴|Sweden|
+NO|47||노르웨이|Norway|
+FI|358||핀란드|Finland|
+IS|354||아이슬란드|Iceland|
+EE|372||에스토니아|Estonia|
+LV|371||라트비아|Latvia|
+LT|370||리투아니아|Lithuania|
+PL|48||폴란드|Poland|
+CZ|420||체코|Czechia|Czech Republic
+SK|421||슬로바키아|Slovakia|
+HU|36||헝가리|Hungary|
+SI|386||슬로베니아|Slovenia|
+HR|385||크로아티아|Croatia|
+BA|387||보스니아 헤르체고비나|Bosnia and Herzegovina|보스니아
+RS|381||세르비아|Serbia|
+ME|382||몬테네그로|Montenegro|
+MK|389||북마케도니아|North Macedonia|마케도니아
+AL|355||알바니아|Albania|
+XK|383||코소보|Kosovo|
+GR|30||그리스|Greece|
+BG|359||불가리아|Bulgaria|
+RO|40||루마니아|Romania|
+MD|373||몰도바|Moldova|
+UA|380||우크라이나|Ukraine|
+BY|375||벨라루스|Belarus|
+MX|52||멕시코|Mexico|
+GT|502||과테말라|Guatemala|
+BZ|501||벨리즈|Belize|
+SV|503||엘살바도르|El Salvador|
+HN|504||온두라스|Honduras|
+NI|505||니카라과|Nicaragua|
+CR|506||코스타리카|Costa Rica|
+PA|507||파나마|Panama|
+CU|53||쿠바|Cuba|
+HT|509||아이티|Haiti|
+DO|1|809|도미니카공화국|Dominican Republic|
+JM|1|876|자메이카|Jamaica|
+PR|1|787|푸에르토리코|Puerto Rico|
+BS|1|242|바하마|Bahamas|
+BB|1|246|바베이도스|Barbados|
+TT|1|868|트리니다드 토바고|Trinidad and Tobago|
+GU|1|671|괌|Guam|
+MP|1|670|북마리아나 제도|Northern Mariana Islands|사이판,Saipan
+CO|57||콜롬비아|Colombia|
+VE|58||베네수엘라|Venezuela|
+EC|593||에콰도르|Ecuador|
+PE|51||페루|Peru|
+BO|591||볼리비아|Bolivia|
+BR|55||브라질|Brazil|
+PY|595||파라과이|Paraguay|
+UY|598||우루과이|Uruguay|
+AR|54||아르헨티나|Argentina|
+CL|56||칠레|Chile|
+GY|592||가이아나|Guyana|
+SR|597||수리남|Suriname|
+AU|61||호주|Australia|오스트레일리아
+NZ|64||뉴질랜드|New Zealand|
+FJ|679||피지|Fiji|
+PG|675||파푸아뉴기니|Papua New Guinea|
+SB|677||솔로몬 제도|Solomon Islands|
+VU|678||바누아투|Vanuatu|
+WS|685||사모아|Samoa|
+TO|676||통가|Tonga|
+KI|686||키리바시|Kiribati|
+MH|692||마셜 제도|Marshall Islands|
+FM|691||미크로네시아|Micronesia|
+PW|680||팔라우|Palau|
+NR|674||나우루|Nauru|
+TV|688||투발루|Tuvalu|
+NC|687||뉴칼레도니아|New Caledonia|
+PF|689||프랑스령 폴리네시아|French Polynesia|타히티,Tahiti
+EG|20||이집트|Egypt|
+LY|218||리비아|Libya|
+TN|216||튀니지|Tunisia|
+DZ|213||알제리|Algeria|
+MA|212||모로코|Morocco|
+SD|249||수단|Sudan|
+SS|211||남수단|South Sudan|
+ET|251||에티오피아|Ethiopia|
+ER|291||에리트레아|Eritrea|
+DJ|253||지부티|Djibouti|
+SO|252||소말리아|Somalia|
+KE|254||케냐|Kenya|
+UG|256||우간다|Uganda|
+TZ|255||탄자니아|Tanzania|
+RW|250||르완다|Rwanda|
+BI|257||부룬디|Burundi|
+CD|243||콩고민주공화국|DR Congo|민주콩고
+CG|242||콩고공화국|Republic of the Congo|콩고
+GA|241||가봉|Gabon|
+CM|237||카메룬|Cameroon|
+CF|236||중앙아프리카공화국|Central African Republic|
+TD|235||차드|Chad|
+NG|234||나이지리아|Nigeria|
+NE|227||니제르|Niger|
+GH|233||가나|Ghana|
+CI|225||코트디부아르|Côte d'Ivoire|Ivory Coast,아이보리코스트
+BF|226||부르키나파소|Burkina Faso|
+ML|223||말리|Mali|
+SN|221||세네갈|Senegal|
+GM|220||감비아|Gambia|
+GN|224||기니|Guinea|
+GW|245||기니비사우|Guinea-Bissau|
+SL|232||시에라리온|Sierra Leone|
+LR|231||라이베리아|Liberia|
+TG|228||토고|Togo|
+BJ|229||베냉|Benin|
+MR|222||모리타니|Mauritania|
+CV|238||카보베르데|Cabo Verde|Cape Verde
+ST|239||상투메 프린시페|São Tomé and Príncipe|
+GQ|240||적도 기니|Equatorial Guinea|
+AO|244||앙골라|Angola|
+ZM|260||잠비아|Zambia|
+ZW|263||짐바브웨|Zimbabwe|
+MW|265||말라위|Malawi|
+MZ|258||모잠비크|Mozambique|
+MG|261||마다가스카르|Madagascar|
+MU|230||모리셔스|Mauritius|
+SC|248||세이셸|Seychelles|
+KM|269||코모로|Comoros|
+ZA|27||남아프리카공화국|South Africa|남아공
+NA|264||나미비아|Namibia|
+BW|267||보츠와나|Botswana|
+LS|266||레소토|Lesotho|
+SZ|268||에스와티니|Eswatini|스와질란드,Swaziland
+RE|262||레위니옹|Réunion|`.split('\n').map(l => {
+  const [iso, cc, area, ko, en, al] = l.split('|');
+  return { iso, cc, area, ko, en, al: al ? al.split(',') : [] };
+});
+const CC_BY_ISO = Object.fromEntries(CC_DATA.map(c => [c.iso, c]));
+const CC_POPULAR = ['KR','US','JP','CN','VN','PH','TH','ID','MY','SG','TW','HK','MN','UZ','KZ','NP','IN','AU','GB','DE'];
 function phoneCC(v) {
   if (!isIntlPhone(v)) return '82';
   const d = String(v).replace(/\D/g, '');
   return d ? ccOf(d) : '';
 }
+// 번호(와 고른 국가 힌트)로 국가를 찾는다. 같은 국가번호를 쓰는 나라는 지역번호 · 앞자리로 가린다
+function ccEntryFor(value, hintIso) {
+  const cc = phoneCC(value);
+  if (!cc) return null;
+  const hint = CC_BY_ISO[hintIso];
+  const nat = isIntlPhone(value) ? String(value).replace(/\D/g, '').slice(cc.length) : '';
+  if (cc === '1') {
+    const byArea = CC_DATA.find(c => c.cc === '1' && c.area && nat.startsWith(c.area));
+    if (byArea) return byArea;
+    return hint?.cc === '1' && !hint.area ? hint : CC_BY_ISO.US;
+  }
+  if (cc === '7') return hint?.cc === '7' ? hint : (nat.startsWith('7') ? CC_BY_ISO.KZ : CC_BY_ISO.RU);
+  if (hint?.cc === cc) return hint;
+  return CC_DATA.find(c => c.cc === cc) || { iso: '', cc, ko: '+' + cc, en: '', al: [], area: '' };
+}
+function ccBtnLabel(value, hintIso) {
+  const e = ccEntryFor(value, hintIso);
+  if (!e) return '<span class="cc-iso">🌐</span><span class="cc-no">+?</span><span class="cc-car">▾</span>';
+  return '<span class="cc-iso">' + esc(e.iso || '🌐') + '</span><span class="cc-no">+' + esc(e.cc + (e.area ? ' ' + e.area : '')) + '</span><span class="cc-car">▾</span>';
+}
 // 국가 선택 + 번호 입력 — oninput 은 입력 칸의 처리 코드(this = 입력 칸)
 function phoneBoxHtml(value, placeholder, oninput, extraClass) {
-  const cc = phoneCC(value);
-  const opts = CC_LIST.map(([k, f, c, n]) => '<option value="' + c + '"' + (c === cc ? ' selected' : '') + '>' + f + ' +' + c + ' ' + n + '</option>');
-  if (cc && !CC_LIST.some(x => x[2] === cc)) opts.push('<option value="' + cc + '" selected>🌐 +' + cc + '</option>');
-  opts.push('<option value="other">🌐 다른 국가 (직접 +국가번호)</option>');
   const okCls = value ? (phoneOk(value) ? 'phone-ok' : 'phone-bad') : '';
-  return '<div class="ph-wrap"><select class="cc-pick" title="국가번호 — 해외 번호는 국가를 고르세요" onchange="ccPick(this)">' + opts.join('') + '</select>' +
+  const e = ccEntryFor(value);
+  return '<div class="ph-wrap"><button type="button" class="cc-btn" data-iso="' + (e?.iso || '') + '" title="국가 고르기 · 검색" onclick="openCcPicker(this)">' + ccBtnLabel(value) + '</button>' +
     '<input ' + PHONE_ATTRS.replace('010-0000-0000', placeholder || '010-0000-0000') + ' class="' + okCls + (extraClass ? ' ' + extraClass : '') + '" value="' + esc(fmtPhone(value || '')) + '" oninput="' + oninput + '"></div>';
 }
-// 국가를 바꾸면 번호 칸 앞의 「+국가번호」를 바꿔 준다 (한국이면 국내 번호 그대로)
-function ccPick(sel) {
-  const inp = sel.parentElement.querySelector('input');
+function ccRecent() {
+  try { const a = JSON.parse(localStorage.getItem('io_cc_recent') || '[]'); return Array.isArray(a) ? a.filter(i => CC_BY_ISO[i]).slice(0, 5) : []; }
+  catch (e) { return []; }
+}
+function ccRemember(iso) {
+  try { localStorage.setItem('io_cc_recent', JSON.stringify([iso, ...ccRecent().filter(x => x !== iso)].slice(0, 5))); } catch (e) {}
+}
+const ccNorm = t => String(t || '').toLowerCase().replace(/[\s·\-().']/g, '');
+// 검색: 한국어 · 영어 · 별칭 · ISO · 국가번호(+66, 66) — 앞부분이 맞는 나라를 먼저
+function ccSearch(q) {
+  const n = ccNorm(q).replace(/^\+/, '');
+  if (!n) return null;
+  const digits = /^\d+$/.test(n);
+  const scored = [];
+  CC_DATA.forEach(c => {
+    let sc = 0;
+    if (digits) {
+      const full = c.cc + c.area;
+      if (full === n || c.cc === n) sc = 100; else if (full.startsWith(n)) sc = 60;
+    } else {
+      const names = [c.ko, c.en, ...c.al].map(ccNorm);
+      if (ccNorm(c.iso) === n) sc = 95;
+      else if (names.some(x => x === n)) sc = 90;
+      else if (names.some(x => x.startsWith(n))) sc = 70;
+      else if (names.some(x => x.includes(n))) sc = 40;
+    }
+    if (sc) scored.push([sc, c]);
+  });
+  return scored.sort((a, b) => b[0] - a[0] || a[1].ko.localeCompare(b[1].ko, 'ko')).map(x => x[1]);
+}
+function ccItemHtml(c, i) {
+  return '<button type="button" class="ccp-item" data-iso="' + c.iso + '" onclick="pickCc(\'' + c.iso + '\')" onmousemove="ccHover(this)">' +
+    '<span class="cc-iso">' + c.iso + '</span><span class="ccp-nm">' + esc(c.ko) + ' <small>' + esc(c.en) + '</small></span>' +
+    '<span class="ccp-no">+' + c.cc + (c.area ? ' ' + c.area : '') + '</span></button>';
+}
+function renderCcList(q) {
+  const box = document.getElementById('ccpList');
+  if (!box) return;
+  const found = ccSearch(q);
+  if (found) {
+    box.innerHTML = found.length ? found.map(ccItemHtml).join('')
+      : '<div class="ccp-empty">「' + esc(q) + '」에 맞는 나라가 없습니다.<br>번호 칸에 <b>+국가번호</b>를 직접 넣어도 됩니다.</div>';
+  } else {
+    const rec = ccRecent();
+    const sec = (t, list) => list.length ? '<div class="ccp-sec">' + t + '</div>' + list.map(ccItemHtml).join('') : '';
+    box.innerHTML = sec('최근 고른 국가', rec.map(i => CC_BY_ISO[i])) +
+      sec('자주 쓰는 국가', CC_POPULAR.filter(i => !rec.includes(i)).map(i => CC_BY_ISO[i])) +
+      sec('전체 국가 (가나다순 · ' + CC_DATA.length + '곳)', [...CC_DATA].sort((a, b) => a.ko.localeCompare(b.ko, 'ko')));
+  }
+  const first = box.querySelector('.ccp-item');
+  if (first) ccHover(first, true);
+}
+function ccHover(el, noScroll) {
+  document.querySelectorAll('#ccpList .ccp-item.on').forEach(x => x.classList.remove('on'));
+  el.classList.add('on');
+  if (!noScroll) return;
+}
+let ccTargetBtn = null;
+function openCcPicker(btn) {
+  ccTargetBtn = btn;
+  let pop = document.getElementById('ccPop');
+  if (!pop) {
+    pop = document.createElement('div');
+    pop.id = 'ccPop'; pop.className = 'cc-pop';
+    pop.innerHTML = '<div class="ccp-head"><input type="search" id="ccpQ" autocomplete="off" placeholder="나라 검색 — 태국, Thailand, TH, 66" ' +
+        'oninput="renderCcList(this.value)" onkeydown="ccKey(event)"><button type="button" class="ccp-x" onclick="closeCcPicker()" aria-label="닫기">✕</button></div>' +
+      '<div class="ccp-list" id="ccpList"></div>' +
+      '<div class="ccp-foot">목록에 없는 나라는 번호 칸에 <b>+국가번호</b>부터 직접 입력하세요.</div>';
+    document.body.appendChild(pop);
+    const back = document.createElement('div');
+    back.id = 'ccBack'; back.className = 'cc-back';
+    back.onclick = closeCcPicker;
+    document.body.appendChild(back);
+    window.addEventListener('resize', () => { if (pop.classList.contains('open') && !pop.classList.contains('sheet')) closeCcPicker(); });
+  }
+  const mobile = window.innerWidth <= 640;
+  pop.classList.toggle('sheet', mobile);
+  if (!mobile) {
+    const r = btn.getBoundingClientRect();
+    const w = 340, h = 420;
+    const below = window.innerHeight - r.bottom > h + 12 || r.top < h + 12;
+    pop.style.left = Math.max(8, Math.min(window.innerWidth - w - 8, r.left)) + 'px';
+    pop.style.top = (below ? r.bottom + 4 : r.top - h - 4) + 'px';
+  } else { pop.style.left = pop.style.top = ''; }
+  pop.classList.add('open');
+  document.getElementById('ccBack').classList.add('open');
+  const q = document.getElementById('ccpQ');
+  q.value = '';
+  renderCcList('');
+  document.getElementById('ccpList').scrollTop = 0;
+  setTimeout(() => q.focus(), 30);
+}
+function closeCcPicker() {
+  document.getElementById('ccPop')?.classList.remove('open');
+  document.getElementById('ccBack')?.classList.remove('open');
+}
+function ccKey(e) {
+  const items = [...document.querySelectorAll('#ccpList .ccp-item')];
+  let i = items.findIndex(x => x.classList.contains('on'));
+  if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+    e.preventDefault();
+    i = Math.max(0, Math.min(items.length - 1, i + (e.key === 'ArrowDown' ? 1 : -1)));
+    if (items[i]) { ccHover(items[i]); items[i].scrollIntoView({ block: 'nearest' }); }
+  } else if (e.key === 'Enter') {
+    e.preventDefault();
+    if (items[i >= 0 ? i : 0]) pickCc(items[i >= 0 ? i : 0].dataset.iso);
+  } else if (e.key === 'Escape') { closeCcPicker(); ccTargetBtn?.focus(); }
+}
+// 고른 나라를 번호 칸 앞에 넣는다 (한국이면 국내 번호, 북미 섬나라는 지역번호까지)
+function pickCc(iso) {
+  const c = CC_BY_ISO[iso], btn = ccTargetBtn;
+  closeCcPicker();
+  if (!c || !btn) return;
+  const inp = btn.parentElement.querySelector('input');
   if (!inp) return;
   const cur = inp.value;
-  let nat = isIntlPhone(cur) ? cur.replace(/\D/g, '').slice(phoneCC(cur).length) : cur.replace(/\D/g, '');
-  if (sel.value === 'other') { inp.value = '+'; }
-  else if (sel.value === '82') { inp.value = nat ? fmtPhone(nat.startsWith('0') ? nat : '0' + nat) : ''; }
-  else { inp.value = '+' + sel.value + ' ' + (nat.startsWith('0') && !isIntlPhone(cur) ? nat.slice(1) : nat); }
+  let nat = isIntlPhone(cur) ? cur.replace(/\D/g, '').slice(phoneCC(cur).length) : cur.replace(/\D/g, '').replace(/^0/, '');
+  const prev = ccEntryFor(cur, btn.dataset.iso);
+  if (prev?.area && nat.startsWith(prev.area)) nat = nat.slice(prev.area.length);   // 바꾸기 전 나라의 지역번호는 뺀다
+  if (c.cc === '82') inp.value = nat ? fmtPhone('0' + nat) : '';
+  else inp.value = '+' + c.cc + ' ' + (c.area && !nat.startsWith(c.area) ? c.area : '') + nat;
+  btn.dataset.iso = iso;
+  ccRemember(iso);
+  inp.placeholder = c.cc === '82' ? '010-0000-0000' : c.ko + ' 번호';
   inp.dispatchEvent(new Event('input', { bubbles: true }));
+  btn.innerHTML = ccBtnLabel(inp.value, iso);
   inp.focus();
-  inp.placeholder = sel.value === '82' ? '010-0000-0000' : '해외 번호 (국가번호 뒤 번호)';
+  const L = inp.value.length; try { inp.setSelectionRange(L, L); } catch (e) {}
 }
 function fmtPhone(v) {
   if (isIntlPhone(v)) {
@@ -13544,6 +13897,8 @@ function phoneInput(el) {
   }
   el.classList.toggle('phone-bad', (isIntlPhone(f) ? f.replace(/\D/g, '').length >= 9 : f.length >= 12) && !phoneOk(f));
   el.classList.toggle('phone-ok', phoneOk(f));
+  const b = el.parentElement?.querySelector?.('.cc-btn');
+  if (b) b.innerHTML = ccBtnLabel(f, b.dataset.iso);
   return f;
 }
 // inputmode=tel: 휴대폰 키패드에 「+」가 있어 해외 번호도 넣을 수 있다
