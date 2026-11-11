@@ -496,6 +496,8 @@ input,select,textarea { font-family:inherit; }
 .smk-area.flash { animation:mkAreaFlash .5s 3; }
 @keyframes mkAreaFlash { 50% { background:rgba(124,58,237,.28); } }
 .mk-area-note { color:#5b21b6 !important; }
+.no-link-note { margin-top:10px; padding:10px 12px; border-radius:8px; background:#f1f5f9; font-size:12.5px; line-height:1.7; color:var(--text-secondary); }
+.sl-alim { font-size:12px; font-weight:700; color:#3f3a00; background:#fee500; border-radius:6px; padding:5px 9px; white-space:nowrap; }
 #bootPage .boot-wrap { min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px; color:var(--text-muted); font-size:13px; letter-spacing:2px; font-weight:700; }
 .boot-spin { width:34px; height:34px; border:3px solid #d6eef6; border-top-color:var(--cyan); border-radius:50%; animation:convSpin .9s linear infinite; }
 .draft-bar { display:flex; gap:10px; align-items:center; justify-content:space-between; flex-wrap:wrap; padding:10px 14px; margin:0 0 14px; border-radius:10px; background:#ecfdf5; border:1px solid #a7f3d0; color:#065f46; font-size:13px; line-height:1.6; }
@@ -2380,7 +2382,7 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
         <div id="signerList"></div>
         <button class="btn-add-signer" id="btnAddSigner" onclick="addSigner()">+ 서명자 추가</button>
         <p class="fld-msg hint" style="margin:8px 2px 0;">🌐 외국인 서명자는 서명자마다 있는 <b>언어</b> 칸에서 고르세요. 서명 화면이 그 언어로 열리고, 외국어 알림톡이 준비된 언어는 알림톡도 그 언어로 갑니다 (준비 전에는 한국어로 발송). 고르지 않아도 서명 화면은 휴대폰 언어에 맞춰 자동 표시됩니다.</p>
-        <p class="fld-msg hint" style="margin:6px 2px 0;">📱 <b>해외 번호</b>는 번호 칸 앞의 <b>국가 버튼</b>을 눌러 나라를 <b>검색</b>해 고른 뒤 번호를 넣으세요 (예: 「태국」 · 「66」 검색 → +66 812345678). 해외 번호 알림톡은 <b>그 번호로 카카오톡에 가입한 사람</b>에게만 도착하고, 받지 못해도 <b>문자로 대신 가지 않습니다</b>. 보낸 뒤 나오는 창의 <b>서명자별 링크</b>를 복사해 직접 전달할 수 있습니다.</p>
+        <p class="fld-msg hint" style="margin:6px 2px 0;">📱 <b>해외 번호</b>는 번호 칸 앞의 <b>국가 버튼</b>을 눌러 나라를 <b>검색</b>해 고른 뒤 번호를 넣으세요 (예: 「태국」 · 「66」 검색 → +66 812345678). 해외 번호 알림톡은 <b>그 번호로 카카오톡에 가입한 사람</b>에게만 도착하고, 받지 못해도 <b>문자로 대신 가지 않습니다</b>. 서명자가 받지 못했다면 그 사람이 <b>카카오톡에 가입한 번호</b>로 고쳐 다시 보내 주세요.</p>
         <label class="save-signers">
           <input type="checkbox" id="saveSignersToggle">
           이번에 입력한 서명자를 주소록에 저장 <span>(이미 저장된 분은 건너뜁니다)</span>
@@ -2667,9 +2669,9 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
       <div id="shareAlimStatus" style="display:none;border-radius:8px;padding:11px 13px;margin-bottom:14px;font-size:13px;line-height:1.7;"></div>
       <div id="shareCodeNotice" class="code-warn" style="display:none;margin-bottom:14px;"></div>
       <div id="schedNotice" style="display:none;background:#faf5ff;border:1.5px solid #e9d5ff;border-radius:8px;padding:12px;margin-bottom:14px;font-size:12.5px;color:#6d28d9;line-height:1.7;"></div>
-      <p style="font-size:13px;color:var(--text-secondary);margin-bottom:8px;">서명자별 링크 (각자 다른 링크가 발급됩니다)</p>
+      <p style="font-size:13px;color:var(--text-secondary);margin-bottom:8px;">받는 사람</p>
       <div id="signerLinks"></div>
-      <input type="hidden" id="shareUrl">
+      <p class="no-link-note">🔒 서명 링크는 <b>서명자 본인에게 알림톡으로만</b> 전달됩니다. 다른 사람이 대신 서명하지 못하도록 요청자 화면에는 링크를 보여 주지 않습니다.</p>
     </div>
     <div class="modal-footer">
       <button class="btn-action navy" onclick="closeShareModal();goDash();">완료</button>
@@ -3073,7 +3075,6 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
       <div class="bulk-table-wrap" style="margin-top:14px;"><table class="bulk-table" id="bulkResultTable"></table></div>
     </div>
     <div class="modal-footer">
-      <button class="btn-secondary" onclick="bulkExportLinks()">⬇ 링크 CSV 내려받기</button>
       <button class="btn-action navy" onclick="closeBulkResult()">확인</button>
     </div>
   </div>
@@ -3563,7 +3564,6 @@ function openRemind(docId) {
       '<div class="signer-link-info"><div class="sl-name">' + esc(s.name) + '</div>' +
       '<div class="sl-phone" style="font-weight:700;color:var(--navy);">' + esc(fmtPhone(s.phone)) +
         ' <span style="font-weight:400;color:var(--text-muted);">· ' + (s.status === 'viewed' ? '열람함' : '미열람') + '</span></div></div>' +
-      '<button class="btn-copy" onclick="copyRemind(\'' + base + '?s=' + s.sign_token + '\',\'' + esc(s.name).replace(/'/g, '') + '\')">복사</button>' +
       '<button class="btn-alim" data-idx="' + i + '" onclick="sendRemindOne(' + i + ', this)">💬 알림톡</button>' +
     '</div>').join('');
   document.getElementById('remindAllBtn').textContent = '💬 미서명자 모두에게 알림톡 (' + pending.length + '명)';
@@ -4031,7 +4031,7 @@ async function routeByProfile() {
 // ============================================================
 const SB_FN_ADMIN = SB_URL + '/functions/v1/esign-admin';
 const APP_URL = shareBase();
-const BUILD = '2026-11-11.3';   // 배포 확인용. 화면 하단과 콘솔에 표시된다.
+const BUILD = '2026-11-11.5';   // 배포 확인용. 화면 하단과 콘솔에 표시된다.
 
 
 // ============================================================
@@ -5242,7 +5242,19 @@ function pickVaultSig(el, idx) {
 // ============================================================
 // 대량발송
 // ============================================================
-function bulkReset(show) {
+// 「대량발송 시작하기」: 작성하던 대량발송이 있으면 이어서 할지 묻는다. 「취소」 · 발송 뒤(show=false)에는 저장분을 지운다
+function bulkReset(show, opt = {}) {
+  if (!show) { clearBulkDraft(); bulkResetCore(false); return; }
+  bulkResetCore(true);
+  if (opt.fresh) return;
+  loadBulkDraft().then(d => {
+    if (!d) return;
+    if (opt.restore === 'auto' || confirm('작성하던 대량발송이 있습니다.\n「' + (d.title || d.fileName || '제목 없음') + '」 · 명단 ' + (d.rows || []).length + '명 · ' + fmtDraftAt(d.at) + ' 저장\n\n' +
+        '[확인] 이어서 작성\n[취소] 새로 작성 (작성하던 내용은 지워집니다)')) restoreBulkDraft(d);
+    else clearBulkDraft();
+  });
+}
+function bulkResetCore(show) {
   state.bulkRows = [];
   state.bulkPdf = null;
   state.bulkPdfDoc = null;
@@ -5267,6 +5279,7 @@ function bulkReset(show) {
   document.getElementById('bulkPdfPane').innerHTML = '';
   bulkRenderTable();
   if (show) w.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  document.getElementById('bulkDraftBar')?.remove();
 }
 
 // ----- 명단 -----
@@ -5281,6 +5294,7 @@ function bulkDelRow(i) { state.bulkRows.splice(i, 1); bulkRenderTable(); }
 function bulkEditRow(i, key, v) { state.bulkRows[i][key] = v; bulkUpdateInfo(); }
 
 function bulkRenderTable() {
+  scheduleBulkDraftSave();
   const t = document.getElementById('bulkTable');
   if (!t) return;
   if (!state.bulkRows.length) { t.innerHTML = ''; bulkUpdateInfo(); return; }
@@ -5429,6 +5443,7 @@ async function bulkPdfSelect(e) {
     state.bulkPdfDoc = await pdfjsLib.getDocument({ data: state.bulkPdfData.slice(0) }).promise;
     document.getElementById('bulkFieldStep').style.display = 'block';
     await bulkEnterEditor(true);
+    scheduleBulkDraftSave();
   } catch (err) {
     showToast('PDF를 읽지 못했습니다: ' + err.message);
   }
@@ -5567,6 +5582,7 @@ function savePartyASign() {
   state.bulkA.sig = sig;
   document.getElementById('paSigModal').classList.remove('active');
   renderBulkPartyA();
+  scheduleBulkDraftSave();
 }
 
 // ----- 서명란 배치: 일반 발송의 편집 도구를 옮겨 와 그대로 쓴다 -----
@@ -5614,7 +5630,14 @@ async function bulkEnterEditor(fresh) {
         w: 150, h: 50, x: Math.max(10, last.offsetWidth * 0.12), y: Math.max(10, last.offsetHeight * 0.82) });
     }
   }
-  state.fields.forEach(f => renderField(f));
+  state.fields.forEach(f => {
+    if (f._r) {   // 되살린 서명란: 저장해 둔 비율 → 지금 화면 크기의 위치
+      const pg = document.querySelector('#bulkPdfPane .pdf-page[data-page="' + (f.page || 1) + '"]');
+      if (pg) { f.x = f._r.x * pg.offsetWidth; f.y = f._r.y * pg.offsetHeight; f.w = f._r.w * pg.offsetWidth; f.h = f._r.h * pg.offsetHeight; }
+      delete f._r;
+    }
+    renderField(f);
+  });
   if (fresh && n > 1) {   // 마지막 장(미리 놓은 서명란)이 보이게
     const pane = document.getElementById('bulkPdfPane');
     const last = pane.querySelector('.pdf-page[data-page="' + n + '"]');
@@ -5799,16 +5822,12 @@ function showBulkResult(data, title, hasCode) {
     '<p style="font-size:12.5px;color:var(--text-secondary);margin-top:6px;line-height:1.7;">' +
     esc(title) + ' · 서명자마다 개별 문서와 링크가 발급되었습니다.' +
     (hasCode ? '<br>🔐 접근 암호가 설정되어 있습니다. 알림톡에는 암호가 담기지 않으니 <strong>전화나 별도 문자로 직접</strong> 서명자에게 알려주세요.' : '') +
-    '<br>아래 링크를 각 서명자에게 전달해주세요. (알림톡 자동 발송은 연동 후 사용 가능합니다)</p></div>';
+    '<br>🔒 서명 링크는 <b>각 서명자 본인에게 알림톡으로만</b> 전달됩니다. 다른 사람이 대신 서명하지 못하도록 요청자 화면에는 링크를 보여 주지 않습니다.</p></div>';
 
-  const base = signLinkBase();
   document.getElementById('bulkResultTable').innerHTML =
-    '<thead><tr><th style="width:40px;">#</th><th>이름</th><th>연락처</th><th>서명 링크</th></tr></thead><tbody>' +
-    data.items.map((it, i) => {
-      const url = base + '?s=' + it.sign_token;
-      return '<tr><td>' + (i + 1) + '</td><td>' + esc(it.name) + '</td><td>' + esc(it.phone) + '</td>' +
-        '<td><button class="btn-mini" onclick="copyText(\'' + url + '\')">링크 복사</button></td></tr>';
-    }).join('') + '</tbody>';
+    '<thead><tr><th style="width:40px;">#</th><th>이름</th><th>연락처</th></tr></thead><tbody>' +
+    data.items.map((it, i) =>
+      '<tr><td>' + (i + 1) + '</td><td>' + esc(it.name) + '</td><td>' + esc(it.phone) + '</td></tr>').join('') + '</tbody>';
   document.getElementById('bulkResultModal').classList.add('active');
 }
 
@@ -5820,12 +5839,11 @@ function copyText(t) {
     .catch(() => showToast('복사에 실패했습니다.'));
 }
 
-function bulkExportLinks() {
+function bulkExportLinks() {   // 서명 링크는 내보내지 않는다 (명단만)
   const d = state.bulkResult;
   if (!d) return;
-  const base = signLinkBase();
-  const csv = '이름,연락처,서명링크\n' +
-    d.items.map(it => '"' + it.name + '","' + it.phone + '","' + base + '?s=' + it.sign_token + '"').join('\n');
+  const csv = '이름,연락처\n' +
+    d.items.map(it => '"' + it.name + '","' + it.phone + '"').join('\n');
   const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -5874,12 +5892,11 @@ async function openBatch(id) {
   const st = { waiting: '대기', complete: '완료', cancelled: '취소', expired: '만료', scheduled: '예약' };
   box.innerHTML = '<div style="margin-top:12px;"><button class="btn-mini" onclick="openExtend(null,\'' + id + '\')">⏰ 이 묶음의 서명 기한 연장</button></div>' +
     '<div class="bulk-table-wrap" style="margin-top:10px;"><table class="bulk-table">' +
-    '<thead><tr><th>이름</th><th>연락처</th><th>상태</th><th>서명일시</th><th></th></tr></thead><tbody>' +
+    '<thead><tr><th>이름</th><th>연락처</th><th>상태</th><th>서명일시</th></tr></thead><tbody>' +
     items.map(it =>
       '<tr><td>' + esc(it.name) + '</td><td>' + esc(it.phone) + '</td>' +
       '<td>' + (st[it.status] || it.status) + '</td>' +
-      '<td>' + (it.signed_at ? fmtLocal(it.signed_at) : '-') + '</td>' +
-      '<td><button class="btn-mini" onclick="copyText(\'' + base + '?s=' + it.sign_token + '\')">링크</button></td></tr>'
+      '<td>' + (it.signed_at ? fmtLocal(it.signed_at) : '-') + '</td></tr>'
     ).join('') + '</tbody></table></div>';
 }
 
@@ -11026,7 +11043,7 @@ async function doLogin() {
 }
 
 async function doLogout() {
-  clearCreateDraft();   // 같은 기기를 다른 사람이 쓸 수 있으니 작성 중 내용은 지운다
+  clearCreateDraft(); clearBulkDraft();   // 같은 기기를 다른 사람이 쓸 수 있으니 작성 중 내용은 지운다
   await sb.auth.signOut();
   state.user = null; state.session = null; state.documents = [];
   showPage('loginPage');
@@ -14360,6 +14377,101 @@ async function restoreCreateDraft(d) {
   document.addEventListener(ev, e => { if (e.target?.closest?.('#createPage') && e.target.id !== 'docAccessCode') scheduleDraftSave(); }, true));
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') saveCreateDraft(); });
 
+// ===== 대량발송 작성 중 자동 저장 (이 브라우저에만) =====
+// 명단 · PDF · 제목 · 갑(이름 · 연락처 · 서명) · 서명란 · 기입 항목 · 설정. 접근 암호는 저장하지 않는다.
+const bulkDraftKey = () => 'bulk:' + (state.session?.user?.id || 'anon');
+let bulkDraftTimer = null, bulkDraftLastJson = '', bulkDraftFileSig = '';
+function scheduleBulkDraftSave() {
+  clearTimeout(bulkDraftTimer);
+  bulkDraftTimer = setTimeout(saveBulkDraft, 600);
+}
+function bulkDraftMeta() {
+  const flds = state.feBulk ? state.fields : (state.bulkFieldsSaved || []);
+  const fields = (flds || []).map(f => {
+    const pg = document.querySelector('#bulkPdfPane .pdf-page[data-page="' + (f.page || 1) + '"]');
+    const r = (pg && pg.offsetWidth) ? { x: f.x / pg.offsetWidth, y: f.y / pg.offsetHeight, w: f.w / pg.offsetWidth, h: f.h / pg.offsetHeight } : (f._r || null);
+    return { ...f, _r: r };
+  });
+  return {
+    v: 1, at: Date.now(),
+    rows: state.bulkRows || [], title: document.getElementById('bulkTitle')?.value || '',
+    pair: !!state.bulkPair, partyA: state.bulkA || null,
+    fileName: state.bulkPdf?.name || '', fileSize: state.bulkPdf?.size || 0,
+    reqMode: state.feBulk ? (state.reqMode || 'sign') : (state.bulkReqMode || 'sign'),
+    allowMarks: !!state.bulkAllowMarks, fields, fieldIdCounter: state.fieldIdCounter || 0,
+    dl: state.dlChoice?.bulk || '1w', labels: getLabels('lblBulk'),
+    afterNote: { note: document.getElementById('anBulkNote')?.value || '', link: document.getElementById('anBulkLink')?.value || '' }
+  };
+}
+async function saveBulkDraft() {
+  if (!state.session || document.getElementById('bulkWizard')?.style.display === 'none') return;
+  const meta = bulkDraftMeta();
+  const empty = !meta.fileName && !meta.title.trim() && !(meta.rows || []).some(r => (r.name || '').trim() || (r.phone || '').trim()) && !meta.partyA?.sig;
+  if (empty) return;
+  const json = JSON.stringify({ ...meta, at: 0 });
+  const fileSig = meta.fileName + ':' + meta.fileSize;
+  const fileChanged = fileSig !== bulkDraftFileSig;
+  if (json === bulkDraftLastJson && !fileChanged) return;
+  try {
+    const file = (fileChanged && state.bulkPdfData) ? state.bulkPdfData.slice(0) : null;
+    await draftOp('readwrite', st => {
+      const k = bulkDraftKey();
+      if (file || !state.bulkPdfData) st.put({ meta, file }, k);
+      else { const g = st.get(k); g.onsuccess = () => st.put({ meta, file: g.result?.file || null }, k); }
+    });
+    bulkDraftLastJson = json; bulkDraftFileSig = fileSig;
+  } catch (e) { console.warn('대량발송 저장 실패', e); }
+}
+async function loadBulkDraft() {
+  if (!state.session) return null;
+  try {
+    const rec = await draftOp('readonly', st => st.get(bulkDraftKey()));
+    if (!rec?.meta || Date.now() - rec.meta.at > 24 * 3600000) return null;
+    return { ...rec.meta, file: rec.file };
+  } catch (e) { return null; }
+}
+function clearBulkDraft() {
+  bulkDraftLastJson = ''; bulkDraftFileSig = '';
+  try { draftOp('readwrite', st => st.delete(bulkDraftKey())).catch(() => {}); } catch (e) {}
+}
+async function restoreBulkDraft(d) {
+  state.bulkRows = (d.rows || []).map(r => ({ name: r.name || '', phone: r.phone || '' }));
+  document.getElementById('bulkTitle').value = d.title || '';
+  state.bulkPair = d.pair !== false;
+  if (d.partyA) state.bulkA = { who: d.partyA.who || 'me', name: d.partyA.name || '', phone: d.partyA.phone || '', sig: d.partyA.sig || null };
+  renderBulkPartyA();
+  state.dlChoice.bulk = d.dl || '1w';
+  renderDeadlineChips('bulk');
+  if (d.labels?.length) setLabelsDraft('lblBulk', d.labels);
+  const an = document.getElementById('anBulkNote'), al = document.getElementById('anBulkLink');
+  if (an) { an.value = d.afterNote?.note || ''; anCount('Bulk'); }
+  if (al) al.value = d.afterNote?.link || '';
+  if (d.file && d.fileName) {
+    state.bulkPdf = new File([d.file], d.fileName, { type: 'application/pdf' });
+    state.bulkPdfData = d.file;
+    document.getElementById('bulkPdfName').textContent = d.fileName + ' (' + Math.round((d.fileSize || d.file.byteLength) / 1024) + 'KB)';
+    try {
+      const pdfjsLib = await getPdfJs();
+      state.bulkPdfDoc = await pdfjsLib.getDocument({ data: d.file.slice(0) }).promise;
+      document.getElementById('bulkFieldStep').style.display = 'block';
+      state.bulkFieldsSaved = (d.fields || []).map(f => ({ ...f }));
+      state.fieldIdCounter = Math.max(state.fieldIdCounter || 0, d.fieldIdCounter || 0);
+      state.bulkReqMode = d.reqMode || 'sign';
+      state.bulkAllowMarks = !!d.allowMarks;
+      await bulkEnterEditor(false);
+    } catch (e) { showToast('저장해 둔 PDF 를 다시 열지 못했습니다. 문서를 다시 골라 주세요.'); }
+  }
+  bulkRenderTable();
+  bulkDraftFileSig = (d.fileName || '') + ':' + (d.fileSize || 0);
+  const w = document.getElementById('bulkWizard');
+  document.getElementById('bulkDraftBar')?.remove();
+  w.insertAdjacentHTML('afterbegin', '<div class="draft-bar" id="bulkDraftBar"><span>💾 작성하던 대량발송을 되살렸습니다 (' + fmtDraftAt(d.at) + ' 저장 · 명단 ' + state.bulkRows.length + '명). 접근 암호는 다시 넣어 주세요.</span>' +
+    '<button type="button" onclick="if(confirm(\'작성하던 대량발송을 지우고 새로 작성할까요?\')){clearBulkDraft();bulkReset(true,{fresh:true});}">새로 작성</button></div>');
+}
+['input', 'change', 'mouseup', 'touchend'].forEach(ev =>
+  document.addEventListener(ev, e => { if (e.target?.closest?.('#viewBulk') && e.target.id !== 'bulkAccessCode') scheduleBulkDraftSave(); }, true));
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') saveBulkDraft(); });
+
 // 한글 · Word 를 PDF 로 바꿔 일반 PDF 처럼 쓴다
 async function convertAndUse(file) {
   if (file.size > 20 * 1024 * 1024) { showToast('한글 · Word 파일은 20MB 이하여야 합니다.'); return; }
@@ -14946,7 +15058,6 @@ async function createDocument() {
         esc(data.signers.map(s => s.name).join(', ')) + ' 님께 <b>전화나 별도 문자로 직접</b> 알려주세요.' : '';
     }
     renderShareLinks(base, data.signers);
-    document.getElementById('shareUrl').value = base + '?s=' + first.sign_token;
     const sn = document.getElementById('schedNotice');
     if (sn) {
       if (data.status === 'scheduled') {
@@ -15333,7 +15444,7 @@ function confirmRecipients(signers, deadlineHtml) {
           (isIntlPhone(s.phone) && phoneCC(s.phone) !== '82' ? ' 🌐' : '') + '</span></div>').join('') +
         '</div>' +
         (signers.some(s => isIntlPhone(s.phone) && phoneCC(s.phone) !== '82')
-          ? '<p class="bulk-hint" style="margin-top:8px;">🌐 해외 번호는 그 번호로 <b>카카오톡에 가입한 경우에만</b> 알림톡이 도착하고, 실패해도 문자로 대신 가지 않습니다. 보낸 뒤 서명 링크를 직접 전달하는 것도 함께 해 주세요.</p>' : '') +
+          ? '<p class="bulk-hint" style="margin-top:8px;">🌐 해외 번호는 그 번호로 <b>카카오톡에 가입한 경우에만</b> 알림톡이 도착하고, 실패해도 문자로 대신 가지 않습니다. 번호가 그 사람의 카카오톡 가입 번호인지 한 번 더 확인해 주세요.</p>' : '') +
         (deadlineHtml ? '<div class="dl-confirm">' + deadlineHtml + '</div>' : '') +
         '<label style="display:flex;gap:8px;align-items:center;margin-top:14px;font-size:13.5px;cursor:pointer;">' +
           '<input type="checkbox" id="rcCheck" style="width:18px;height:18px;"> 이름 · 전화번호 · 서명 기한을 모두 확인했습니다</label>' +
@@ -15350,7 +15461,7 @@ function confirmRecipients(signers, deadlineHtml) {
   });
 }
 
-// 서명자별 링크 목록 렌더링
+// 받는 사람 목록 — 서명 링크는 보여 주지 않는다 (요청자 · 다른 사람이 대신 서명하는 것을 막기 위해 알림톡으로만 전달)
 function renderShareLinks(base, signers) {
   const wrap = document.getElementById('signerLinks');
   if (!wrap) return;
@@ -15359,8 +15470,7 @@ function renderShareLinks(base, signers) {
       '<span class="signer-num" style="background:'+SIGNER_COLORS[i]+'">'+(i+1)+'</span>' +
       '<div class="signer-link-info"><div class="sl-name">'+esc(s.name)+'</div>' +
       '<div class="sl-phone" style="font-weight:700;color:var(--navy);">'+esc(fmtPhone(s.phone))+'</div></div>' +
-      '<button class="btn-copy" onclick="copyLink(\''+base+'#sign/'+s.sign_token+'\')">복사</button>' +
-      '<button class="btn-kakao-sm" onclick="shareKakaoFor(\''+base+'#sign/'+s.sign_token+'\',\''+esc(s.name).replace(/'/g, '')+'\')">카톡</button>' +
+      '<span class="sl-alim">💬 알림톡</span>' +
     '</div>'
   ).join('');
 }
@@ -15755,6 +15865,7 @@ async function handleRoute() {
       const view = (hash.match(/^#view=([a-z]+)$/) || [])[1];
       showPage('dashPage');
       if (view && document.querySelector('.tab[data-view="' + view + '"]')) switchView(view);
+      if (view === 'bulk') loadBulkDraft().then(d => { if (d) bulkReset(true, { restore: 'auto' }); });
       await loadDocuments();
       if (state.openPlanAfterLogin) { state.openPlanAfterLogin = false; switchView('plan'); }
     }
