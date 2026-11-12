@@ -524,6 +524,14 @@ input,select,textarea { font-family:inherit; }
 .pv-body .pdf-page { position:relative; background:#fff; box-shadow:0 2px 12px rgba(0,0,0,.35); }
 .pv-body .pdf-page canvas, .pv-body .pdf-page img { display:block; max-width:100%; }
 .pv-body .sign-loading { color:#e5e7eb; }
+.pv-foot { flex:0 0 auto; background:#fff; border-top:1px solid var(--border); padding:12px 14px; padding-bottom:max(12px, env(safe-area-inset-bottom)); }
+.pv-note2 { font-size:13px; line-height:1.6; color:var(--text); margin:0 0 10px; text-align:center; }
+.pv-note2 b { color:var(--danger); }
+.pv-acts { display:flex; gap:10px; max-width:560px; margin:0 auto; }
+.pv-acts button { flex:1 1 0; padding:13px 10px; border-radius:10px; font-size:15px; font-weight:800; cursor:pointer; font-family:inherit; }
+.pv-edit { background:#fff; color:var(--navy); border:1.5px solid var(--border); }
+.pv-go { background:var(--cyan); color:#fff; border:0; }
+.pv-go:disabled { opacity:.6; }
 .an-form { border:1.5px solid #fde68a; background:#fffbeb; border-radius:var(--radius-lg); padding:14px 16px; margin:0 0 14px; }
 .an-form textarea, .an-form input { width:100%; padding:10px 12px; border:1.5px solid var(--border); border-radius:8px; font-size:15px; font-family:inherit; background:#fff; }
 .an-count { float:right; font-size:11.5px; color:var(--text-muted); font-weight:500; }
@@ -3373,7 +3381,7 @@ async function openSignedInBrowser() {
 
 // ===== 문서 크게 보기 창 (서명자 · 요청자 공용) =====
 // 휴대폰 뒤로가기(제스처 · 버튼)를 누르면 창만 닫히도록 기록을 하나 쌓는다.
-function openPdfOverlay({ title, bytes, imgUrl, back, dl, onDownload }) {
+function openPdfOverlay({ title, bytes, imgUrl, back, dl, onDownload, actions, note }) {
   let ov = document.getElementById('pvOverlay');
   if (!ov) {
     ov = document.createElement('div');
@@ -3385,8 +3393,13 @@ function openPdfOverlay({ title, bytes, imgUrl, back, dl, onDownload }) {
   ov.innerHTML = '<div class="pv-head"><button type="button" class="pv-back" onclick="closePdfOverlay()">← ' + esc(back || '돌아가기') + '</button>' +
     '<div class="pv-title">' + esc(title || '') + '</div>' +
     (onDownload ? '<button type="button" class="pv-dl" id="pvDl">⬇ ' + esc(dl || '내려받기') + '</button>' : '') + '</div>' +
-    '<div class="pv-body" id="pvBody"><div class="sign-loading">…</div></div>';
+    '<div class="pv-body" id="pvBody"><div class="sign-loading">…</div></div>' +
+    (actions?.length || note ? '<div class="pv-foot">' + (note ? '<p class="pv-note2">' + note + '</p>' : '') +
+      '<div class="pv-acts"><button type="button" class="pv-edit" onclick="closePdfOverlay()">← ' + esc(back || '돌아가기') + '</button>' +
+      (actions || []).map((a, i) => '<button type="button" class="' + (a.primary ? 'pv-go' : 'pv-edit') + '" data-act="' + i + '">' + esc(a.label) + '</button>').join('') +
+      '</div></div>' : '');
   if (onDownload) ov.querySelector('#pvDl').onclick = () => onDownload();
+  (actions || []).forEach((a, i) => { const b = ov.querySelector('[data-act="' + i + '"]'); if (b) b.onclick = () => a.onClick(b); });
   ov.classList.add('active');
   document.body.style.overflow = 'hidden';
   try { history.pushState({ io: 'pv' }, ''); state.pvPushed = true; } catch (e) { state.pvPushed = false; }
@@ -4031,7 +4044,7 @@ async function routeByProfile() {
 // ============================================================
 const SB_FN_ADMIN = SB_URL + '/functions/v1/esign-admin';
 const APP_URL = shareBase();
-const BUILD = '2026-11-11.5';   // 배포 확인용. 화면 하단과 콘솔에 표시된다.
+const BUILD = '2026-11-12.1';   // 배포 확인용. 화면 하단과 콘솔에 표시된다.
 
 
 // ============================================================
@@ -11292,7 +11305,14 @@ const SL = {
     mk_tap_area: '점선 영역 안에서 넣을 곳을 누르세요',
     an_title: '요청자가 남긴 안내',
     an_open: '참고 링크 열기',
-    an_warn: '요청자가 남긴 외부 링크입니다. 주소를 확인한 뒤 여세요.'
+    an_warn: '요청자가 남긴 외부 링크입니다. 주소를 확인한 뒤 여세요.',
+    pvs_title: '제출 전 미리보기',
+    pvs_edit: '수정하기',
+    pvs_submit: '✔ 이대로 서명 제출',
+    pvs_note: '내 서명과 입력한 내용이 이렇게 들어갑니다. 고칠 곳이 있으면 <b>「수정하기」</b>를 눌러 돌아가세요.',
+    pvs_last: '마지막 서명자입니다. 제출하면 <b>모든 서명이 끝나 문서가 완료되고 되돌릴 수 없습니다.</b> 고칠 곳이 있으면 「수정하기」를 누르세요.',
+    pvs_mine: '내가 서명한 문서',
+    pvs_mine_btn: '내가 서명한 문서 보기'
   },
   en: {
     hdr: 'E-Signature', loading: 'Loading the document...',
@@ -11479,7 +11499,14 @@ const SL = {
     mk_tap_area: 'Tap where to place it inside a dashed area',
     an_title: 'Note from the requester',
     an_open: 'Open reference link',
-    an_warn: 'This is an external link left by the requester. Check the address before opening it.'
+    an_warn: 'This is an external link left by the requester. Check the address before opening it.',
+    pvs_title: 'Preview before submitting',
+    pvs_edit: 'Edit',
+    pvs_submit: '✔ Submit signature',
+    pvs_note: 'This is how your signature and entries will appear. To change anything, tap <b>「Edit」</b> to go back.',
+    pvs_last: 'You are the last signer. Once submitted, <b>the document is completed and cannot be undone.</b> Tap 「Edit」 to change anything.',
+    pvs_mine: 'Document I signed',
+    pvs_mine_btn: 'View the document I signed'
   },
   zh: {
     hdr: '电子签名', loading: '正在加载文件...',
@@ -11665,7 +11692,14 @@ const SL = {
     mk_tap_area: '请在虚线区域内点击放置位置',
     an_title: '请求方留下的说明',
     an_open: '打开参考链接',
-    an_warn: '这是请求方留下的外部链接。请确认网址后再打开。'
+    an_warn: '这是请求方留下的外部链接。请确认网址后再打开。',
+    pvs_title: '提交前预览',
+    pvs_edit: '修改',
+    pvs_submit: '✔ 确认提交签名',
+    pvs_note: '您的签名和填写内容将如此显示。如需修改，请点击<b>「修改」</b>返回。',
+    pvs_last: '您是最后一位签名人。提交后<b>文件即完成，无法撤销。</b>如需修改，请点击「修改」。',
+    pvs_mine: '我签署的文件',
+    pvs_mine_btn: '查看我签署的文件'
   },
   ja: {
     hdr: '電子署名', loading: '文書を読み込んでいます...',
@@ -11851,7 +11885,14 @@ const SL = {
     mk_tap_area: '点線エリアの中で入れる場所を押してください',
     an_title: '依頼者からのご案内',
     an_open: '参考リンクを開く',
-    an_warn: '依頼者が残した外部リンクです。アドレスを確認してから開いてください。'
+    an_warn: '依頼者が残した外部リンクです。アドレスを確認してから開いてください。',
+    pvs_title: '提出前のプレビュー',
+    pvs_edit: '修正する',
+    pvs_submit: '✔ この内容で署名を提出',
+    pvs_note: '署名と入力内容はこのように入ります。直す所があれば<b>「修正する」</b>で戻ってください。',
+    pvs_last: '最後の署名者です。提出すると<b>文書が完了し、元に戻せません。</b>直す所があれば「修正する」を押してください。',
+    pvs_mine: '署名した文書',
+    pvs_mine_btn: '署名した文書を見る'
   },
   vi: {
     hdr: 'Chữ ký điện tử', loading: 'Đang tải tài liệu...',
@@ -12037,7 +12078,14 @@ const SL = {
     mk_tap_area: 'Chạm vào vị trí cần đặt bên trong vùng nét đứt',
     an_title: 'Lời nhắn từ người yêu cầu',
     an_open: 'Mở liên kết tham khảo',
-    an_warn: 'Đây là liên kết bên ngoài do người yêu cầu để lại. Hãy kiểm tra địa chỉ trước khi mở.'
+    an_warn: 'Đây là liên kết bên ngoài do người yêu cầu để lại. Hãy kiểm tra địa chỉ trước khi mở.',
+    pvs_title: 'Xem trước khi gửi',
+    pvs_edit: 'Chỉnh sửa',
+    pvs_submit: '✔ Gửi chữ ký',
+    pvs_note: 'Chữ ký và nội dung bạn nhập sẽ hiển thị như thế này. Nếu cần sửa, hãy nhấn <b>「Chỉnh sửa」</b> để quay lại.',
+    pvs_last: 'Bạn là người ký cuối cùng. Sau khi gửi, <b>tài liệu sẽ hoàn tất và không thể hoàn tác.</b> Nhấn 「Chỉnh sửa」 nếu cần sửa.',
+    pvs_mine: 'Tài liệu tôi đã ký',
+    pvs_mine_btn: 'Xem tài liệu tôi đã ký'
   }
 };
 
@@ -15594,17 +15642,71 @@ async function submitSignature() {
     sigData = state.sigUploadedImage;
   }
 
-  // 마지막 서명자: 이 서명으로 문서가 완료되어 되돌릴 수 없으므로 한 번 더 확인
-  const left = (state.signData?.all_signers || []).filter(x => x.status !== 'signed').length;
-  if (left <= 1 && !confirm(st('final_confirm'))) { closeSigModal(); return; }
-
   const methodKey = ['draw','typed','upload'][method];
-  const btn = document.querySelector('#sigModal .btn-action');
-  btn.disabled = true; btn.textContent = st('processing');
+  // 작성할 항목 · 추가한 항목이 맞는지 먼저 (틀리면 서명 창을 닫고 그 칸으로)
+  if (!checkSignInputs()) { closeSigModal(); return; }
+  if (!checkSignMarks()) { closeSigModal(); return; }
+  state.pendingSig = { method, methodKey, sigData };
+  const left = (state.signData?.all_signers || []).filter(x => x.status !== 'signed').length;
+
+  // 제출 전 미리보기 — 내 서명 · 기입 내용이 들어간 모습을 보여 주고, 「수정하기」로 돌아갈 수 있게
+  const mbtn = document.querySelector('#sigModal .btn-action');
+  if (state.signData?.document?.file_type === 'pdf') {
+    mbtn.disabled = true; mbtn.textContent = st('processing');
+    let bytes = null;
+    try { bytes = await composeMySignedPreview(state.pendingSig, false); } catch (e) { console.warn('미리보기 실패', e); }
+    mbtn.disabled = false; mbtn.textContent = st('modal_submit');
+    if (bytes) {
+      closeSigModal();
+      openPdfOverlay({
+        title: st('pvs_title'), bytes, back: st('pvs_edit'),
+        note: left <= 1 ? st('pvs_last') : st('pvs_note'),
+        actions: [{ label: st('pvs_submit'), primary: true, onClick: btn => submitPendingSignature(btn) }]
+      });
+      return;
+    }
+  }
+  // 미리보기를 만들 수 없는 문서(그림 등): 마지막 서명자는 한 번 더 확인하고 바로 제출
+  if (left <= 1 && !confirm(st('final_confirm'))) { closeSigModal(); return; }
+  return submitPendingSignature(mbtn);
+}
+
+// 내 서명 · 기입 값 · 추가 항목을 넣은 미리보기 PDF (다른 사람 서명은 넣지 않는다)
+async function composeMySignedPreview(sig, submitted) {
+  const sd = state.signData;
+  const me = sd?.signer;
+  if (!sd?.document || !me) return null;
+  const now = new Date().toISOString();
+  const signers = [{ id: me.id, name: me.name, status: 'signed', sig_method: sig.methodKey, sig_data: sig.sigData, signed_at: now }];
+  const fields = (sd.fields || []).filter(f => !f.signer_id || f.signer_id === me.id).map(f => ({ ...f, signer_id: me.id }));
+  const inputs = myInputs().map(f => ({ ...f, signer_id: me.id, value: signInputVal(f).trim() }));
+  const marks = (state.myMarks || []).map(m => ({ ...m, signer_id: me.id }));
+  let bytes = await composeSignedPdf(sd.document, signers, fields, inputs, marks);
+  if (!submitted) {   // 제출 전 미리보기 표시 (이 파일이 서명본으로 쓰이지 않게)
+    const { PDFDocument, rgb, StandardFonts, degrees } = PDFLib;
+    const pdf = await PDFDocument.load(bytes);
+    const font = await pdf.embedFont(StandardFonts.HelveticaBold);
+    pdf.getPages().forEach(pg => {
+      const { width, height } = pg.getSize();
+      pg.drawText('PREVIEW', { x: width * 0.2, y: height * 0.42, size: Math.min(width, height) * 0.16, font,
+        color: rgb(0.85, 0.2, 0.2), opacity: 0.12, rotate: degrees(35) });
+    });
+    bytes = await pdf.save();
+  }
+  return bytes;
+}
+
+// 미리보기에서 「이대로 제출」 (미리보기를 못 만든 문서는 서명 창에서 바로)
+async function submitPendingSignature(btn) {
+  const pend = state.pendingSig;
+  if (!pend) return;
+  const { methodKey, sigData } = pend;
+  const label = btn ? btn.textContent : '';
+  if (btn) { btn.disabled = true; btn.textContent = st('processing'); }
 
   try {
-    if (!await submitSignInputs()) return;
-    if (!await submitSignMarks()) return;
+    if (!await submitSignInputs()) { closePdfOverlay(); return; }
+    if (!await submitSignMarks()) { closePdfOverlay(); return; }
     const post = sd => fetch(SB_FN, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -15631,19 +15733,31 @@ async function submitSignature() {
         CONSENT_REQUIRED: st('err_CONSENT_REQUIRED'),
         INVALID_TOKEN: st('err_INVALID_TOKEN')
       };
-      if (String(out.error).includes('INPUTS_REQUIRED')) { closeSigModal(); checkSignInputs(); showToast(st('in_fix')); return; }
+      if (String(out.error).includes('INPUTS_REQUIRED')) { closeSigModal(); closePdfOverlay(); checkSignInputs(); showToast(st('in_fix')); return; }
       showToast(msgs[out.error] || (st('sign_fail') + out.error));
       return;
     }
 
     closeSigModal();
+    closePdfOverlay();
+    state.signedNow = pend;   // 완료 화면의 「내가 서명한 문서 보기」에 쓴다
     showToast(st('sign_ok'), true);
     setTimeout(() => showSignComplete(out), 600);
   } catch (e) {
     showToast(st('sign_net_err'));
   } finally {
-    btn.disabled = false; btn.textContent = st('modal_submit');
+    if (btn) { btn.disabled = false; btn.textContent = label; }
   }
+}
+// 제출한 뒤 내가 서명한 문서 보기
+async function viewMySignedDoc(btn) {
+  if (!state.signedNow) return;
+  if (btn) btn.disabled = true;
+  try {
+    const bytes = await composeMySignedPreview(state.signedNow, true);
+    if (bytes) openPdfOverlay({ title: st('pvs_mine'), bytes, back: st('pv_back') });
+  } catch (e) { showToast(st('dl_err')); }
+  finally { if (btn) btn.disabled = false; }
 }
 
 // 서명 완료 화면
@@ -15689,6 +15803,8 @@ function showSignComplete(result) {
         st('audit_ip') + ': ' + esc(result.ip || st('recorded')) + '<br>' +
         st('audit_device') + ': ' + esc(result.device ? result.device.os + ' / ' + result.device.browser : st('recorded')) +
         '</p></div>' +
+      (state.signedNow && state.signData?.document?.file_type === 'pdf'
+        ? '<button type="button" class="btn-secondary" style="margin-top:14px;width:100%;max-width:340px;padding:12px;" onclick="viewMySignedDoc(this)">📄 ' + st('pvs_mine_btn') + '</button>' : '') +
       '<div id="afterNoteDone"></div>' +
       '<p class="ip-notice">' + st('done_legal') + '</p>' +
       (result.all_completed ? '' : undoBoxHtml()) +
