@@ -18,6 +18,8 @@
   try {
     var t = localStorage.getItem('io_theme'), i = localStorage.getItem('io_icon') || 'black';
     if (t === 'white' || t === 'black') document.documentElement.setAttribute('data-theme', t);
+    var m = localStorage.getItem('io_mode');   // light(기본) · dark · auto(시스템 설정)
+    if (m === 'dark' || (m === 'auto' && window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches)) document.documentElement.setAttribute('data-mode', 'dark');
     if (i === 'white' || i === 'navy' || i === 'black') {
       var set = function (sel, href) { var el = document.querySelector(sel); if (el) el.setAttribute('href', href); };
       set('link[rel="apple-touch-icon"]', 'icons/' + i + '/apple-touch-icon.png');
@@ -1321,6 +1323,193 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
 .trash-row .dl.urgent { color:var(--danger); font-weight:600; }
 .trash-row .act { text-align:right; white-space:nowrap; }
 @media (max-width:700px) { .trash-row { grid-template-columns:1fr 110px; row-gap:8px; } }
+
+
+
+/* ===== DARK MODE (generated) ===== */
+/* 다크 모드 — 바탕 · 글자 · 테두리 색 변수. 문서(PDF) · 서명 칸은 종이처럼 밝게 둔다 */
+html[data-mode="dark"] {
+  color-scheme: dark;
+  --bg:#0f141a; --card:#171d25; --text:#e6edf3; --text-secondary:#a9b6c3; --text-muted:#7a8a9c;
+  --border:#2a3441; --border-hover:#3a4655; --info-bg:#132233; --success-bg:#10261e; --warning-bg:#2a2210; --danger-bg:#2a1414;
+  --navy-text:#cfe0f2;
+  --shadow-sm:0 1px 3px rgba(0,0,0,.45); --shadow-md:0 4px 12px rgba(0,0,0,.5); --shadow-lg:0 8px 24px rgba(0,0,0,.55);
+}
+html[data-mode="dark"] body { background:var(--bg); color:var(--text); }
+html[data-mode="dark"][data-theme="black"] { --navy-text:#e6d3a8; }
+html[data-mode="dark"][data-theme="white"] { --cyan:#2f7fc4; --cyan-hover:#2569a6; --cyan-light:#8cc6f2; }
+html[data-mode="dark"][data-theme="white"] .app-header { background:var(--card); border-bottom-color:var(--border); }
+html[data-mode="dark"][data-theme="white"] .btn-logout:hover { background:#222b36; color:var(--text); }
+html[data-mode="dark"][data-theme="white"] .sign-lang { background:#1e2732; color:var(--text); border-color:var(--border); }
+html[data-mode="dark"][data-theme="white"] .app-header .btn-secondary { color:var(--text) !important; }
+html[data-mode="dark"] input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]),
+html[data-mode="dark"] select, html[data-mode="dark"] textarea { background-color:#121820; color:var(--text); border-color:var(--border); }
+html[data-mode="dark"] ::placeholder { color:#5f6f82; }
+html[data-mode="dark"] .modal-overlay { background:rgba(0,0,0,.62); }
+html[data-mode="dark"] .pdf-page, html[data-mode="dark"] .pv-body .pdf-page { background:#fff; }
+html[data-mode="dark"] a { color:#7cc4ee; }
+html[data-mode="dark"] .btn-action.navy, html[data-mode="dark"] .btn-copy, html[data-mode="dark"] .toast,
+html[data-mode="dark"] .btn-mini.primary, html[data-mode="dark"] .bulk-num, html[data-mode="dark"] .pdf-page-label { background:#26476b; }
+html[data-mode="dark"][data-theme="black"] .btn-action.navy, html[data-mode="dark"][data-theme="black"] .btn-copy,
+html[data-mode="dark"][data-theme="black"] .toast, html[data-mode="dark"][data-theme="black"] .btn-mini.primary { background:#2c2c30; }
+/* 직접 쓴 흰 바탕(style="background:#fff") */
+html[data-mode="dark"] [style*="background:#fff;"], html[data-mode="dark"] [style$="background:#fff"], html[data-mode="dark"] [style*="background: #fff"],
+html[data-mode="dark"] [style*="background:white"], html[data-mode="dark"] [style*="background:#ffffff"], html[data-mode="dark"] [style*="background:#fafbfc"],
+html[data-mode="dark"] [style*="background:#f8fafc"] { background-color:var(--card) !important; }
+html[data-mode="dark"] [style*="color:var(--navy)"] { color:var(--navy-text) !important; }
+html[data-mode="dark"] [style*="color:#1a2a3a"], html[data-mode="dark"] [style*="color:#333"], html[data-mode="dark"] [style*="color:#111"] { color:var(--text) !important; }
+
+/* 자동 계산 (밝은 바탕 → 어두운 바탕, 어두운 글자 → 밝은 글자) */
+html[data-mode="dark"] .btn-google { background:#171d25; color:#e6edf3; }
+html[data-mode="dark"] .btn-google:hover { background:#23262a; }
+html[data-mode="dark"] .oauth-note { background:var(--info-bg,#152a37); border:1px solid #284b5d; }
+html[data-mode="dark"] .lp-nav { background:rgba(23,29,37,0.92); }
+html[data-mode="dark"] .lp-btn-ghost:hover { color:var(--navy-text); }
+html[data-mode="dark"] .cmp-table td.us b { color:var(--navy-text); }
+html[data-mode="dark"] .lp-section-alt { background:#171d25; }
+html[data-mode="dark"] .lp-btn-soft { color:var(--navy-text); }
+html[data-mode="dark"] .stat-card .stat-value { color:var(--navy-text); }
+html[data-mode="dark"] .doc-label { background:#152537; color:#a6baf2; border:1px solid #283f5d; }
+html[data-mode="dark"] .doc-label button { color:#a6baf2; }
+html[data-mode="dark"] .code-warn { background:#372815; border:1.5px solid #5d4428; color:#f2b9a6; }
+html[data-mode="dark"] .status-waiting { color:#f2c7a6; }
+html[data-mode="dark"] .status-progress { color:#a6d7f2; }
+html[data-mode="dark"] .status-complete { color:#a6f2dc; }
+html[data-mode="dark"] .status-expired { color:#f2a6a6; }
+html[data-mode="dark"] .signer-acct { border:1.5px solid #28325d; }
+html[data-mode="dark"] .signer-acct b { color:#b4b0e8; }
+html[data-mode="dark"] .sa-google { background:#171d25; color:#becada; }
+html[data-mode="dark"] .signer-acct .sa-links button { background:#171d25; }
+html[data-mode="dark"] .sa-save { color:#b4b0e8; }
+html[data-mode="dark"] .si-row.auto input, html[data-mode="dark"] .si-row.auto textarea { background:#151d37; }
+html[data-mode="dark"] .sp-sec > summary, html[data-mode="dark"] .sp-sec > h5 { color:var(--navy-text); }
+html[data-mode="dark"] .sp-grid input, html[data-mode="dark"] .sp-grid select, html[data-mode="dark"] .sp-extra input { background:#171d25; }
+html[data-mode="dark"] .sp-extra button { background:#171d25; }
+html[data-mode="dark"] .pa-box { border:1.5px solid #284b5d; background:#152a37; }
+html[data-mode="dark"] .pa-row .pa-label { color:var(--navy-text); }
+html[data-mode="dark"] .pa-who { background:#171d25; }
+html[data-mode="dark"] .pa-who:has(input:checked) { background:#153637; }
+html[data-mode="dark"] .pa-sig .pa-prev { background:#171d25; }
+html[data-mode="dark"] .pa-hint b { color:var(--navy-text); }
+html[data-mode="dark"] .pa-tabs button { background:#171d25; }
+html[data-mode="dark"] .rr-banner { background:#372815; color:#f2b9a6; }
+html[data-mode="dark"] .rr-banner h4 small { color:#f2b9a6; }
+html[data-mode="dark"] .rr-banner .rr-note { background:#171d25; border:1px solid #5d4428; color:#f2b6a6; }
+html[data-mode="dark"] .rr-signer:has(input:checked) { background:#372815; }
+html[data-mode="dark"] .rr-phrases button { background:#171d25; color:#f2b9a6; }
+html[data-mode="dark"] .undo-box .btn-undo { background:#373115; color:#f2c3a6; }
+html[data-mode="dark"] .dl-preview b { color:var(--navy-text); }
+html[data-mode="dark"] .dl-confirm { background:#153637; border:1px solid #28575d; color:var(--navy-text); }
+html[data-mode="dark"] .rm-opt b { color:var(--navy-text); }
+html[data-mode="dark"] .input-palette { border:1.5px dashed #2b5059; background:#152f37; }
+html[data-mode="dark"] .ip-title { color:var(--navy-text); }
+html[data-mode="dark"] .mk-perm { border:1.5px dashed #39285d; background:#221537; }
+html[data-mode="dark"] .mk-perm .ip-title { color:#c5aaee; }
+html[data-mode="dark"] .mk-perm .ip-title b { color:#c4a9ef; }
+html[data-mode="dark"] .mk-perm-item:has(input:checked) { background:#211537; color:#c4a9ef; }
+html[data-mode="dark"] .mk-area-tools .btn-tool { color:#c4a9ef; }
+html[data-mode="dark"] .mk-area-tools span b { color:#c4a9ef; }
+html[data-mode="dark"] .mk-area-note { color:#c4a9ef !important; }
+html[data-mode="dark"] .inst-hero > div > b { color:var(--navy-text); }
+html[data-mode="dark"] .inst-hero span b { color:var(--navy-text); }
+html[data-mode="dark"] .inst-ok { background:#153727; border:1px solid #295b44; color:#a6f2dd; }
+html[data-mode="dark"] .inst-sec h5 { color:var(--navy-text); }
+html[data-mode="dark"] .th-sec h4 { color:var(--navy-text); }
+html[data-mode="dark"] .pi-save { color:#a6f2dd; }
+html[data-mode="dark"] .pi-st.ok { background:#153727; color:#a6f2dc; }
+html[data-mode="dark"] .pi-st.dup { background:#1e262f; color:#c4cbd4; }
+html[data-mode="dark"] .pi-st.bad { background:#371515; }
+html[data-mode="dark"] .no-link-note { background:#1e262f; }
+html[data-mode="dark"] .draft-bar { background:#153727; border:1px solid #295b44; color:#a6f2dd; }
+html[data-mode="dark"] .draft-bar button { background:#171d25; color:#a6f2dd; }
+html[data-mode="dark"] .conv-box { background:#153037; }
+html[data-mode="dark"] .conv-box b { color:var(--navy-text); }
+html[data-mode="dark"] .conv-spin { border:3px solid #284b5d; }
+html[data-mode="dark"] .conv-done { background:#153727; border:1px solid #295b44; color:#a6f2dd; }
+html[data-mode="dark"] .sign-preview-bar button { background:#171d25; color:#a9cbef; }
+html[data-mode="dark"] .pv-head .pv-back { background:#171d25; color:#a9cbef; }
+html[data-mode="dark"] .pv-foot { background:#171d25; }
+html[data-mode="dark"] .pv-edit { background:#171d25; color:var(--navy-text); }
+html[data-mode="dark"] .an-form { background:#373115; }
+html[data-mode="dark"] .an-form textarea, html[data-mode="dark"] .an-form input { background:#171d25; }
+html[data-mode="dark"] .after-note { background:#373115; }
+html[data-mode="dark"] .after-note .an-h { color:#f2c3a6; }
+html[data-mode="dark"] .mk-box { border:1.5px solid #39285d; }
+html[data-mode="dark"] .mk-bar { border:1.5px solid #39285d; }
+html[data-mode="dark"] .mk-box h4 { color:#c4a9ef; }
+html[data-mode="dark"] .mk-box summary { color:#c4a8f0; }
+html[data-mode="dark"] .mk-box b { color:#c5aaee; }
+html[data-mode="dark"] .mk-box .mk-notice { background:#211537; color:#c5aaee; }
+html[data-mode="dark"] .mk-tool { background:#171d25; }
+html[data-mode="dark"] .mk-count { color:#c4a9ef; }
+html[data-mode="dark"] .mk-hint { background:#211537; color:#c4a9ef; }
+html[data-mode="dark"] .mk-hint button { color:#c4a8f0; }
+html[data-mode="dark"] .mk-badge { background:#211537; color:#c4a8f0; }
+html[data-mode="dark"] .mr-row.done { background:#163620; border-color:#285c3a; }
+html[data-mode="dark"] .mr-mark { color:#b7b4e4; }
+html[data-mode="dark"] .sign-inputs { border:1.5px solid #2b5059; }
+html[data-mode="dark"] .sign-inputs h4 { color:var(--navy-text); }
+html[data-mode="dark"] .si-row input, html[data-mode="dark"] .si-row textarea { background:#171d25; }
+html[data-mode="dark"] .pw-link-box .pv { color:var(--navy-text); }
+html[data-mode="dark"] .temp-pw { color:var(--navy-text); }
+html[data-mode="dark"] .warn-box p { color:#f2c7a6; }
+html[data-mode="dark"] .btn-dots:hover, html[data-mode="dark"] .btn-dots.on { color:var(--navy-text); }
+html[data-mode="dark"] .p-pending { background:#373115; color:#f2c7a6; }
+html[data-mode="dark"] .p-active { background:#153727; color:#a6f2dc; }
+html[data-mode="dark"] .p-suspended { background:#371515; color:#f2a6a6; }
+html[data-mode="dark"] .btn-chk.done { color:#a6f2dc; }
+html[data-mode="dark"] .fld-msg.ok { color:#a6f2dc; }
+html[data-mode="dark"] .su-sec { color:var(--navy-text); }
+html[data-mode="dark"] .choice input:checked + span { color:var(--navy-text); }
+html[data-mode="dark"] .cat-notice { background:#152437; color:#a6baf2; }
+html[data-mode="dark"] .cat-guide { background:#153727; color:#a6f2dc; }
+html[data-mode="dark"] .cat-faq { background:#373115; color:#f2c7a6; }
+html[data-mode="dark"] .cat-inquiry { background:#152a37; color:#a6d7f2; }
+html[data-mode="dark"] .cat-feature { background:#1b1537; color:#c4a8f0; }
+html[data-mode="dark"] .cat-bug { background:#371515; color:#f2a6a6; }
+html[data-mode="dark"] .cat-contract { background:#153637; color:#a6e2f2; }
+html[data-mode="dark"] .st-open { background:#373115; color:#f2c7a6; }
+html[data-mode="dark"] .st-in_progress { background:#152a37; color:#a6d7f2; }
+html[data-mode="dark"] .st-answered { background:#153727; color:#a6f2dc; }
+html[data-mode="dark"] .batch-stats b { color:var(--navy-text); }
+html[data-mode="dark"] .sec-box { border:1px solid #284b5d; }
+html[data-mode="dark"] .sec-title { color:var(--navy-text); }
+html[data-mode="dark"] .cat-hr { background:#151d37; color:#b3aeea; }
+html[data-mode="dark"] .cat-edu { background:#361728; color:#f2a6c6; }
+html[data-mode="dark"] .cat-privacy { background:#16362f; color:#a6f2ec; }
+html[data-mode="dark"] .cat-estate { background:#372815; color:#f2bca6; }
+html[data-mode="dark"] .cat-office { background:#1e262f; color:#c2cad6; }
+html[data-mode="dark"] .tpl-disclaimer { color:#f2c3a6; }
+html[data-mode="dark"] .tpl-doc h2 { color:var(--navy-text); }
+html[data-mode="dark"] .tpl-doc .note { color:#f2c3a6; }
+html[data-mode="dark"] .status-scheduled { background:#1b1537; color:#c4a8f0; }
+html[data-mode="dark"] .sched-box { background:#261537; border:1.5px solid #41285d; }
+html[data-mode="dark"] .sched-badge { color:#c4a8f0; }
+html[data-mode="dark"] .ret-banner.warn { background:#372815; color:#f2b9a6; }
+html[data-mode="dark"] .ret-banner.danger { border-color:#5d2828; color:#f2a6a6; }
+html[data-mode="dark"] .st-pending { background:#372815; color:#f2bca6; }
+html[data-mode="dark"] .st-confirmed { background:var(--success-bg,#153727); color:#a6f2dc; }
+html[data-mode="dark"] .st-active { background:#153727; color:#a6f2dc; }
+html[data-mode="dark"] .st-past_due { background:#372815; color:#f2bca6; }
+html[data-mode="dark"] .mem-bulk { background:#373115; color:#f2c3a6; }
+html[data-mode="dark"] .cc-iso { background:#1e262f; color:#a9cbef; }
+html[data-mode="dark"] .ccp-item.on { background:#192b33; }
+html[data-mode="dark"] .ccp-no { color:var(--navy-text); }
+html[data-mode="dark"] .board-seg-btn.active { color:var(--navy-text); }
+html[data-mode="dark"] .phone-bad { background:#371515 !important; }
+html[data-mode="dark"] .rc-row .ph { color:var(--navy-text); }
+html[data-mode="dark"] .io-ad-bar { background:#171d25; border-top:1px solid #39404b; }
+html[data-mode="dark"] .io-ad-bar .tx { color:#bfcad9; }
+html[data-mode="dark"] .io-ad-bar .tx b { color:#a9cbef; }
+@media (min-width:760px) {
+  html[data-mode="dark"] .io-ad-bar { border:1px solid #39404b; }
+}
+html[data-mode="dark"] .io-ad-card .bt { background:#171d25; color:#a9cbef; }
+html[data-mode="dark"] .sign-lang option { color:#e6edf3; }
+html[data-mode="dark"] .sp-chip.done { color:#a6f2dc; }
+html[data-mode="dark"] .consent-box h4 { color:var(--navy-text); }
+html[data-mode="dark"] .legal-badge { color:#a6f2dc; }
+/* ===== DARK MODE END ===== */
 </style>
 </head>
 <body>
@@ -2109,7 +2298,7 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
     <div class="app-header-right">
       <span class="app-header-user" id="headerUser"></span><span class="role-pill" id="rolePill" style="display:none;">관리자</span>
       <button class="btn-theme btn-install" onclick="openInstallGuide()" title="PC · 휴대폰에 앱으로 설치">💻 앱 설치</button>
-      <button class="btn-theme" onclick="openThemePicker()" title="화면 테마 · 홈 화면 아이콘">🎨 테마</button>
+      <button class="btn-theme" onclick="openThemePicker()" title="다크 모드 · 화면 테마 · 홈 화면 아이콘">🎨 테마</button>
       <button class="btn-logout" onclick="doLogout()">로그아웃</button>
     </div>
   </header>
@@ -4174,7 +4363,7 @@ async function routeByProfile() {
 // ============================================================
 const SB_FN_ADMIN = SB_URL + '/functions/v1/esign-admin';
 const APP_URL = shareBase();
-const BUILD = '2026-11-23.3';   // 배포 확인용. 화면 하단과 콘솔에 표시된다.
+const BUILD = '2026-11-23.4';   // 배포 확인용. 화면 하단과 콘솔에 표시된다.
 
 
 // ============================================================
@@ -4992,12 +5181,28 @@ const THEMES = [
 const THEME_COLOR = { white: '#ffffff', black: '#08080a', navy: '#091e33' };
 const curTheme = () => { try { const t = localStorage.getItem('io_theme'); return ['white', 'black'].includes(t) ? t : 'navy'; } catch (e) { return 'navy'; } };
 const curIcon = () => { try { const i = localStorage.getItem('io_icon'); return ['white', 'navy'].includes(i) ? i : 'black'; } catch (e) { return 'black'; } };
+const curMode = () => { try { const m = localStorage.getItem('io_mode'); return ['dark', 'auto'].includes(m) ? m : 'light'; } catch (e) { return 'light'; } };
+const isDark = () => document.documentElement.getAttribute('data-mode') === 'dark';
+function applyMode(m) {
+  const dark = m === 'dark' || (m === 'auto' && window.matchMedia?.('(prefers-color-scheme: dark)').matches);
+  if (dark) document.documentElement.setAttribute('data-mode', 'dark');
+  else document.documentElement.removeAttribute('data-mode');
+  applyTheme(curTheme());
+}
+function setMode(m) { try { localStorage.setItem('io_mode', m); } catch (e) {} applyMode(m); renderThemePicker(); }
+// 「시스템 설정 따라가기」: 컴퓨터 · 휴대폰의 밝기 설정이 바뀌면 바로 따라간다
+window.matchMedia?.('(prefers-color-scheme: dark)').addEventListener?.('change', () => { if (curMode() === 'auto') applyMode('auto'); });
 function applyTheme(t) {
   if (t === 'navy') document.documentElement.removeAttribute('data-theme');
   else document.documentElement.setAttribute('data-theme', t);
-  // 화이트 테마는 머리말이 흰색이라 남색 로고를 쓴다
-  const src = t === 'white' ? LOGO_H : LOGO_W;
+  // 밝은 화이트 테마만 머리말이 흰색이라 남색 로고, 나머지는 흰 로고
+  const dark = isDark();
+  const src = (t === 'white' && !dark) ? LOGO_H : LOGO_W;
   document.querySelectorAll('#headerLogo, .headerLogoClone').forEach(el => { el.src = src; });
+  // 로그인 · 가입 · 소개 화면의 흰 카드 위 로고: 다크 모드에서는 흰 로고
+  ['loginLogo', 'signupLogo', 'resetLogo', 'lpLogo'].forEach(id => { const el = document.getElementById(id); if (el) el.src = dark ? LOGO_W : LOGO_H; });
+  const tc = document.querySelector('meta[name="theme-color"]');
+  if (tc && dark) tc.setAttribute('content', '#0f141a');
 }
 function applyIcon(i) {
   const set = (sel, href) => { const el = document.querySelector(sel); if (el) el.setAttribute('href', href); };
@@ -5014,10 +5219,17 @@ function renderThemePicker() {
   const t = curTheme(), ic = curIcon();
   const box = document.getElementById('themeBody');
   if (!box) return;
+  const md = curMode();
+  const MODES = [{ k: 'light', name: '☀️ 밝게', sw: ['#ffffff', '#f4f6f9', '#e2e8f0'] }, { k: 'dark', name: '🌙 어둡게', sw: ['#0f141a', '#171d25', '#2a3441'] },
+                 { k: 'auto', name: '🖥 시스템 설정', sw: ['#ffffff', '#171d25', '#0f141a'] }];
   box.innerHTML =
+    '<div class="th-sec"><h4>밝기 (다크 모드)</h4><div class="th-opts">' +
+      MODES.map(x => '<button type="button" class="th-opt' + (x.k === md ? ' on' : '') + '" onclick="setMode(\'' + x.k + '\')">' +
+        '<div class="th-sw">' + x.sw.map(c => '<i style="background-color:' + c + '"></i>').join('') + '</div>' + x.name + (x.k === md ? ' ✓' : '') + '</button>').join('') +
+    '</div><p class="th-note">「시스템 설정」은 컴퓨터 · 휴대폰의 밝게 / 어둡게 설정을 따라갑니다. 문서와 서명 칸은 종이처럼 밝게 보입니다.</p></div>' +
     '<div class="th-sec"><h4>화면 테마</h4><div class="th-opts">' +
       THEMES.map(x => '<button type="button" class="th-opt' + (x.k === t ? ' on' : '') + '" onclick="setTheme(\'' + x.k + '\')">' +
-        '<div class="th-sw">' + x.sw.map(c => '<i style="background:' + c + '"></i>').join('') + '</div>' + x.name + (x.k === t ? ' ✓' : '') + '</button>').join('') +
+        '<div class="th-sw">' + x.sw.map(c => '<i style="background-color:' + c + '"></i>').join('') + '</div>' + x.name + (x.k === t ? ' ✓' : '') + '</button>').join('') +
     '</div><p class="th-note">머리말 · 버튼 · 강조 색이 바뀝니다. 이 브라우저에만 적용됩니다.</p></div>' +
     '<div class="th-sec"><h4>홈 화면 · 탭 아이콘</h4><div class="th-opts">' +
       THEMES.map(x => '<button type="button" class="th-opt' + (x.k === ic ? ' on' : '') + '" onclick="setIcon(\'' + x.k + '\')">' +
@@ -16284,7 +16496,7 @@ function init() {
   renderLandingForms(null);
   lpSetCycle('m');
   document.querySelectorAll('.headerLogoClone').forEach(el => el.src = LOGO_W);
-  applyTheme(curTheme());
+  applyMode(curMode());
   // 앱으로 설치할 수 있게 서비스 워커 등록 (https 에서만 · 화면은 캐시하지 않는다)
   if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) navigator.serviceWorker.register('sw.js').catch(() => {});
   initSigners();
