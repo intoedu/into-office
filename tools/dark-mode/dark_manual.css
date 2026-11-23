@@ -1,0 +1,31 @@
+/* 다크 모드 — 바탕 · 글자 · 테두리 색 변수. 문서(PDF) · 서명 칸은 종이처럼 밝게 둔다 */
+html[data-mode="dark"] {
+  color-scheme: dark;
+  --bg:#0f141a; --card:#171d25; --text:#e6edf3; --text-secondary:#a9b6c3; --text-muted:#7a8a9c;
+  --border:#2a3441; --border-hover:#3a4655; --info-bg:#132233; --success-bg:#10261e; --warning-bg:#2a2210; --danger-bg:#2a1414;
+  --navy-text:#cfe0f2;
+  --shadow-sm:0 1px 3px rgba(0,0,0,.45); --shadow-md:0 4px 12px rgba(0,0,0,.5); --shadow-lg:0 8px 24px rgba(0,0,0,.55);
+}
+html[data-mode="dark"] body { background:var(--bg); color:var(--text); }
+html[data-mode="dark"][data-theme="black"] { --navy-text:#e6d3a8; }
+html[data-mode="dark"][data-theme="white"] { --cyan:#2f7fc4; --cyan-hover:#2569a6; --cyan-light:#8cc6f2; }
+html[data-mode="dark"][data-theme="white"] .app-header { background:var(--card); border-bottom-color:var(--border); }
+html[data-mode="dark"][data-theme="white"] .btn-logout:hover { background:#222b36; color:var(--text); }
+html[data-mode="dark"][data-theme="white"] .sign-lang { background:#1e2732; color:var(--text); border-color:var(--border); }
+html[data-mode="dark"][data-theme="white"] .app-header .btn-secondary { color:var(--text) !important; }
+html[data-mode="dark"] input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]),
+html[data-mode="dark"] select, html[data-mode="dark"] textarea { background-color:#121820; color:var(--text); border-color:var(--border); }
+html[data-mode="dark"] ::placeholder { color:#5f6f82; }
+html[data-mode="dark"] .modal-overlay { background:rgba(0,0,0,.62); }
+html[data-mode="dark"] .pdf-page, html[data-mode="dark"] .pv-body .pdf-page { background:#fff; }
+html[data-mode="dark"] a { color:#7cc4ee; }
+html[data-mode="dark"] .btn-action.navy, html[data-mode="dark"] .btn-copy, html[data-mode="dark"] .toast,
+html[data-mode="dark"] .btn-mini.primary, html[data-mode="dark"] .bulk-num, html[data-mode="dark"] .pdf-page-label { background:#26476b; }
+html[data-mode="dark"][data-theme="black"] .btn-action.navy, html[data-mode="dark"][data-theme="black"] .btn-copy,
+html[data-mode="dark"][data-theme="black"] .toast, html[data-mode="dark"][data-theme="black"] .btn-mini.primary { background:#2c2c30; }
+/* 직접 쓴 흰 바탕(style="background:#fff") */
+html[data-mode="dark"] [style*="background:#fff;"], html[data-mode="dark"] [style$="background:#fff"], html[data-mode="dark"] [style*="background: #fff"],
+html[data-mode="dark"] [style*="background:white"], html[data-mode="dark"] [style*="background:#ffffff"], html[data-mode="dark"] [style*="background:#fafbfc"],
+html[data-mode="dark"] [style*="background:#f8fafc"] { background-color:var(--card) !important; }
+html[data-mode="dark"] [style*="color:var(--navy)"] { color:var(--navy-text) !important; }
+html[data-mode="dark"] [style*="color:#1a2a3a"], html[data-mode="dark"] [style*="color:#333"], html[data-mode="dark"] [style*="color:#111"] { color:var(--text) !important; }
