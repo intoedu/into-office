@@ -532,6 +532,19 @@ html[data-theme="white"] .btn-logout:hover { color:var(--navy); background:#f1f5
 html[data-theme="white"] .app-header .btn-secondary { color:var(--navy) !important; border-color:var(--border) !important; }
 html[data-theme="white"] .sign-lang { background:#f1f5f9; color:var(--text); border-color:var(--border); }
 html[data-theme="white"] .btn-theme { color:var(--text-secondary); border-color:var(--border); }
+.inst-hero { display:flex; gap:14px; align-items:center; padding:14px; border-radius:12px; background:var(--info-bg); margin-bottom:14px; }
+.inst-hero img { width:64px; height:64px; border-radius:14px; flex:none; box-shadow:0 2px 8px rgba(0,0,0,.2); }
+.inst-hero > div > b { display:block; font-size:15px; color:var(--navy); margin-bottom:3px; }
+.inst-hero span b { color:var(--navy); }
+.inst-hero span { font-size:12.5px; color:var(--text-secondary); line-height:1.6; }
+.inst-go { width:100%; padding:14px; border-radius:10px; background:var(--cyan); color:#fff; font-size:15px; font-weight:800; margin-bottom:14px; }
+.inst-ok { padding:12px 14px; border-radius:10px; background:#ecfdf5; border:1px solid #a7f3d0; color:#065f46; font-size:13.5px; margin-bottom:14px; }
+.inst-sec { border:1px solid var(--border); border-radius:10px; padding:12px 14px; margin-bottom:10px; }
+.inst-sec.me { border-color:var(--cyan); box-shadow:0 0 0 3px rgba(4,183,221,.12); }
+.inst-sec h5 { font-size:13.5px; font-weight:800; color:var(--navy); margin-bottom:6px; }
+.inst-sec h5 em { font-style:normal; font-size:11px; font-weight:700; color:#fff; background:var(--cyan); border-radius:6px; padding:1px 7px; margin-left:6px; }
+.inst-sec ol { padding-left:18px; font-size:13px; line-height:1.8; color:var(--text); }
+.inst-note { font-size:12px; color:var(--text-muted); line-height:1.7; margin-top:6px; }
 .btn-theme { color:rgba(255,255,255,.75); font-size:13px; padding:6px 10px; border-radius:6px; border:1px solid rgba(255,255,255,.25); transition:all .2s; white-space:nowrap; }
 .btn-theme:hover { background:rgba(255,255,255,.1); }
 .th-sec { margin-bottom:18px; }
@@ -1328,6 +1341,7 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
         <a href="#lpFaq">자주 묻는 질문</a>
       </div>
       <div class="lp-nav-cta">
+        <button class="lp-btn lp-btn-ghost lp-install" onclick="openInstallGuide()">💻 PC · 앱 설치</button>
         <button class="lp-btn lp-btn-ghost" onclick="goLogin()">로그인</button>
         <button class="lp-btn lp-btn-primary" onclick="goSignup()">무료로 시작하기</button>
       </div>
@@ -1630,6 +1644,10 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
       <h2>자주 묻는 질문</h2>
     </div>
     <div style="max-width:760px;margin:0 auto;">
+      <div class="lp-faq-item">
+        <button class="lp-faq-q" onclick="lpFaq(this)">윈도우 PC에 프로그램처럼 설치할 수 있나요?<span class="mk">+</span></button>
+        <div class="lp-faq-a">네. 크롬이나 엣지에서 인투오피스를 연 뒤 「💻 PC · 앱 설치」를 누르면 시작 메뉴 · 바탕화면 · 작업 표시줄에 앱으로 설치됩니다. 따로 설치 파일을 내려받지 않아도 되고, 항상 최신 버전으로 열립니다. <a href="javascript:void(0)" onclick="openInstallGuide()">설치 방법 보기</a></div>
+      </div>
       <div class="lp-faq-item">
         <button class="lp-faq-q" onclick="lpFaq(this)">서명받는 사람도 가입해야 하나요?<span class="mk">+</span></button>
         <div class="lp-faq-a">아닙니다. 서명자는 문자나 카카오톡으로 받은 링크를 눌러 바로 서명합니다. 앱 설치도, 회원가입도 필요 없습니다. 휴대폰만 있으면 됩니다.</div>
@@ -2090,6 +2108,7 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
     <img id="headerLogo" class="logo" alt="INTO OFFICE">
     <div class="app-header-right">
       <span class="app-header-user" id="headerUser"></span><span class="role-pill" id="rolePill" style="display:none;">관리자</span>
+      <button class="btn-theme btn-install" onclick="openInstallGuide()" title="PC · 휴대폰에 앱으로 설치">💻 앱 설치</button>
       <button class="btn-theme" onclick="openThemePicker()" title="화면 테마 · 홈 화면 아이콘">🎨 테마</button>
       <button class="btn-logout" onclick="doLogout()">로그아웃</button>
     </div>
@@ -2882,6 +2901,17 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
       <button class="btn-secondary" onclick="closeContactPicker()">취소</button>
       <button class="btn-action" onclick="applyContactPick()">선택한 서명자 넣기</button>
     </div>
+  </div>
+</div>
+
+<!-- PC · 휴대폰에 앱으로 설치 -->
+<div class="modal-overlay" id="installModal">
+  <div class="modal" style="max-width:560px;">
+    <div class="modal-header">
+      <h3>💻 인투오피스 앱 설치</h3>
+      <button class="modal-close" onclick="document.getElementById('installModal').classList.remove('active')">✕</button>
+    </div>
+    <div class="modal-body" id="installBody" style="max-height:70vh;overflow-y:auto;"></div>
   </div>
 </div>
 
@@ -4144,7 +4174,7 @@ async function routeByProfile() {
 // ============================================================
 const SB_FN_ADMIN = SB_URL + '/functions/v1/esign-admin';
 const APP_URL = shareBase();
-const BUILD = '2026-11-23.2';   // 배포 확인용. 화면 하단과 콘솔에 표시된다.
+const BUILD = '2026-11-23.3';   // 배포 확인용. 화면 하단과 콘솔에 표시된다.
 
 
 // ============================================================
@@ -4884,6 +4914,72 @@ async function deleteContacts(ids) {
   if (error || !data?.ok) { showToast('삭제하지 못했습니다. 잠시 후 다시 시도해주세요.'); return; }
   showToast(data.deleted + '명을 삭제했습니다.', true);
   loadContacts(true);
+}
+
+// ===== PC · 휴대폰에 앱으로 설치 (PWA) =====
+// 크롬 · 엣지는 설치 창을 바로 띄우고(beforeinstallprompt), 그 밖의 브라우저는 단계별 안내를 보여 준다.
+let installEvt = null;
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); installEvt = e; if (document.getElementById('installModal')?.classList.contains('active')) renderInstallGuide(); });
+window.addEventListener('appinstalled', () => { installEvt = null; showToast('인투오피스 앱을 설치했습니다. 시작 메뉴 · 바탕화면에서 열 수 있습니다.', true); renderInstallGuide(); });
+const isInstalledApp = () => window.matchMedia?.('(display-mode: minimal-ui)').matches || window.matchMedia?.('(display-mode: standalone)').matches || navigator.standalone === true;
+function installEnv() {
+  const ua = navigator.userAgent;
+  const ios = /iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+  if (ios) return 'ios';
+  if (/Android/.test(ua)) return 'android';
+  if (/Edg\//.test(ua)) return 'edge';
+  if (/Chrome\//.test(ua) && !/OPR\/|Whale\//.test(ua)) return 'chrome';
+  if (/Whale\//.test(ua)) return 'whale';
+  if (/Macintosh/.test(ua) && /Safari\//.test(ua)) return 'safari';
+  return 'other';
+}
+function openInstallGuide() { renderInstallGuide(); document.getElementById('installModal').classList.add('active'); }
+async function doInstall() {
+  if (!installEvt) { renderInstallGuide(); return; }
+  installEvt.prompt();
+  try { const r = await installEvt.userChoice; if (r?.outcome === 'accepted') installEvt = null; } catch (e) {}
+  renderInstallGuide();
+}
+function renderInstallGuide() {
+  const box = document.getElementById('installBody');
+  if (!box) return;
+  const env = installEnv();
+  const icon = document.querySelector('link[rel="apple-touch-icon"]')?.getAttribute('href') || 'icons/apple-touch-icon.png';
+  const sec = (k, title, steps, note) => '<div class="inst-sec' + (k.includes(env) ? ' me' : '') + '"><h5>' + title + (k.includes(env) ? '<em>지금 쓰는 브라우저</em>' : '') + '</h5>' +
+    '<ol>' + steps.map(x => '<li>' + x + '</li>').join('') + '</ol>' + (note ? '<p class="inst-note">' + note + '</p>' : '') + '</div>';
+  box.innerHTML =
+    '<div class="inst-hero"><img src="' + icon + '" alt=""><div><b>설치 파일 없이 앱으로 설치</b>' +
+      '<span>윈도우 PC는 <b>시작 메뉴 · 바탕화면 · 작업 표시줄</b>에, 휴대폰은 <b>홈 화면</b>에 인투오피스가 생깁니다. 브라우저 주소창 없이 따로 열리고, 항상 최신 버전입니다.</span></div></div>' +
+    (isInstalledApp() ? '<div class="inst-ok">✅ 지금 설치된 앱으로 열려 있습니다.</div>'
+      : installEvt ? '<button type="button" class="inst-go" onclick="doInstall()">💻 지금 이 컴퓨터에 설치하기</button>' : '') +
+    sec(['chrome'], '윈도우 · 맥 — 크롬 (Chrome)', [
+      '크롬에서 <b>intoedu.github.io/into-office</b> 를 엽니다.',
+      '주소창 오른쪽 끝의 <b>설치 아이콘(모니터 모양 ⊕)</b>을 누르거나, 오른쪽 위 <b>⋮ 메뉴 → 전송, 저장, 공유 → 페이지를 앱으로 설치</b>를 누릅니다.',
+      '<b>설치</b>를 누르면 끝납니다. 시작 메뉴에서 「INTO OFFICE」를 찾아 <b>작업 표시줄에 고정</b>해 두면 편합니다.'
+    ], '메뉴 이름은 크롬 버전에 따라 「인투오피스 설치」처럼 조금 다를 수 있습니다.') +
+    sec(['edge'], '윈도우 — 엣지 (Edge)', [
+      '엣지에서 <b>intoedu.github.io/into-office</b> 를 엽니다.',
+      '주소창 오른쪽의 <b>앱 설치 아이콘</b>을 누르거나, 오른쪽 위 <b>⋯ 메뉴 → 앱 → 이 사이트를 앱으로 설치</b>를 누릅니다.',
+      '<b>설치</b>를 누르고, 나오는 창에서 <b>작업 표시줄에 고정 · 바탕 화면 바로 가기 만들기</b>를 고르면 됩니다.'
+    ]) +
+    sec(['whale', 'other'], '그 밖의 브라우저 (웨일 · 파이어폭스 등)', [
+      '설치 기능이 없거나 이름이 다릅니다. <b>크롬이나 엣지</b>에서 위 방법으로 설치해 주세요.',
+      '바로 가기만 필요하면: 바탕화면에서 마우스 오른쪽 → 새로 만들기 → 바로 가기 → 주소 <b>https://intoedu.github.io/into-office/</b> 입력'
+    ]) +
+    sec(['safari'], '맥 — 사파리 (Safari)', [
+      '사파리에서 인투오피스를 엽니다.',
+      '메뉴 막대 <b>파일 → Dock에 추가</b>를 누릅니다.'
+    ]) +
+    sec(['ios'], 'iPhone · iPad', [
+      '<b>사파리</b>에서 인투오피스를 엽니다.',
+      '아래(또는 위)의 <b>공유 버튼(□↑)</b>을 누릅니다.',
+      '<b>홈 화면에 추가</b>를 누릅니다. 아이콘 색은 「🎨 테마」에서 고를 수 있습니다.'
+    ]) +
+    sec(['android'], '안드로이드 휴대폰', [
+      '<b>크롬</b>에서 인투오피스를 엽니다.',
+      '오른쪽 위 <b>⋮ 메뉴 → 홈 화면에 추가</b>(또는 「앱 설치」)를 누릅니다.'
+    ]) +
+    '<p class="inst-note">설치한 앱도 같은 계정으로 로그인하며, 데이터는 웹과 똑같이 서버에 저장됩니다. 지우고 싶으면 윈도우 「설정 → 앱」 또는 앱 창 오른쪽 위 ⋯ 메뉴에서 제거할 수 있습니다.</p>';
 }
 
 // ===== 화면 테마 · 홈 화면 아이콘 (이 브라우저에만 저장) =====
@@ -16189,6 +16285,8 @@ function init() {
   lpSetCycle('m');
   document.querySelectorAll('.headerLogoClone').forEach(el => el.src = LOGO_W);
   applyTheme(curTheme());
+  // 앱으로 설치할 수 있게 서비스 워커 등록 (https 에서만 · 화면은 캐시하지 않는다)
+  if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) navigator.serviceWorker.register('sw.js').catch(() => {});
   initSigners();
   // 서명 기한 선택 (기본 1주)
   renderDeadlineChips('create');
