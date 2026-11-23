@@ -1,0 +1,27 @@
+{
+  "name": "INTO OFFICE 인투오피스",
+  "short_name": "INTO OFFICE",
+  "description": "카카오톡으로 받는 전자서명",
+  "start_url": "./",
+  "scope": "./",
+  "display": "browser",
+  "background_color": "#091e33",
+  "theme_color": "#091e33",
+  "icons": [
+    {
+      "src": "icons/navy/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/navy/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/navy/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}

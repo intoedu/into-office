@@ -11,7 +11,23 @@
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="apple-mobile-web-app-title" content="INTO OFFICE">
 <meta name="application-name" content="INTO OFFICE">
-<meta name="theme-color" content="#0e2d4d">
+<meta name="theme-color" content="#08080a">
+<script>
+// 화면 테마 · 홈 화면 아이콘 (이 브라우저에만 저장) — 그리기 전에 적용해 깜빡이지 않게
+(function () {
+  try {
+    var t = localStorage.getItem('io_theme'), i = localStorage.getItem('io_icon') || 'black';
+    if (t === 'white' || t === 'black') document.documentElement.setAttribute('data-theme', t);
+    if (i === 'white' || i === 'navy' || i === 'black') {
+      var set = function (sel, href) { var el = document.querySelector(sel); if (el) el.setAttribute('href', href); };
+      set('link[rel="apple-touch-icon"]', 'icons/' + i + '/apple-touch-icon.png');
+      set('link[rel="icon"][sizes="32x32"]', 'icons/' + i + '/favicon-32.png');
+      set('link[rel="icon"][sizes="192x192"]', 'icons/' + i + '/icon-192.png');
+      set('link[rel="manifest"]', 'manifest-' + i + '.webmanifest');
+    }
+  } catch (e) {}
+})();
+</script>
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
 <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
 <!-- 서명 · 도장 생성용 한글 손글씨 / 명조 서체 -->
@@ -503,6 +519,31 @@ input,select,textarea { font-family:inherit; }
 .smk-area.flash { animation:mkAreaFlash .5s 3; }
 @keyframes mkAreaFlash { 50% { background:rgba(124,58,237,.28); } }
 .mk-area-note { color:#5b21b6 !important; }
+/* ===== 화면 테마: 원본(남색) · 블랙(골드) · 화이트 — 색 변수만 바꾼다 (본문 카드는 밝게 두어 읽기 쉽게) ===== */
+html[data-theme="black"] { --navy:#141416; --navy-light:#2a2a2e; --navy-dark:#000000; --cyan:#a07c33; --cyan-light:#d4b46e; --cyan-hover:#86672a; --bg:#f2f2f3; --info-bg:#fbf7ee; }
+html[data-theme="black"] .app-header { background:linear-gradient(180deg,#1c1c1e,#08080a); }
+html[data-theme="black"] .app-header .logo { filter:brightness(0) saturate(100%) invert(77%) sepia(31%) saturate(560%) hue-rotate(3deg) brightness(92%); }
+html[data-theme="black"] .role-pill { background:#a07c33; }
+html[data-theme="white"] { --cyan:#0e2d4d; --cyan-light:#3a6a9a; --cyan-hover:#163d66; --bg:#f7f8fa; }
+html[data-theme="white"] .app-header { background:#ffffff; border-bottom:1px solid var(--border); }
+html[data-theme="white"] .app-header-user { color:var(--text-secondary); }
+html[data-theme="white"] .btn-logout { color:var(--text-secondary); }
+html[data-theme="white"] .btn-logout:hover { color:var(--navy); background:#f1f5f9; }
+html[data-theme="white"] .app-header .btn-secondary { color:var(--navy) !important; border-color:var(--border) !important; }
+html[data-theme="white"] .sign-lang { background:#f1f5f9; color:var(--text); border-color:var(--border); }
+html[data-theme="white"] .btn-theme { color:var(--text-secondary); border-color:var(--border); }
+.btn-theme { color:rgba(255,255,255,.75); font-size:13px; padding:6px 10px; border-radius:6px; border:1px solid rgba(255,255,255,.25); transition:all .2s; white-space:nowrap; }
+.btn-theme:hover { background:rgba(255,255,255,.1); }
+.th-sec { margin-bottom:18px; }
+.th-sec h4 { font-size:14px; font-weight:800; color:var(--navy); margin-bottom:10px; }
+.th-opts { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+.th-opt { border:2px solid var(--border); border-radius:12px; padding:10px; background:var(--card); cursor:pointer; text-align:center; font-family:inherit; font-size:13px; font-weight:700; color:var(--text); }
+.th-opt.on { border-color:var(--cyan); box-shadow:0 0 0 3px rgba(4,183,221,.18); }
+.th-opt img { width:72px; height:72px; border-radius:16px; display:block; margin:0 auto 8px; box-shadow:0 2px 8px rgba(0,0,0,.18); }
+.th-sw { height:46px; border-radius:8px; margin-bottom:8px; display:flex; overflow:hidden; border:1px solid var(--border); }
+.th-sw i { flex:1; }
+.th-note { font-size:12px; color:var(--text-muted); line-height:1.7; margin-top:8px; }
+@media (max-width:640px) { .btn-theme { padding:6px 8px; font-size:12.5px; } }
 .ct-import { display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin:-4px 0 14px; }
 .ct-import span { flex:1 1 260px; font-size:12px; color:var(--text-muted); line-height:1.6; }
 .pick-btns { display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end; }
@@ -2049,6 +2090,7 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
     <img id="headerLogo" class="logo" alt="INTO OFFICE">
     <div class="app-header-right">
       <span class="app-header-user" id="headerUser"></span><span class="role-pill" id="rolePill" style="display:none;">관리자</span>
+      <button class="btn-theme" onclick="openThemePicker()" title="화면 테마 · 홈 화면 아이콘">🎨 테마</button>
       <button class="btn-logout" onclick="doLogout()">로그아웃</button>
     </div>
   </header>
@@ -2840,6 +2882,17 @@ select.sel { width:100%; padding:12px 14px; border:1.5px solid var(--border); bo
       <button class="btn-secondary" onclick="closeContactPicker()">취소</button>
       <button class="btn-action" onclick="applyContactPick()">선택한 서명자 넣기</button>
     </div>
+  </div>
+</div>
+
+<!-- 화면 테마 · 홈 화면 아이콘 -->
+<div class="modal-overlay" id="themeModal">
+  <div class="modal" style="max-width:520px;">
+    <div class="modal-header">
+      <h3>🎨 테마 · 아이콘</h3>
+      <button class="modal-close" onclick="document.getElementById('themeModal').classList.remove('active')">✕</button>
+    </div>
+    <div class="modal-body" id="themeBody"></div>
   </div>
 </div>
 
@@ -4091,7 +4144,7 @@ async function routeByProfile() {
 // ============================================================
 const SB_FN_ADMIN = SB_URL + '/functions/v1/esign-admin';
 const APP_URL = shareBase();
-const BUILD = '2026-11-23.1';   // 배포 확인용. 화면 하단과 콘솔에 표시된다.
+const BUILD = '2026-11-23.2';   // 배포 확인용. 화면 하단과 콘솔에 표시된다.
 
 
 // ============================================================
@@ -4831,6 +4884,51 @@ async function deleteContacts(ids) {
   if (error || !data?.ok) { showToast('삭제하지 못했습니다. 잠시 후 다시 시도해주세요.'); return; }
   showToast(data.deleted + '명을 삭제했습니다.', true);
   loadContacts(true);
+}
+
+// ===== 화면 테마 · 홈 화면 아이콘 (이 브라우저에만 저장) =====
+// 테마: navy(원본) · black(블랙 + 골드) · white(화이트). 아이콘: 같은 디자인의 세 가지 색 (기본 블랙)
+const THEMES = [
+  { k: 'white', name: '화이트', sw: ['#ffffff', '#0e2d4d', '#f7f8fa'] },
+  { k: 'black', name: '블랙', sw: ['#141416', '#a07c33', '#f2f2f3'] },
+  { k: 'navy', name: '원본 (남색)', sw: ['#0e2d4d', '#04b7dd', '#f4f6f9'] }
+];
+const THEME_COLOR = { white: '#ffffff', black: '#08080a', navy: '#091e33' };
+const curTheme = () => { try { const t = localStorage.getItem('io_theme'); return ['white', 'black'].includes(t) ? t : 'navy'; } catch (e) { return 'navy'; } };
+const curIcon = () => { try { const i = localStorage.getItem('io_icon'); return ['white', 'navy'].includes(i) ? i : 'black'; } catch (e) { return 'black'; } };
+function applyTheme(t) {
+  if (t === 'navy') document.documentElement.removeAttribute('data-theme');
+  else document.documentElement.setAttribute('data-theme', t);
+  // 화이트 테마는 머리말이 흰색이라 남색 로고를 쓴다
+  const src = t === 'white' ? LOGO_H : LOGO_W;
+  document.querySelectorAll('#headerLogo, .headerLogoClone').forEach(el => { el.src = src; });
+}
+function applyIcon(i) {
+  const set = (sel, href) => { const el = document.querySelector(sel); if (el) el.setAttribute('href', href); };
+  set('link[rel="apple-touch-icon"]', 'icons/' + i + '/apple-touch-icon.png');
+  set('link[rel="icon"][sizes="32x32"]', 'icons/' + i + '/favicon-32.png');
+  set('link[rel="icon"][sizes="192x192"]', 'icons/' + i + '/icon-192.png');
+  set('link[rel="manifest"]', 'manifest-' + i + '.webmanifest');
+  const tc = document.querySelector('meta[name="theme-color"]'); if (tc) tc.setAttribute('content', THEME_COLOR[i]);
+}
+function setTheme(t) { try { localStorage.setItem('io_theme', t); } catch (e) {} applyTheme(t); renderThemePicker(); }
+function setIcon(i) { try { localStorage.setItem('io_icon', i); } catch (e) {} applyIcon(i); renderThemePicker(); }
+function openThemePicker() { renderThemePicker(); document.getElementById('themeModal').classList.add('active'); }
+function renderThemePicker() {
+  const t = curTheme(), ic = curIcon();
+  const box = document.getElementById('themeBody');
+  if (!box) return;
+  box.innerHTML =
+    '<div class="th-sec"><h4>화면 테마</h4><div class="th-opts">' +
+      THEMES.map(x => '<button type="button" class="th-opt' + (x.k === t ? ' on' : '') + '" onclick="setTheme(\'' + x.k + '\')">' +
+        '<div class="th-sw">' + x.sw.map(c => '<i style="background:' + c + '"></i>').join('') + '</div>' + x.name + (x.k === t ? ' ✓' : '') + '</button>').join('') +
+    '</div><p class="th-note">머리말 · 버튼 · 강조 색이 바뀝니다. 이 브라우저에만 적용됩니다.</p></div>' +
+    '<div class="th-sec"><h4>홈 화면 · 탭 아이콘</h4><div class="th-opts">' +
+      THEMES.map(x => '<button type="button" class="th-opt' + (x.k === ic ? ' on' : '') + '" onclick="setIcon(\'' + x.k + '\')">' +
+        '<img src="icons/' + x.k + '/apple-touch-icon.png" alt="">' + x.name + (x.k === ic ? ' ✓' : '') + '</button>').join('') +
+    '</div><p class="th-note">브라우저 탭 아이콘은 바로 바뀝니다. <b>iPhone · iPad 홈 화면 아이콘</b>은 고른 뒤 홈 화면의 아이콘을 지우고 ' +
+      'Safari 공유 버튼 → 「홈 화면에 추가」로 다시 추가해야 바뀝니다.</p>' +
+      '<button type="button" class="btn-mini" style="margin-top:6px;" onclick="setIcon(curTheme())">테마와 같은 색으로 맞추기</button></div>';
 }
 
 // ----- 엑셀 · CSV 로 사람 불러오기 (주소록 일괄 등록 · 개별 발송 서명자 넣기) -----
@@ -16090,6 +16188,7 @@ function init() {
   renderLandingForms(null);
   lpSetCycle('m');
   document.querySelectorAll('.headerLogoClone').forEach(el => el.src = LOGO_W);
+  applyTheme(curTheme());
   initSigners();
   // 서명 기한 선택 (기본 1주)
   renderDeadlineChips('create');
